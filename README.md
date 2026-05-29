@@ -12,13 +12,36 @@ Run from the root of the project you want to initialize:
 curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/bootstrap.sh | bash
 ```
 
+By default, bootstrap asks which agent adapter to generate. To initialize non-interactively, pass the adapter explicitly:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/bootstrap.sh \
+  | bash -s -- --agents claude
+```
+
+Supported agents are: `pi`, `codex`, `claude`, `cursor`, and `custom`.
+
+Multiple agents can be selected with commas or spaces:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/bootstrap.sh \
+  | bash -s -- --agents "pi claude"
+```
+
+For `custom`, provide an output path if you do not want the default `INSTRUCTIONS.md`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/bootstrap.sh \
+  | bash -s -- --agents custom --custom-path .my-agent/instructions.md
+```
+
 The bootstrap command:
 
 1. runs `git init` if the current directory is not already inside a git work tree
 2. copies templates into `.agent/templates/`
 3. creates `STATE.md`, `BRAINSTORM.md`, and `.gitignore` if missing
 4. installs `bin/agent-workspace`
-5. asks which agent instruction files to generate
+5. asks which agent instruction files to generate, unless `--agents` or `AGENT_WORKSPACE_AGENTS` is provided
 
 Existing files are skipped, never overwritten.
 
@@ -45,7 +68,8 @@ After bootstrap, use the local CLI:
 ```bash
 ./bin/agent-workspace status
 ./bin/agent-workspace add-agent
-./bin/agent-workspace init
+./bin/agent-workspace add-agent --agents cursor
+./bin/agent-workspace init --agents claude
 ```
 
 `init` repeats the bootstrap behavior using the local CLI. You do not need to run it immediately after the curl bootstrap.

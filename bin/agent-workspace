@@ -19,11 +19,19 @@ say() { printf '%s\n' "$*"; }
 warn() { printf 'warning: %s\n' "$*" >&2; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 
+# Agent selection can come from command-line arguments, environment variables,
+# or the interactive prompt. CLI args intentionally have highest precedence so
+# agents can run the curl bootstrap non-interactively, for example:
+#   curl -fsSL .../bootstrap.sh | bash -s -- --agents claude
 SELECTED_AGENTS="${AGENT_WORKSPACE_AGENTS:-}"
 CUSTOM_OUTPUT_PATH="${AGENT_WORKSPACE_CUSTOM_PATH:-}"
 PROMPT_VALUE=""
+COMMAND="init"
+AGENTS_FROM_CLI=0
 
 can_prompt() {
+  # The bootstrap script is commonly piped from curl, so stdin is the script body.
+  # Read prompts from /dev/tty instead of stdin to keep interactive use possible.
   { true < /dev/tty > /dev/tty; } 2>/dev/null
 }
 
@@ -47,6 +55,8 @@ script_path() {
 }
 
 copy_skip() {
+  # Generated files are never overwritten automatically. This keeps bootstrap safe
+  # to rerun and avoids destroying local project-specific instructions or memory.
   local src="$1" dst="$2"
   if [ -e "$dst" ]; then
     say "skip existing $dst"
@@ -87,6 +97,8 @@ resolve_template_source() {
 }
 
 install_templates() {
+  # Keep a local template cache so future ./bin/agent-workspace add-agent calls
+  # work without depending on the source repository layout.
   local dst_root=".agent/templates"
   mkdir -p "$dst_root"
 
@@ -185,17 +197,92 @@ generate_custom_adapter() {
   copy_skip "$src" "$dst"
 }
 
+parse_args() {
+  # Supported input precedence:
+  #   1. CLI args, e.g. --agents claude
+  #   2. AGENT_WORKSPACE_AGENTS / AGENT_WORKSPACE_CUSTOM_PATH env vars
+  #   3. Interactive prompt
+  # This preserves human-friendly bootstrap while enabling agent-friendly,
+  # non-interactive initialization.
+  if [ "$#" -gt 0 ]; then
+    case "$1" in
+      init|add-agent|status|help)
+        COMMAND="$1"
+        shift
+        ;;
+      -h|--help)
+        COMMAND="help"
+        shift
+        ;;
+    esac
+  fi
+
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --agents)
+        shift
+        [ "$#" -gt 0 ] || die "--agents requires a value"
+        SELECTED_AGENTS="$1"
+        AGENTS_FROM_CLI=1
+        shift
+        ;;
+      --agents=*)
+        SELECTED_AGENTS="${1#--agents=}"
+        [ -n "$SELECTED_AGENTS" ] || die "--agents requires a value"
+        AGENTS_FROM_CLI=1
+        shift
+        ;;
+      --custom-path)
+        shift
+        [ "$#" -gt 0 ] || die "--custom-path requires a value"
+        CUSTOM_OUTPUT_PATH="$1"
+        shift
+        ;;
+      --custom-path=*)
+        CUSTOM_OUTPUT_PATH="${1#--custom-path=}"
+        [ -n "$CUSTOM_OUTPUT_PATH" ] || die "--custom-path requires a value"
+        shift
+        ;;
+      --)
+        shift
+        [ "$#" -eq 0 ] || die "unexpected argument after --: $1"
+        ;;
+      *)
+        if [ "$COMMAND" = "add-agent" ] && [ -z "$SELECTED_AGENTS" ]; then
+          SELECTED_AGENTS="$1"
+          AGENTS_FROM_CLI=1
+          shift
+        else
+          die "unknown argument: $1"
+        fi
+        ;;
+    esac
+  done
+}
+
 select_agents() {
   if [ -n "$SELECTED_AGENTS" ]; then
     return 0
   fi
 
-  can_prompt || die "cannot prompt for agent selection. Run in an interactive terminal or set AGENT_WORKSPACE_AGENTS, for example: curl -fsSL $RAW_BASE/bootstrap.sh | AGENT_WORKSPACE_AGENTS=\"pi claude\" bash"
+  can_prompt || die "cannot prompt for agent selection. Run in an interactive terminal or pass --agents, for example: curl -fsSL $RAW_BASE/bootstrap.sh | bash -s -- --agents claude"
 
   prompt_line "Select agent adapters to generate:"
   prompt_line "  pi, codex, claude, cursor, custom"
   prompt_read 'Agents (comma/space separated, blank for none): '
   SELECTED_AGENTS="$PROMPT_VALUE"
+}
+
+validate_agents_selection() {
+  local selected="$1" token
+  selected="${selected//,/ }"
+
+  for token in $selected; do
+    case "$token" in
+      pi|codex|claude|cursor|custom|none|None|NONE) ;;
+      *) die "unknown agent selection: $token" ;;
+    esac
+  done
 }
 
 selection_has_custom() {
@@ -212,7 +299,13 @@ collect_custom_path() {
     return 0
   fi
 
-  can_prompt || die "cannot prompt for custom instruction file. Set AGENT_WORKSPACE_CUSTOM_PATH, for example: AGENT_WORKSPACE_CUSTOM_PATH=INSTRUCTIONS.md"
+  if [ "$AGENTS_FROM_CLI" -eq 1 ]; then
+    CUSTOM_OUTPUT_PATH="INSTRUCTIONS.md"
+    validate_custom_path "$CUSTOM_OUTPUT_PATH"
+    return 0
+  fi
+
+  can_prompt || die "cannot prompt for custom instruction file. Set AGENT_WORKSPACE_CUSTOM_PATH or pass --custom-path, for example: --custom-path INSTRUCTIONS.md"
 
   prompt_read 'Custom instruction file [INSTRUCTIONS.md]: '
   CUSTOM_OUTPUT_PATH="${PROMPT_VALUE:-INSTRUCTIONS.md}"
@@ -240,9 +333,11 @@ add_agent() {
     SELECTED_AGENTS="$1"
   else
     select_agents
-    if selection_has_custom "$SELECTED_AGENTS"; then
-      collect_custom_path
-    fi
+  fi
+
+  validate_agents_selection "$SELECTED_AGENTS"
+  if selection_has_custom "$SELECTED_AGENTS"; then
+    collect_custom_path
   fi
 
   run_selected_agents "$SELECTED_AGENTS"
@@ -250,6 +345,7 @@ add_agent() {
 
 init() {
   select_agents
+  validate_agents_selection "$SELECTED_AGENTS"
   if selection_has_custom "$SELECTED_AGENTS"; then
     collect_custom_path
   fi
@@ -282,17 +378,26 @@ status() {
 
 usage() {
   cat <<'USAGE'
-Usage: agent-workspace [init|add-agent|status|help]
+Usage: agent-workspace [init|add-agent|status|help] [options]
+
+Options:
+  --agents AGENTS       Comma/space separated agents: pi, codex, claude, cursor, custom
+  --custom-path PATH    Output path used with --agents custom
 
 With no command, runs init. The curl bootstrap command also runs init.
+
+Examples:
+  agent-workspace init --agents claude
+  agent-workspace add-agent --agents cursor
+  agent-workspace add-agent cursor
 USAGE
 }
 
-cmd="${1:-init}"
-case "$cmd" in
+parse_args "$@"
+case "$COMMAND" in
   init) init ;;
   add-agent) add_agent ;;
   status) status ;;
-  help|-h|--help) usage ;;
+  help) usage ;;
   *) usage >&2; exit 1 ;;
 esac
