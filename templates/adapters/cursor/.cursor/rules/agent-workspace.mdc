@@ -1,0 +1,15 @@
+---
+description: Agent Workspace shared instructions
+alwaysApply: true
+---
+
+Read and follow the shared workspace instructions:
+
+- `.agent/COLLABORATION.md`
+- `.agent/MEMORY.md`
+- `.agent/WORKFLOWS.md`
+
+Then read project memory if present:
+
+- `STATE.md`
+- `BRAINSTORM.md`
