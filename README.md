@@ -1,116 +1,80 @@
 # agent-workspace
 
-Agent Workspace bootstraps portable, agent-independent collaboration files into any project.
+Agent Workspace standardizes the project setup needed to work with AI coding agents.
 
-It is designed for people who work with multiple coding agents or AI assistants and want the same collaboration style, memory workflow, and project context everywhere.
+It generates agent-specific instruction entrypoints, project memory files, and privacy-aware defaults so each project starts with a consistent collaboration structure. This reduces repeated manual setup and helps keep context portable when switching between agents or adding a new agent later.
 
-## Purpose
+## Install / initialize
 
-Most agents have different entrypoint files:
-
-- Pi / Codex-style agents often read `AGENTS.md`
-- Claude Code reads `CLAUDE.md`
-- Cursor uses rule files
-- future tools may use something else
-
-Agent Workspace keeps the source of truth in a neutral folder:
-
-```text
-.agent/
-```
-
-Agent-specific files are thin adapters that point back to `.agent/`.
-
-## Generated structure
-
-A typical initialized project may contain:
-
-```text
-.agent/
-  COLLABORATION.md
-  MEMORY.md
-  WORKFLOWS.md
-
-AGENTS.md        # optional adapter for Pi/Codex-style agents
-CLAUDE.md        # optional adapter for Claude Code
-STATE.md         # project-local current state
-BRAINSTORM.md    # project-local durable reasoning
-```
-
-Only the adapters you choose are created.
-
-## Quick start
-
-From inside a project directory:
+Run from the root of the project you want to initialize:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/agent-workspace/main/bootstrap.sh | bash
+curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/bootstrap.sh | bash
 ```
 
-Or, from a local clone of this repository:
+The bootstrap command:
+
+1. runs `git init` if the current directory is not already inside a git work tree
+2. copies templates into `.agent/templates/`
+3. creates `STATE.md`, `BRAINSTORM.md`, and `.gitignore` if missing
+4. installs `bin/agent-workspace`
+5. asks which agent instruction files to generate
+
+Existing files are skipped, never overwritten.
+
+## Generated files
+
+Depending on selected agents, Agent Workspace can generate:
+
+- `AGENTS.md` for Pi / Codex-style agents
+- `CLAUDE.md` for Claude Code
+- `.cursor/rules/agent-workspace.mdc` for Cursor
+- a custom instruction file at a path you choose
+
+It also generates private memory files:
+
+- `STATE.md` — current situation, active work, next actions
+- `BRAINSTORM.md` — durable reasoning, decisions, observations
+
+The default generated `.gitignore` ignores `.agent/`, `STATE.md`, and `BRAINSTORM.md`.
+
+## Local CLI
+
+After bootstrap, use the local CLI:
 
 ```bash
+./bin/agent-workspace status
+./bin/agent-workspace add-agent
 ./bin/agent-workspace init
 ```
 
-## Commands
+`init` repeats the bootstrap behavior using the local CLI. You do not need to run it immediately after the curl bootstrap.
 
-### Initialize a project
+`add-agent` uses `.agent/templates/` to generate additional agent instruction files later.
 
-```bash
-agent-workspace init
-```
+## Customizing for your own workflow
 
-Initializes git if needed, creates a privacy-aware `.gitignore`, creates the core `.agent/` files, and asks which agent adapter(s) to add.
+Agent Workspace is intentionally plain and open source. If the defaults do not match how you work, clone or fork the repository and adapt the templates, supported adapters, or bootstrap behavior for your own needs.
 
-### Add another agent later
+The main customization points are:
 
-```bash
-agent-workspace add-agent
-```
+- `templates/default/` for memory files and `.gitignore` defaults
+- `templates/adapters/` for agent-specific instruction files
+- `bootstrap.sh` for initialization behavior
 
-Adds another adapter if it does not already exist.
+## Templates
 
-### Check status
-
-```bash
-agent-workspace status
-```
-
-Shows which core files and adapters exist in the current project.
-
-## Supported adapters
-
-Initial adapters:
-
-- `pi` → `AGENTS.md`
-- `codex` → `AGENTS.md`
-- `claude` → `CLAUDE.md`
-- `cursor` → `.cursor/rules/agent-workspace.mdc`
-- `custom` → user-provided path
-
-Note: `pi` and `codex` currently share `AGENTS.md`. This is intentional.
-
-## Design principles
-
-- Agent-independent core
-- Plain Markdown files
-- Safe and idempotent by default
-- No silent overwrites
-- Git initialized by default when needed
-- Privacy-aware `.gitignore`
-- Project-local memory
-- Minimal adapters for specific tools
-
-## Repository layout
+Repository templates live in:
 
 ```text
-bin/agent-workspace          # CLI script
-bootstrap.sh                 # curl-friendly entrypoint
-templates/default/           # human-readable default templates
-templates/adapters/          # human-readable adapter templates
+templates/default/
+templates/adapters/
 ```
 
-## License
+Initialized projects receive a local template cache at:
 
-MIT © Alexandru Diacov
+```text
+.agent/templates/
+```
+
+You can edit `.agent/templates/`, delete generated files, and rerun `init` or `add-agent` to regenerate customized outputs.

@@ -3,6 +3,11 @@
 .env.*
 *.log
 
+# Agent Workspace local cache and private project memory
+.agent/
+STATE.md
+BRAINSTORM.md
+
 # Local/private identity or secrets
 USER_PROFILE.md
 LOCAL.md
@@ -10,11 +15,3 @@ PRIVATE.md
 secrets/
 *.pem
 *.key
-
-# Raw agent/session evidence may contain sensitive conversation
-sessions/pending/*.md
-sessions/archive/*.md
-
-# Uncomment if project memory should stay private
-# STATE.md
-# BRAINSTORM.md

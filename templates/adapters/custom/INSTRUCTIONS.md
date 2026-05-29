@@ -1,7 +1,4 @@
----
-description: Agent Workspace project instructions
-alwaysApply: true
----
+# Custom Agent Instructions
 
 ## Collaboration style
 
@@ -25,3 +22,5 @@ When meaningful work finishes:
 ## Workflows
 
 Before implementation, inspect existing files. Make minimal, precise changes. Run relevant checks when possible. Summarize changed files and next steps.
+
+Project-specific instructions may be added below.

@@ -1,359 +1,298 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="0.1.0"
+RAW_BASE="${AGENT_WORKSPACE_RAW_BASE:-https://raw.githubusercontent.com/adiacov/agent-workspace/main}"
+TEMPLATE_SOURCE_DIR="${AGENT_WORKSPACE_TEMPLATE_SOURCE_DIR:-}"
+
+TEMPLATE_FILES=(
+  "default/.gitignore"
+  "default/STATE.md"
+  "default/BRAINSTORM.md"
+  "adapters/pi/AGENTS.md"
+  "adapters/codex/AGENTS.md"
+  "adapters/claude/CLAUDE.md"
+  "adapters/cursor/.cursor/rules/agent-workspace.mdc"
+  "adapters/custom/INSTRUCTIONS.md"
+)
 
 say() { printf '%s\n' "$*"; }
 warn() { printf 'warning: %s\n' "$*" >&2; }
+die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 
-write_file() {
-  local path="$1"
-  local content="$2"
-  if [[ -e "$path" ]]; then
-    say "skip: $path already exists"
-    return 0
-  fi
-  mkdir -p "$(dirname "$path")"
-  printf '%s' "$content" > "$path"
-  say "create: $path"
+SELECTED_AGENTS="${AGENT_WORKSPACE_AGENTS:-}"
+CUSTOM_OUTPUT_PATH="${AGENT_WORKSPACE_CUSTOM_PATH:-}"
+PROMPT_VALUE=""
+
+can_prompt() {
+  { true < /dev/tty > /dev/tty; } 2>/dev/null
 }
 
-core_collaboration() { cat <<'EOF'
-# Collaboration Style
-
-Work with me as a dialogue, not as a lecture.
-
-Prefer:
-
-- one important thing at a time
-- concise responses unless detail is needed
-- clarifying questions when direction is ambiguous
-- concrete next actions after abstract discussion
-- honest pushback when assumptions seem weak
-
-Avoid:
-
-- long monologues
-- generic motivation
-- dumping many options at once
-- pretending certainty
-- rushing to implementation before framing the problem
-
-Act as a thinking partner, mentor, technical guide, implementation assistant, and accountability mirror.
-EOF
+prompt_line() {
+  printf '%s\n' "$*" >&2
 }
 
-core_memory() { cat <<'EOF'
-# Memory Workflow
-
-Use project files as durable memory instead of relying on chat history.
-
-At the start of meaningful work, read these files if present:
-
-1. `.agent/COLLABORATION.md`
-2. `.agent/MEMORY.md`
-3. `.agent/WORKFLOWS.md`
-4. `STATE.md`
-5. `BRAINSTORM.md`
-
-File responsibilities:
-
-- `STATE.md` — current situation, active work, next actions, blockers
-- `BRAINSTORM.md` — durable reasoning, decisions, hypotheses, research findings
-- `.agent/` — shared agent instructions and workflows
-
-When a meaningful discussion or work session finishes:
-
-- update `STATE.md` if the current situation changed
-- update `BRAINSTORM.md` if durable insights were discovered
-- avoid duplicating information across files
-EOF
+prompt_read() {
+  local prompt="$1"
+  PROMPT_VALUE=""
+  printf '%s' "$prompt" >&2
+  IFS= read -r PROMPT_VALUE < /dev/tty
 }
 
-core_workflows() { cat <<'EOF'
-# Workflows
-
-## Start of session
-
-1. Read the agent adapter file for the current tool.
-2. Read shared instructions in `.agent/`.
-3. Read `STATE.md` and `BRAINSTORM.md` if present.
-4. Ask what we are working on if the task is unclear.
-
-## Discussion workflow
-
-1. Restate the problem simply.
-2. Identify the current decision.
-3. Ask one useful question if needed.
-4. Suggest a small next step.
-
-## Implementation workflow
-
-1. Inspect existing files before changing them.
-2. Explain intended changes briefly.
-3. Make minimal, precise edits.
-4. Run relevant checks when possible.
-5. Summarize changed files and next steps.
-EOF
-}
-
-state_template() { cat <<'EOF'
-# STATE.md
-
-## Purpose
-
-Current project situation. Expected to change.
-
-## Current focus
-
-Not defined yet.
-
-## Active work
-
-Not defined yet.
-
-## Next actions
-
-- Define the project purpose.
-EOF
-}
-
-brainstorm_template() { cat <<'EOF'
-# BRAINSTORM.md
-
-## Purpose
-
-Durable project reasoning and long-term memory.
-
-Preserve:
-
-- observations
-- decisions and rationale
-- hypotheses
-- research findings
-- changes in direction
-
-Avoid storing temporary state here.
-EOF
-}
-
-gitignore_template() { cat <<'EOF'
-.DS_Store
-.env
-.env.*
-*.log
-
-# Local/private identity or secrets
-USER_PROFILE.md
-LOCAL.md
-PRIVATE.md
-secrets/
-*.pem
-*.key
-
-# Raw agent/session evidence may contain sensitive conversation
-sessions/pending/*.md
-sessions/archive/*.md
-
-# Uncomment if project memory should stay private
-# STATE.md
-# BRAINSTORM.md
-EOF
-}
-
-agents_adapter() { cat <<'EOF'
-# AGENTS.md
-
-Read and follow the shared workspace instructions:
-
-1. `.agent/COLLABORATION.md`
-2. `.agent/MEMORY.md`
-3. `.agent/WORKFLOWS.md`
-
-Then read project memory if present:
-
-1. `STATE.md`
-2. `BRAINSTORM.md`
-
-Project-specific instructions may be added below.
-EOF
-}
-
-claude_adapter() { cat <<'EOF'
-# CLAUDE.md
-
-Read and follow the shared workspace instructions:
-
-1. `.agent/COLLABORATION.md`
-2. `.agent/MEMORY.md`
-3. `.agent/WORKFLOWS.md`
-
-Then read project memory if present:
-
-1. `STATE.md`
-2. `BRAINSTORM.md`
-
-Project-specific Claude Code instructions may be added below.
-EOF
-}
-
-cursor_adapter() { cat <<'EOF'
----
-description: Agent Workspace shared instructions
-alwaysApply: true
----
-
-Read and follow the shared workspace instructions:
-
-- `.agent/COLLABORATION.md`
-- `.agent/MEMORY.md`
-- `.agent/WORKFLOWS.md`
-
-Then read project memory if present:
-
-- `STATE.md`
-- `BRAINSTORM.md`
-EOF
-}
-
-custom_adapter() {
-  local name="$1"
-  cat <<EOF
-# ${name} Instructions
-
-Read and follow the shared workspace instructions:
-
-1. \`.agent/COLLABORATION.md\`
-2. \`.agent/MEMORY.md\`
-3. \`.agent/WORKFLOWS.md\`
-
-Then read project memory if present:
-
-1. \`STATE.md\`
-2. \`BRAINSTORM.md\`
-
-Project-specific instructions may be added below.
-EOF
-}
-
-ensure_git_repo() {
-  if ! command -v git >/dev/null 2>&1; then
-    warn "git not found; skipping git init"
-    return 0
-  fi
-
-  if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    say "skip: git repository already exists"
+script_path() {
+  if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
+    cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P
   else
-    git init >/dev/null
-    say "create: git repository"
+    return 1
   fi
 }
 
-create_core() {
-  ensure_git_repo
-  write_file ".gitignore" "$(gitignore_template)"
-  write_file ".agent/COLLABORATION.md" "$(core_collaboration)"
-  write_file ".agent/MEMORY.md" "$(core_memory)"
-  write_file ".agent/WORKFLOWS.md" "$(core_workflows)"
-  write_file "STATE.md" "$(state_template)"
-  write_file "BRAINSTORM.md" "$(brainstorm_template)"
+copy_skip() {
+  local src="$1" dst="$2"
+  if [ -e "$dst" ]; then
+    say "skip existing $dst"
+    return 0
+  fi
+  mkdir -p "$(dirname "$dst")"
+  cp "$src" "$dst"
+  say "created $dst"
 }
 
-add_agent_named() {
-  local agent="$1"
-  case "$agent" in
-    pi|codex|agents)
-      write_file "AGENTS.md" "$(agents_adapter)"
-      ;;
-    claude)
-      write_file "CLAUDE.md" "$(claude_adapter)"
-      ;;
-    cursor)
-      write_file ".cursor/rules/agent-workspace.mdc" "$(cursor_adapter)"
-      ;;
-    custom)
-      add_custom_agent
-      ;;
-    none|skip|'')
-      ;;
-    *)
-      warn "unknown agent: $agent"
-      warn "supported: pi, codex, claude, cursor, custom"
-      return 1
-      ;;
+download_file() {
+  local rel="$1" dst="$2"
+  command -v curl >/dev/null 2>&1 || die "curl is required to download templates"
+  mkdir -p "$(dirname "$dst")"
+  curl -fsSL "$RAW_BASE/templates/$rel" -o "$dst"
+}
+
+resolve_template_source() {
+  if [ -n "$TEMPLATE_SOURCE_DIR" ]; then
+    [ -d "$TEMPLATE_SOURCE_DIR" ] || die "template source not found: $TEMPLATE_SOURCE_DIR"
+    printf '%s\n' "$TEMPLATE_SOURCE_DIR"
+    return 0
+  fi
+
+  local dir
+  if dir="$(script_path 2>/dev/null)"; then
+    if [ -d "$dir/templates" ]; then
+      printf '%s\n' "$dir/templates"
+      return 0
+    fi
+    if [ -d "$dir/../templates" ]; then
+      (cd "$dir/../templates" && pwd -P)
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
+install_templates() {
+  local dst_root=".agent/templates"
+  mkdir -p "$dst_root"
+
+  local src_root=""
+  if src_root="$(resolve_template_source 2>/dev/null)"; then
+    for rel in "${TEMPLATE_FILES[@]}"; do
+      [ -f "$src_root/$rel" ] || die "missing template: $src_root/$rel"
+      copy_skip "$src_root/$rel" "$dst_root/$rel"
+    done
+  else
+    local tmp
+    tmp="$(mktemp -d)"
+    for rel in "${TEMPLATE_FILES[@]}"; do
+      download_file "$rel" "$tmp/$rel"
+      copy_skip "$tmp/$rel" "$dst_root/$rel"
+    done
+    rm -rf "$tmp"
+  fi
+}
+
+ensure_git() {
+  command -v git >/dev/null 2>&1 || die "git is required"
+  if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    return 0
+  fi
+  git init
+}
+
+generate_defaults() {
+  [ -d ".agent/templates/default" ] || die "missing .agent/templates/default"
+  local file rel
+  while IFS= read -r -d '' file; do
+    rel="${file#.agent/templates/default/}"
+    copy_skip "$file" "$rel"
+  done < <(find .agent/templates/default -type f -print0)
+}
+
+install_cli() {
+  mkdir -p bin
+  if [ -e "bin/agent-workspace" ]; then
+    say "skip existing bin/agent-workspace"
+    return 0
+  fi
+
+  if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
+    cp "${BASH_SOURCE[0]}" bin/agent-workspace
+  else
+    command -v curl >/dev/null 2>&1 || die "curl is required to install bin/agent-workspace"
+    curl -fsSL "$RAW_BASE/bootstrap.sh" -o bin/agent-workspace
+  fi
+  chmod +x bin/agent-workspace
+  say "created bin/agent-workspace"
+}
+
+adapter_destination() {
+  case "$1" in
+    pi) printf '%s\n' "AGENTS.md" ;;
+    codex) printf '%s\n' "AGENTS.md" ;;
+    claude) printf '%s\n' "CLAUDE.md" ;;
+    cursor) printf '%s\n' ".cursor/rules/agent-workspace.mdc" ;;
+    *) return 1 ;;
   esac
 }
 
-add_custom_agent() {
-  local name path
-  printf 'Custom agent name: '
-  read -r name
-  printf 'Instruction file path (example: GEMINI.md): '
-  read -r path
-  if [[ -z "${path}" ]]; then
-    warn "path is required"
-    return 1
-  fi
-  write_file "$path" "$(custom_adapter "${name:-Custom Agent}")"
+adapter_template() {
+  case "$1" in
+    pi) printf '%s\n' ".agent/templates/adapters/pi/AGENTS.md" ;;
+    codex) printf '%s\n' ".agent/templates/adapters/codex/AGENTS.md" ;;
+    claude) printf '%s\n' ".agent/templates/adapters/claude/CLAUDE.md" ;;
+    cursor) printf '%s\n' ".agent/templates/adapters/cursor/.cursor/rules/agent-workspace.mdc" ;;
+    *) return 1 ;;
+  esac
+}
+
+generate_adapter() {
+  local agent="$1" src dst
+  src="$(adapter_template "$agent")" || die "unknown agent: $agent"
+  dst="$(adapter_destination "$agent")" || die "unknown agent: $agent"
+  [ -f "$src" ] || die "missing adapter template: $src"
+  copy_skip "$src" "$dst"
+}
+
+validate_custom_path() {
+  local dst="$1"
+  case "$dst" in
+    /*|*..*) die "custom path must be project-root-relative and must not contain .." ;;
+  esac
+}
+
+generate_custom_adapter() {
+  local src=".agent/templates/adapters/custom/INSTRUCTIONS.md"
+  [ -f "$src" ] || die "missing custom adapter template: $src"
+
+  local dst="${CUSTOM_OUTPUT_PATH:-INSTRUCTIONS.md}"
+  validate_custom_path "$dst"
+  copy_skip "$src" "$dst"
 }
 
 select_agents() {
-  say "Which agent adapter(s) should be added?"
-  say "Options: pi, codex, claude, cursor, custom, none"
-  printf 'Enter one or more, comma-separated [pi]: '
-  read -r selected
-  selected="${selected:-pi}"
-  IFS=',' read -ra agents <<< "$selected"
-  for agent in "${agents[@]}"; do
-    agent="$(printf '%s' "$agent" | xargs)"
-    add_agent_named "$agent"
-  done
+  if [ -n "$SELECTED_AGENTS" ]; then
+    return 0
+  fi
+
+  can_prompt || die "cannot prompt for agent selection. Run in an interactive terminal or set AGENT_WORKSPACE_AGENTS, for example: curl -fsSL $RAW_BASE/bootstrap.sh | AGENT_WORKSPACE_AGENTS=\"pi claude\" bash"
+
+  prompt_line "Select agent adapters to generate:"
+  prompt_line "  pi, codex, claude, cursor, custom"
+  prompt_read 'Agents (comma/space separated, blank for none): '
+  SELECTED_AGENTS="$PROMPT_VALUE"
 }
 
-cmd_init() {
-  create_core
-  select_agents
-  say "done"
-}
-
-cmd_add_agent() {
-  select_agents
-  say "done"
-}
-
-cmd_status() {
-  say "Agent Workspace status"
-  for path in ".agent/COLLABORATION.md" ".agent/MEMORY.md" ".agent/WORKFLOWS.md" "STATE.md" "BRAINSTORM.md" "AGENTS.md" "CLAUDE.md" ".cursor/rules/agent-workspace.mdc"; do
-    if [[ -e "$path" ]]; then
-      say "present: $path"
-    else
-      say "missing: $path"
-    fi
-  done
-}
-
-usage() { cat <<EOF
-agent-workspace $VERSION
-
-Usage:
-  agent-workspace init
-  agent-workspace add-agent
-  agent-workspace status
-  agent-workspace --help
-EOF
-}
-
-main() {
-  local cmd="${1:-init}"
-  case "$cmd" in
-    init) cmd_init ;;
-    add-agent|agent-add) cmd_add_agent ;;
-    status|doctor) cmd_status ;;
-    -h|--help|help) usage ;;
-    --version|version) say "$VERSION" ;;
-    *) usage; exit 1 ;;
+selection_has_custom() {
+  local selected=" ${1//,/ } "
+  case "$selected" in
+    *" custom "*) return 0 ;;
+    *) return 1 ;;
   esac
 }
 
-main "$@"
+collect_custom_path() {
+  if [ -n "$CUSTOM_OUTPUT_PATH" ]; then
+    validate_custom_path "$CUSTOM_OUTPUT_PATH"
+    return 0
+  fi
+
+  can_prompt || die "cannot prompt for custom instruction file. Set AGENT_WORKSPACE_CUSTOM_PATH, for example: AGENT_WORKSPACE_CUSTOM_PATH=INSTRUCTIONS.md"
+
+  prompt_read 'Custom instruction file [INSTRUCTIONS.md]: '
+  CUSTOM_OUTPUT_PATH="${PROMPT_VALUE:-INSTRUCTIONS.md}"
+  validate_custom_path "$CUSTOM_OUTPUT_PATH"
+}
+
+run_selected_agents() {
+  local selected="$1" token
+  selected="${selected//,/ }"
+
+  for token in $selected; do
+    case "$token" in
+      pi|codex|claude|cursor) generate_adapter "$token" ;;
+      custom) generate_custom_adapter ;;
+      none|None|NONE) ;;
+      *) die "unknown agent selection: $token" ;;
+    esac
+  done
+}
+
+add_agent() {
+  [ -d ".agent/templates" ] || die "missing .agent/templates. Run ./bin/agent-workspace init or bootstrap again to install templates."
+
+  if [ "$#" -gt 0 ]; then
+    SELECTED_AGENTS="$1"
+  else
+    select_agents
+    if selection_has_custom "$SELECTED_AGENTS"; then
+      collect_custom_path
+    fi
+  fi
+
+  run_selected_agents "$SELECTED_AGENTS"
+}
+
+init() {
+  select_agents
+  if selection_has_custom "$SELECTED_AGENTS"; then
+    collect_custom_path
+  fi
+
+  ensure_git
+  install_templates
+  generate_defaults
+  install_cli
+  add_agent "$SELECTED_AGENTS"
+}
+
+status_one() {
+  if [ -e "$1" ]; then
+    printf 'present  %s\n' "$1"
+  else
+    printf 'missing  %s\n' "$1"
+  fi
+}
+
+status() {
+  status_one ".agent/templates"
+  status_one "bin/agent-workspace"
+  status_one ".gitignore"
+  status_one "STATE.md"
+  status_one "BRAINSTORM.md"
+  status_one "AGENTS.md"
+  status_one "CLAUDE.md"
+  status_one ".cursor/rules/agent-workspace.mdc"
+}
+
+usage() {
+  cat <<'USAGE'
+Usage: agent-workspace [init|add-agent|status|help]
+
+With no command, runs init. The curl bootstrap command also runs init.
+USAGE
+}
+
+cmd="${1:-init}"
+case "$cmd" in
+  init) init ;;
+  add-agent) add_agent ;;
+  status) status ;;
+  help|-h|--help) usage ;;
+  *) usage >&2; exit 1 ;;
+esac

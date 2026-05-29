@@ -1,14 +1,26 @@
 # CLAUDE.md
 
-Read and follow the shared workspace instructions:
+## Collaboration style
 
-1. `.agent/COLLABORATION.md`
-2. `.agent/MEMORY.md`
-3. `.agent/WORKFLOWS.md`
+Work with the user as a dialogue. Prefer concise responses, one important thing at a time, clarifying questions when direction is ambiguous, concrete next actions, and honest pushback when assumptions seem weak.
 
-Then read project memory if present:
+## Memory workflow
+
+Use project files as durable memory instead of relying on chat history.
+
+At the start of meaningful work, read these files if present:
 
 1. `STATE.md`
 2. `BRAINSTORM.md`
+
+When meaningful work finishes:
+
+- update `STATE.md` if the current situation changed
+- update `BRAINSTORM.md` if durable insights were discovered
+- avoid duplicating information across files
+
+## Workflows
+
+Before implementation, inspect existing files. Make minimal, precise changes. Run relevant checks when possible. Summarize changed files and next steps.
 
 Project-specific Claude Code instructions may be added below.
