@@ -4,50 +4,6 @@ Agent Workspace standardizes the project setup needed to work with AI coding age
 
 It generates agent-specific instruction entrypoints, project memory files, and privacy-aware defaults so each project starts with a consistent collaboration structure. This reduces repeated manual setup and helps keep context portable when switching between agents or adding a new agent later.
 
-## Example
-
-Start with any project:
-
-```text
-my-project/
-  src/
-  README.md
-```
-
-Run Agent Workspace for Claude:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/bootstrap.sh \
-  | bash -s -- --agents claude
-```
-
-The project now has:
-
-```text
-my-project/
-  .agent/
-    templates/
-  bin/
-    agent-workspace
-  CLAUDE.md
-  STATE.md
-  BRAINSTORM.md
-  .gitignore
-  src/
-  README.md
-```
-
-For multiple agents:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/bootstrap.sh \
-  | bash -s -- --agents "claude cursor"
-```
-
-This creates both `CLAUDE.md` and `.cursor/rules/agent-workspace.mdc`.
-
-Existing files are skipped, never overwritten.
-
 ## Install / initialize
 
 Run from the root of the project you want to initialize:
