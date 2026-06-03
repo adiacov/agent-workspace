@@ -10,8 +10,9 @@ Use project files as durable memory instead of relying on chat history.
 
 At the start of meaningful work, read these files if present:
 
-1. `STATE.md`
-2. `BRAINSTORM.md`
+1. `WORKFLOWS.md`
+2. `STATE.md`
+3. `BRAINSTORM.md`
 
 When meaningful work finishes:
 

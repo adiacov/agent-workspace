@@ -8,6 +8,7 @@ CORE_TEMPLATE_FILES=(
   "default/.gitignore"
   "default/STATE.md"
   "default/BRAINSTORM.md"
+  "default/WORKFLOWS.md"
   "adapters/pi/AGENTS.md"
   "adapters/codex/AGENTS.md"
   "adapters/claude/CLAUDE.md"
