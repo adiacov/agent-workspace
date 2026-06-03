@@ -1,0 +1,13 @@
+{
+	"version": 1,
+	"enabled": true,
+	"pendingDir": "sessions/pending",
+	"archiveDir": "sessions/archive",
+	"includeReload": false,
+	"skipEmptySessions": true,
+	"maxArchivedCheckpoints": 50,
+	"recentEntries": 24,
+	"maxTextPerEntry": 4000,
+	"createdAt": "2026-06-03T05:57:27.438Z",
+	"updatedAt": "2026-06-03T05:57:27.438Z"
+}

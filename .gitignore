@@ -10,7 +10,6 @@ AGENTS.md
 CLAUDE.md
 STATE.md
 BRAINSTORM.md
-.pi/
 
 # Local/private identity or secrets
 USER_PROFILE.md
@@ -19,6 +18,11 @@ PRIVATE.md
 secrets/
 *.pem
 *.key
+
+# Pi project config: track checkpoint settings, ignore other local Pi files
+.pi/*
+!.pi/
+!.pi/checkpoint.json
 
 # Raw agent/session evidence may contain sensitive conversation
 sessions/pending/*.md
