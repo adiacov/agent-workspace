@@ -12,11 +12,19 @@ Run from the root of the project you want to initialize:
 curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/bootstrap.sh | bash
 ```
 
-By default, bootstrap asks which agent adapter to generate. To initialize non-interactively, pass the adapter explicitly:
+By default, bootstrap uses the `general` workspace profile and asks which agent adapter to generate. To initialize non-interactively, pass the adapter explicitly:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/bootstrap.sh \
   | bash -s -- --agents claude
+```
+
+Choose a workspace profile with `--profile` or `AGENT_WORKSPACE_PROFILE`:
+
+```bash
+agent-workspace init --profile software --agents pi
+agent-workspace init --profile general
+AGENT_WORKSPACE_PROFILE=software agent-workspace init
 ```
 
 Supported agents are: `pi`, `codex`, `claude`, `cursor`, and `custom`.
@@ -45,6 +53,11 @@ The bootstrap command:
 
 Existing files are skipped, never overwritten.
 
+Workspace profiles:
+
+- `general` is the default profile. It generates the standard memory files only and does not generate or cache `ENGINEERING.md`.
+- `software` adds coding-project engineering guidance by caching `.agent/templates/profiles/software/ENGINEERING.md` and generating root `ENGINEERING.md` if missing.
+
 ## Generated files
 
 Depending on selected agents, Agent Workspace can generate:
@@ -70,6 +83,9 @@ After bootstrap, use the local CLI:
 ./bin/agent-workspace add-agent
 ./bin/agent-workspace add-agent --agents cursor
 ./bin/agent-workspace init --agents claude
+./bin/agent-workspace init --profile software --agents pi
+./bin/agent-workspace init --profile general
+AGENT_WORKSPACE_PROFILE=software ./bin/agent-workspace init
 ```
 
 `init` repeats the bootstrap behavior using the local CLI. You do not need to run it immediately after the curl bootstrap.
@@ -93,6 +109,7 @@ Repository templates live in:
 ```text
 templates/default/
 templates/adapters/
+templates/profiles/
 ```
 
 Initialized projects receive a local template cache at:

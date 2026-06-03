@@ -4,7 +4,7 @@ set -euo pipefail
 RAW_BASE="${AGENT_WORKSPACE_RAW_BASE:-https://raw.githubusercontent.com/adiacov/agent-workspace/main}"
 TEMPLATE_SOURCE_DIR="${AGENT_WORKSPACE_TEMPLATE_SOURCE_DIR:-}"
 
-TEMPLATE_FILES=(
+CORE_TEMPLATE_FILES=(
   "default/.gitignore"
   "default/STATE.md"
   "default/BRAINSTORM.md"
@@ -13,6 +13,10 @@ TEMPLATE_FILES=(
   "adapters/claude/CLAUDE.md"
   "adapters/cursor/.cursor/rules/agent-workspace.mdc"
   "adapters/custom/INSTRUCTIONS.md"
+)
+
+SOFTWARE_PROFILE_TEMPLATE_FILES=(
+  "profiles/software/ENGINEERING.md"
 )
 
 say() { printf '%s\n' "$*"; }
@@ -25,6 +29,7 @@ die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 #   curl -fsSL .../bootstrap.sh | bash -s -- --agents claude
 SELECTED_AGENTS="${AGENT_WORKSPACE_AGENTS:-}"
 CUSTOM_OUTPUT_PATH="${AGENT_WORKSPACE_CUSTOM_PATH:-}"
+WORKSPACE_PROFILE="${AGENT_WORKSPACE_PROFILE:-}"
 PROMPT_VALUE=""
 COMMAND="init"
 AGENTS_FROM_CLI=0
@@ -102,16 +107,21 @@ install_templates() {
   local dst_root=".agent/templates"
   mkdir -p "$dst_root"
 
+  local template_files=("${CORE_TEMPLATE_FILES[@]}")
+  if [ "$WORKSPACE_PROFILE" = "software" ]; then
+    template_files+=("${SOFTWARE_PROFILE_TEMPLATE_FILES[@]}")
+  fi
+
   local src_root=""
   if src_root="$(resolve_template_source 2>/dev/null)"; then
-    for rel in "${TEMPLATE_FILES[@]}"; do
+    for rel in "${template_files[@]}"; do
       [ -f "$src_root/$rel" ] || die "missing template: $src_root/$rel"
       copy_skip "$src_root/$rel" "$dst_root/$rel"
     done
   else
     local tmp
     tmp="$(mktemp -d)"
-    for rel in "${TEMPLATE_FILES[@]}"; do
+    for rel in "${template_files[@]}"; do
       download_file "$rel" "$tmp/$rel"
       copy_skip "$tmp/$rel" "$dst_root/$rel"
     done
@@ -134,6 +144,18 @@ generate_defaults() {
     rel="${file#.agent/templates/default/}"
     copy_skip "$file" "$rel"
   done < <(find .agent/templates/default -type f -print0)
+}
+
+generate_profile_files() {
+  case "$WORKSPACE_PROFILE" in
+    general) return 0 ;;
+    software)
+      local src=".agent/templates/profiles/software/ENGINEERING.md"
+      [ -f "$src" ] || die "missing software profile template: $src"
+      copy_skip "$src" "ENGINEERING.md"
+      ;;
+    *) die "unsupported workspace profile: $WORKSPACE_PROFILE" ;;
+  esac
 }
 
 install_cli() {
@@ -243,6 +265,17 @@ parse_args() {
         [ -n "$CUSTOM_OUTPUT_PATH" ] || die "--custom-path requires a value"
         shift
         ;;
+      --profile)
+        shift
+        [ "$#" -gt 0 ] || die "--profile requires a value"
+        WORKSPACE_PROFILE="$1"
+        shift
+        ;;
+      --profile=*)
+        WORKSPACE_PROFILE="${1#--profile=}"
+        [ -n "$WORKSPACE_PROFILE" ] || die "--profile requires a value"
+        shift
+        ;;
       --)
         shift
         [ "$#" -eq 0 ] || die "unexpected argument after --: $1"
@@ -258,6 +291,29 @@ parse_args() {
         ;;
     esac
   done
+}
+
+validate_profile() {
+  case "$WORKSPACE_PROFILE" in
+    general|software) ;;
+    *) die "invalid workspace profile: $WORKSPACE_PROFILE (supported: general, software)" ;;
+  esac
+}
+
+select_profile() {
+  if [ -n "$WORKSPACE_PROFILE" ]; then
+    validate_profile
+    return 0
+  fi
+
+  if can_prompt; then
+    prompt_read 'Workspace profile [general/software] (default: general): '
+    WORKSPACE_PROFILE="${PROMPT_VALUE:-general}"
+  else
+    WORKSPACE_PROFILE="general"
+  fi
+
+  validate_profile
 }
 
 select_agents() {
@@ -344,6 +400,7 @@ add_agent() {
 }
 
 init() {
+  select_profile
   select_agents
   validate_agents_selection "$SELECTED_AGENTS"
   if selection_has_custom "$SELECTED_AGENTS"; then
@@ -353,6 +410,7 @@ init() {
   ensure_git
   install_templates
   generate_defaults
+  generate_profile_files
   install_cli
   add_agent "$SELECTED_AGENTS"
 }
@@ -383,11 +441,15 @@ Usage: agent-workspace [init|add-agent|status|help] [options]
 Options:
   --agents AGENTS       Comma/space separated agents: pi, codex, claude, cursor, custom
   --custom-path PATH    Output path used with --agents custom
+  --profile PROFILE     Workspace profile: general, software (default: general)
 
 With no command, runs init. The curl bootstrap command also runs init.
 
 Examples:
   agent-workspace init --agents claude
+  agent-workspace init --profile software --agents pi
+  agent-workspace init --profile general
+  AGENT_WORKSPACE_PROFILE=software agent-workspace init
   agent-workspace add-agent --agents cursor
   agent-workspace add-agent cursor
 USAGE

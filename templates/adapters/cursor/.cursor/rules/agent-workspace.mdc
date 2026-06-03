@@ -24,4 +24,4 @@ When meaningful work finishes:
 
 ## Workflows
 
-Before implementation, inspect existing files. Make minimal, precise changes. Run relevant checks when possible. Summarize changed files and next steps.
+Before implementation, inspect existing files. If ENGINEERING.md exists, read and follow it for coding and implementation work. Make minimal, precise changes. Run relevant checks when possible. Summarize changed files and next steps.
