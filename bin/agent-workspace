@@ -132,6 +132,13 @@ install_templates() {
 ensure_git() {
   command -v git >/dev/null 2>&1 || die "git is required"
   if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    local top current
+    top="$(git rev-parse --show-toplevel)"
+    top="$(cd "$top" && pwd -P)"
+    current="$(pwd -P)"
+    if [ "$top" != "$current" ]; then
+      die "current directory is inside another git repository: $top. Run from the project root or outside any existing repository."
+    fi
     return 0
   fi
   git init

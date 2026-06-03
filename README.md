@@ -45,7 +45,7 @@ curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/bootst
 
 The bootstrap command:
 
-1. runs `git init` if the current directory is not already inside a git work tree
+1. runs `git init` if needed, or stops if the current directory is inside another git repository but is not that repository root
 2. copies templates into `.agent/templates/`
 3. creates `STATE.md`, `BRAINSTORM.md`, and `.gitignore` if missing
 4. installs `bin/agent-workspace`
