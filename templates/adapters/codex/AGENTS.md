@@ -13,6 +13,7 @@ At the start of meaningful work, read these files if present:
 1. `WORKFLOWS.md`
 2. `STATE.md`
 3. `BRAINSTORM.md`
+4. `BRIEF.md`
 
 When meaningful work finishes:
 

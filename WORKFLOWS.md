@@ -12,6 +12,7 @@
    - compare these facts with project memory.
 4. If durable memory is stale or contradicted by repo/task reality, update memory or project docs before continuing normal work.
 5. If the task is unclear after reconciliation, ask what we are working on.
+6. Read project scope if present, such as `BRIEF.md`.
 
 ## Pending checkpoint handling
 
