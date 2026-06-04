@@ -109,7 +109,7 @@ install_templates() {
   mkdir -p "$dst_root"
 
   local template_files=("${CORE_TEMPLATE_FILES[@]}")
-  if [ "$WORKSPACE_PROFILE" = "software" ]; then
+  if [ "$WORKSPACE_PROFILE" = "code" ]; then
     template_files+=("${SOFTWARE_PROFILE_TEMPLATE_FILES[@]}")
   fi
 
@@ -157,9 +157,9 @@ generate_defaults() {
 generate_profile_files() {
   case "$WORKSPACE_PROFILE" in
     general) return 0 ;;
-    software)
+    code)
       local src=".agent/templates/profiles/software/ENGINEERING.md"
-      [ -f "$src" ] || die "missing software profile template: $src"
+      [ -f "$src" ] || die "missing code profile template: $src"
       copy_skip "$src" "ENGINEERING.md"
       ;;
     *) die "unsupported workspace profile: $WORKSPACE_PROFILE" ;;
@@ -303,8 +303,12 @@ parse_args() {
 
 validate_profile() {
   case "$WORKSPACE_PROFILE" in
-    general|software) ;;
-    *) die "invalid workspace profile: $WORKSPACE_PROFILE (supported: general, software)" ;;
+    general|code) ;;
+    software)
+      warn "workspace profile 'software' is deprecated; use 'code'"
+      WORKSPACE_PROFILE="code"
+      ;;
+    *) die "invalid workspace profile: $WORKSPACE_PROFILE (supported: general, code)" ;;
   esac
 }
 
@@ -315,7 +319,7 @@ select_profile() {
   fi
 
   if can_prompt; then
-    prompt_read 'Workspace profile [general/software] (default: general): '
+    prompt_read 'Workspace profile [general/code] (default: general): '
     WORKSPACE_PROFILE="${PROMPT_VALUE:-general}"
   else
     WORKSPACE_PROFILE="general"
@@ -449,15 +453,15 @@ Usage: agent-workspace [init|add-agent|status|help] [options]
 Options:
   --agents AGENTS       Comma/space separated agents: pi, codex, claude, cursor, custom
   --custom-path PATH    Output path used with --agents custom
-  --profile PROFILE     Workspace profile: general, software (default: general)
+  --profile PROFILE     Workspace profile: general, code (default: general)
 
 With no command, runs init. The curl bootstrap command also runs init.
 
 Examples:
   agent-workspace init --agents claude
-  agent-workspace init --profile software --agents pi
+  agent-workspace init --profile code --agents pi
   agent-workspace init --profile general
-  AGENT_WORKSPACE_PROFILE=software agent-workspace init
+  AGENT_WORKSPACE_PROFILE=code agent-workspace init
   agent-workspace add-agent --agents cursor
   agent-workspace add-agent cursor
 USAGE

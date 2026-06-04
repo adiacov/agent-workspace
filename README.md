@@ -22,9 +22,9 @@ curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/bootst
 Choose a workspace profile with `--profile` or `AGENT_WORKSPACE_PROFILE`:
 
 ```bash
-agent-workspace init --profile software --agents pi
+agent-workspace init --profile code --agents pi
 agent-workspace init --profile general
-AGENT_WORKSPACE_PROFILE=software agent-workspace init
+AGENT_WORKSPACE_PROFILE=code agent-workspace init
 ```
 
 Supported agents are: `pi`, `codex`, `claude`, `cursor`, and `custom`.
@@ -56,7 +56,7 @@ Existing files are skipped, never overwritten.
 Workspace profiles:
 
 - `general` is the default profile. It generates the standard memory files only and does not generate or cache `ENGINEERING.md`.
-- `software` adds coding-project engineering guidance by caching `.agent/templates/profiles/software/ENGINEERING.md` and generating root `ENGINEERING.md` if missing.
+- `code` adds coding-project engineering guidance by caching `.agent/templates/profiles/software/ENGINEERING.md` and generating root `ENGINEERING.md` if missing. The old `software` profile name is still accepted as a deprecated alias.
 
 ## Generated files
 
@@ -83,9 +83,9 @@ After bootstrap, use the local CLI:
 ./bin/agent-workspace add-agent
 ./bin/agent-workspace add-agent --agents cursor
 ./bin/agent-workspace init --agents claude
-./bin/agent-workspace init --profile software --agents pi
+./bin/agent-workspace init --profile code --agents pi
 ./bin/agent-workspace init --profile general
-AGENT_WORKSPACE_PROFILE=software ./bin/agent-workspace init
+AGENT_WORKSPACE_PROFILE=code ./bin/agent-workspace init
 ```
 
 `init` repeats the bootstrap behavior using the local CLI. You do not need to run it immediately after the curl bootstrap.
