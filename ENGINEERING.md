@@ -42,6 +42,8 @@ Before making changes:
 - Validate inputs at trust boundaries.
 - Avoid unnecessary shared mutable state and hidden side effects.
 - Keep public interfaces stable and documented when consumed outside their module.
+- Add concise comments or docstrings for public entrypoints, non-obvious logic, invariants, important domain rules, and surprising tradeoffs.
+- Avoid noisy comments that restate obvious code; comments should help future maintainers understand intent, constraints, or consequences.
 - Remove dead code, unused imports, debug output, and temporary scaffolding before completion.
 
 ## Documentation
@@ -50,7 +52,7 @@ Document what future maintainers need to understand.
 
 - Document public APIs, configuration, operational steps, and non-obvious behavior.
 - Explain assumptions, invariants, constraints, and tradeoffs.
-- Use comments to explain why something exists, not what the code already states.
+- Use comments to explain why something exists, how non-obvious behavior should be maintained, and what future changes must preserve — not what the code already states.
 - Keep documentation synchronized with implementation.
 - For user-facing tools, document installation, configuration, usage, and common failure modes when relevant.
 
