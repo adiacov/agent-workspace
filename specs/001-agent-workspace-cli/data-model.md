@@ -7,7 +7,7 @@ Represents a target project managed or detected by Agent Workspace.
 **Fields**:
 
 - `path`: project root path being initialized, audited, discovered, or migrated.
-- `metadataStatus`: `present`, `missing`, `legacy`, or `invalid`.
+- `metadataStatus`: `present`, `missing`, `legacy`, `invalid`, or `stale`.
 - `profile`: workspace profile expected for the project, such as `general` or `code`.
 - `agents`: selected/supported agent adapters known for the project.
 - `activeFiles`: generated files that now belong to the project.

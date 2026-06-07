@@ -19,11 +19,11 @@
 - Q: Should workspace metadata be committed to projects? → A: Commit metadata by default.
 - Q: Should projects keep a local template cache? → A: Templates live globally, not per project.
 - Q: What names should the global command and project metadata directory use? → A: Use `agent-ws` and `.agent-workspace/`.
-- Q: Should the new CLI include migration guidance from the current project-local model? → A: Yes, include migration documentation and consider automation.
+- Q: Should the new CLI include migration guidance from the current project-local model? → A: Yes, include migration documentation and a safe migration helper.
 - Q: Should README documentation be rewritten around a simpler user flow? → A: Yes, README must prioritize a clear first-time flow.
 - Q: What counts as the latest stable release for updates? → A: Newest Git/GitHub tag or release not marked pre-release and without alpha, beta, or rc suffixes.
 - Q: What happens if update fails? → A: Preserve the currently working `agent-ws` until the new version is fully installed and validated.
-- Q: Is migration automation required for MVP? → A: Documentation is required; automation is optional but must default to dry-run and require explicit apply for destructive changes.
+- Q: Is migration automation required for MVP? → A: Yes; provide a safe migration helper that defaults to dry-run and requires explicit apply for destructive changes.
 - Q: Should migration logic handle old project-local template caches? → A: No; old project-local template caches are outside the product model and may be deleted manually.
 - Q: How should invalid or stale metadata be handled? → A: Report it in status/audit as invalid or stale; active files remain valid project-owned files.
 - Q: How are `status` and `audit` different? → A: `status` is a quick current-project summary; `audit` performs deeper checks for one or many paths.
@@ -190,7 +190,7 @@ A new user can read the README and quickly understand what Agent Workspace is, h
 - **FR-021**: The CLI MUST preserve the boundary that Agent Workspace owns reusable mechanisms and templates while the target project owns final active instruction files and memory.
 - **FR-022**: The CLI MUST provide help or usage guidance for every user-facing command, including initialization, adding agents, status, audit, discovery, template comparison, sync, and command update.
 - **FR-024**: The project documentation MUST include a migration section explaining how to move from the older `.agent/` and `bin/agent-workspace` approach to the new `agent-ws` and `.agent-workspace/` model.
-- **FR-025**: Migration documentation is required for MVP; if migration automation is provided, it MUST default to dry-run, preview intended changes, require explicit apply for destructive actions, and preserve active instruction files and memory by default.
+- **FR-025**: Migration documentation and a migration helper are required for MVP; the helper MUST default to dry-run, preview intended changes, require explicit apply for destructive actions, and preserve active instruction files and memory by default.
 - **FR-025a**: Migration logic and documentation MUST NOT rely on or manage old project-local template caches; those caches are outside the supported target model and may be deleted manually by the user.
 - **FR-026**: The README MUST prioritize one clear primary install-and-initialize flow before presenting optional advanced usage.
 
@@ -218,7 +218,7 @@ A new user can read the README and quickly understand what Agent Workspace is, h
 - **SC-007**: Developers can view template-vs-active-file differences before applying changes in 100% of projects where comparable templates are available.
 - **SC-008**: The globally installed `agent-ws` command can be updated to a selected stable released version in under 2 minutes when that release is available, and failed updates leave the previous working command usable.
 - **SC-009**: At least 90% of command failures in validation scenarios include a clear explanation and a next action the developer can take.
-- **SC-010**: A developer can migrate a representative legacy local project using the documented migration guidance without losing active instruction files or memory.
+- **SC-010**: A developer can migrate a representative legacy local project using the documented migration guidance and safe migration helper without losing active instruction files or memory.
 - **SC-011**: A new user can complete the README primary quickstart without needing to choose between multiple redundant initialization methods.
 
 ## Assumptions

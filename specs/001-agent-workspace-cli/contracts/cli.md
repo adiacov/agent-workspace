@@ -111,7 +111,7 @@ Updates the globally installed `agent-ws` command from Git/GitHub releases or ta
 
 ### `agent-ws migrate [path]`
 
-Helps migrate a legacy project from local command copies to the global model. Migration documentation is required for MVP; this helper is optional if implemented.
+Helps migrate a legacy project from local command copies to the global model. Migration documentation and this safe helper are required for MVP.
 
 **Options**:
 

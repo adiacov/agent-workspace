@@ -21,17 +21,19 @@
 - [ ] T001 Create global CLI source directories `lib/agent-ws/`, `tests/integration/`, `tests/fixtures/`, and `tests/smoke/`
 - [ ] T002 Create executable global CLI entrypoint skeleton in `bin/agent-ws`
 - [ ] T003 Create development installer skeleton in `install.sh`
-- [ ] T004 [P] Create command dispatch module placeholder in `lib/agent-ws/commands.sh`
-- [ ] T005 [P] Create template source module placeholder in `lib/agent-ws/templates.sh`
-- [ ] T006 [P] Create metadata module placeholder in `lib/agent-ws/metadata.sh`
-- [ ] T007 [P] Create discovery module placeholder in `lib/agent-ws/discovery.sh`
-- [ ] T008 [P] Create audit module placeholder in `lib/agent-ws/audit.sh`
-- [ ] T009 [P] Create diff module placeholder in `lib/agent-ws/diff.sh`
-- [ ] T010 [P] Create sync module placeholder in `lib/agent-ws/sync.sh`
-- [ ] T011 [P] Create update module placeholder in `lib/agent-ws/update.sh`
-- [ ] T012 [P] Create optional migration module placeholder in `lib/agent-ws/migrate.sh`
-- [ ] T013 [P] Create shared integration test helpers in `tests/integration/helpers.sh`
-- [ ] T014 [P] Create smoke test runner skeleton in `tests/smoke/run-smoke.sh`
+- [ ] T004 Implement `install.sh --prefix` to install `bin/agent-ws`, `lib/agent-ws/`, and `templates/` into a global or temporary prefix in `install.sh`
+- [ ] T005 Update legacy bootstrap transition behavior to point users toward `install.sh` and `agent-ws` in `bootstrap.sh`
+- [ ] T006 [P] Create command dispatch module placeholder in `lib/agent-ws/commands.sh`
+- [ ] T007 [P] Create template source module placeholder in `lib/agent-ws/templates.sh`
+- [ ] T008 [P] Create metadata module placeholder in `lib/agent-ws/metadata.sh`
+- [ ] T009 [P] Create discovery module placeholder in `lib/agent-ws/discovery.sh`
+- [ ] T010 [P] Create audit module placeholder in `lib/agent-ws/audit.sh`
+- [ ] T011 [P] Create diff module placeholder in `lib/agent-ws/diff.sh`
+- [ ] T012 [P] Create sync module placeholder in `lib/agent-ws/sync.sh`
+- [ ] T013 [P] Create update module placeholder in `lib/agent-ws/update.sh`
+- [ ] T014 [P] Create migration module placeholder in `lib/agent-ws/migrate.sh`
+- [ ] T015 [P] Create shared integration test helpers in `tests/integration/helpers.sh`
+- [ ] T016 [P] Create smoke test runner skeleton in `tests/smoke/run-smoke.sh`
 
 ---
 
@@ -41,18 +43,19 @@
 
 **⚠️ CRITICAL**: No user story implementation should begin until this phase is complete.
 
-- [ ] T015 Implement CLI module loading and command dispatch in `bin/agent-ws` and `lib/agent-ws/commands.sh`
-- [ ] T016 Implement shared output, warning, error, and exit helpers in `lib/agent-ws/commands.sh`
-- [ ] T017 Implement argument parsing primitives for command, options, path, `--no-prompt`, `--profile`, `--agents`, `--custom-path`, `--dry-run`, `--apply`, and `--version` in `lib/agent-ws/commands.sh`
-- [ ] T018 Implement global template source resolution for repository checkout, installed payload, and selected release source in `lib/agent-ws/templates.sh`
-- [ ] T019 Implement safe copy-skip helper that creates parent directories and never overwrites active files in `lib/agent-ws/templates.sh`
-- [ ] T020 Implement project root and git-root safety helpers in `lib/agent-ws/commands.sh`
-- [ ] T021 Implement metadata JSON write helper with staged file replacement in `lib/agent-ws/metadata.sh`
-- [ ] T022 Implement metadata JSON read, invalid detection, stale revision detection, and privacy-safe field validation in `lib/agent-ws/metadata.sh`
-- [ ] T023 Implement supported profiles and agent adapter mappings in `lib/agent-ws/templates.sh`
-- [ ] T024 Implement custom path validation that rejects absolute paths and parent-directory escapes in `lib/agent-ws/templates.sh`
-- [ ] T025 [P] Add shell syntax smoke checks for all shell entrypoints in `tests/smoke/run-smoke.sh`
-- [ ] T026 [P] Add fixture builder helpers for clean, partial, legacy, and managed projects in `tests/integration/helpers.sh`
+- [ ] T017 Implement CLI module loading and command dispatch in `bin/agent-ws` and `lib/agent-ws/commands.sh`
+- [ ] T018 Implement shared output, warning, error, and exit helpers in `lib/agent-ws/commands.sh`
+- [ ] T019 Implement argument parsing primitives for command, options, path, `--no-prompt`, `--profile`, `--agents`, `--custom-path`, `--dry-run`, `--apply`, and `--version` in `lib/agent-ws/commands.sh`
+- [ ] T020 Implement global template source resolution for repository checkout, installed payload, and selected release source in `lib/agent-ws/templates.sh`
+- [ ] T021 Implement safe copy-skip helper that creates parent directories and never overwrites active files in `lib/agent-ws/templates.sh`
+- [ ] T022 Implement project root and git-root safety helpers in `lib/agent-ws/commands.sh`
+- [ ] T023 Implement metadata JSON write helper with staged file replacement in `lib/agent-ws/metadata.sh`
+- [ ] T024 Implement metadata JSON read, invalid detection, stale revision detection, and privacy-safe field validation in `lib/agent-ws/metadata.sh`
+- [ ] T025 Implement supported profiles and agent adapter mappings in `lib/agent-ws/templates.sh`
+- [ ] T026 Implement custom path validation that rejects absolute paths and parent-directory escapes in `lib/agent-ws/templates.sh`
+- [ ] T027 [P] Add shell syntax smoke checks for all shell entrypoints in `tests/smoke/run-smoke.sh`
+- [ ] T028 [P] Add fixture builder helpers and an explicit fixture matrix for clean, partial, legacy, managed, invalid-metadata, and stale-metadata projects in `tests/integration/helpers.sh`
+- [ ] T029 [P] Add representative failure-message quality tests for clear explanation and next action in `tests/smoke/test_failure_messages.sh`
 
 **Checkpoint**: Foundation ready — user story implementation can now begin.
 
@@ -66,24 +69,24 @@
 
 ### Tests for User Story 1
 
-- [ ] T027 [P] [US1] Add integration test for current-directory initialization in `tests/integration/test_init_current.sh`
-- [ ] T028 [P] [US1] Add integration test for named-directory initialization in `tests/integration/test_init_named_project.sh`
-- [ ] T029 [P] [US1] Add integration test for initialization no-overwrite behavior in `tests/integration/test_init_no_overwrite.sh`
-- [ ] T030 [P] [US1] Add integration test for metadata privacy and required fields in `tests/integration/test_metadata_contract.sh`
-- [ ] T031 [P] [US1] Add integration test proving `.agent/`, project-local template cache, and `bin/agent-workspace` are not created in `tests/integration/test_no_legacy_outputs.sh`
+- [ ] T030 [P] [US1] Add integration test for current-directory initialization in `tests/integration/test_init_current.sh`
+- [ ] T031 [P] [US1] Add integration test for named-directory initialization in `tests/integration/test_init_named_project.sh`
+- [ ] T032 [P] [US1] Add integration test for initialization no-overwrite behavior in `tests/integration/test_init_no_overwrite.sh`
+- [ ] T033 [P] [US1] Add integration test for metadata privacy and required fields in `tests/integration/test_metadata_contract.sh`
+- [ ] T034 [P] [US1] Add integration test proving `.agent/`, project-local template cache, and `bin/agent-workspace` are not created in `tests/integration/test_no_legacy_outputs.sh`
 
 ### Implementation for User Story 1
 
-- [ ] T032 [US1] Implement `agent-ws init` command routing in `lib/agent-ws/commands.sh`
-- [ ] T033 [US1] Implement current-directory initialization flow with git-root safety in `lib/agent-ws/commands.sh`
-- [ ] T034 [US1] Implement named project directory creation and initialization flow in `lib/agent-ws/commands.sh`
-- [ ] T035 [US1] Implement default file generation from global templates in `lib/agent-ws/templates.sh`
-- [ ] T036 [US1] Implement profile-specific generation for `general` and `code` profiles in `lib/agent-ws/templates.sh`
-- [ ] T037 [US1] Implement selected agent file generation during initialization in `lib/agent-ws/templates.sh`
-- [ ] T038 [US1] Implement `.agent-workspace/workspace.json` metadata creation during initialization in `lib/agent-ws/metadata.sh`
-- [ ] T039 [US1] Implement metadata generated-file mapping updates for initialization outputs in `lib/agent-ws/metadata.sh`
-- [ ] T040 [US1] Implement non-interactive `--no-prompt`, `--profile`, and `--agents` initialization behavior in `lib/agent-ws/commands.sh`
-- [ ] T041 [US1] Add init usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
+- [ ] T035 [US1] Implement `agent-ws init` command routing in `lib/agent-ws/commands.sh`
+- [ ] T036 [US1] Implement current-directory initialization flow with git-root safety in `lib/agent-ws/commands.sh`
+- [ ] T037 [US1] Implement named project directory creation and initialization flow in `lib/agent-ws/commands.sh`
+- [ ] T038 [US1] Implement default file generation from global templates in `lib/agent-ws/templates.sh`
+- [ ] T039 [US1] Implement profile-specific generation for `general` and `code` profiles in `lib/agent-ws/templates.sh`
+- [ ] T040 [US1] Implement selected agent file generation during initialization in `lib/agent-ws/templates.sh`
+- [ ] T041 [US1] Implement `.agent-workspace/workspace.json` metadata creation during initialization in `lib/agent-ws/metadata.sh`
+- [ ] T042 [US1] Implement metadata generated-file mapping updates for initialization outputs in `lib/agent-ws/metadata.sh`
+- [ ] T043 [US1] Implement non-interactive `--no-prompt`, `--profile`, and `--agents` initialization behavior in `lib/agent-ws/commands.sh`
+- [ ] T044 [US1] Add init usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
 
 **Checkpoint**: User Story 1 is independently functional and provides the MVP.
 
@@ -97,19 +100,19 @@
 
 ### Tests for User Story 2
 
-- [ ] T042 [P] [US2] Add integration test for adding a supported agent after initialization in `tests/integration/test_add_agent.sh`
-- [ ] T043 [P] [US2] Add integration test for add-agent no-overwrite behavior in `tests/integration/test_add_agent_no_overwrite.sh`
-- [ ] T044 [P] [US2] Add integration test for custom agent path validation in `tests/integration/test_custom_agent_path.sh`
-- [ ] T045 [P] [US2] Add integration test for multiple agents targeting the same destination without silent overwrite in `tests/integration/test_agent_destination_conflict.sh`
+- [ ] T045 [P] [US2] Add integration test for adding a supported agent after initialization in `tests/integration/test_add_agent.sh`
+- [ ] T046 [P] [US2] Add integration test for add-agent no-overwrite behavior in `tests/integration/test_add_agent_no_overwrite.sh`
+- [ ] T047 [P] [US2] Add integration test for custom agent path validation in `tests/integration/test_custom_agent_path.sh`
+- [ ] T048 [P] [US2] Add integration test for multiple agents targeting the same destination without silent overwrite in `tests/integration/test_agent_destination_conflict.sh`
 
 ### Implementation for User Story 2
 
-- [ ] T046 [US2] Implement `agent-ws add-agent` command routing in `lib/agent-ws/commands.sh`
-- [ ] T047 [US2] Implement add-agent template copy flow using global template source in `lib/agent-ws/templates.sh`
-- [ ] T048 [US2] Implement add-agent metadata update for newly generated files in `lib/agent-ws/metadata.sh`
-- [ ] T049 [US2] Implement custom agent output flow using project-root-relative destination paths in `lib/agent-ws/templates.sh`
-- [ ] T050 [US2] Implement duplicate destination detection and clear skip/conflict reporting in `lib/agent-ws/templates.sh`
-- [ ] T051 [US2] Add add-agent usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
+- [ ] T049 [US2] Implement `agent-ws add-agent` command routing in `lib/agent-ws/commands.sh`
+- [ ] T050 [US2] Implement add-agent template copy flow using global template source in `lib/agent-ws/templates.sh`
+- [ ] T051 [US2] Implement add-agent metadata update for newly generated files in `lib/agent-ws/metadata.sh`
+- [ ] T052 [US2] Implement custom agent output flow using project-root-relative destination paths in `lib/agent-ws/templates.sh`
+- [ ] T053 [US2] Implement duplicate destination detection and clear skip/conflict reporting in `lib/agent-ws/templates.sh`
+- [ ] T054 [US2] Add add-agent usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
 
 **Checkpoint**: User Story 2 is independently functional after the foundational phase and can be validated on any initialized project.
 
@@ -123,20 +126,20 @@
 
 ### Tests for User Story 3
 
-- [ ] T052 [P] [US3] Add integration test for quick current-project status in `tests/integration/test_status.sh`
-- [ ] T053 [P] [US3] Add integration test for audit on managed, partial, and legacy fixtures in `tests/integration/test_audit.sh`
-- [ ] T054 [P] [US3] Add integration test for invalid and stale metadata reporting in `tests/integration/test_metadata_status_audit.sh`
-- [ ] T055 [P] [US3] Add integration test for partial-state recovery guidance in `tests/integration/test_audit_recovery_guidance.sh`
+- [ ] T055 [P] [US3] Add integration test for quick current-project status in `tests/integration/test_status.sh`
+- [ ] T056 [P] [US3] Add integration test for audit on managed, partial, and legacy fixtures in `tests/integration/test_audit.sh`
+- [ ] T057 [P] [US3] Add integration test for invalid and stale metadata reporting in `tests/integration/test_metadata_status_audit.sh`
+- [ ] T058 [P] [US3] Add integration test for partial-state recovery guidance in `tests/integration/test_audit_recovery_guidance.sh`
 
 ### Implementation for User Story 3
 
-- [ ] T056 [US3] Implement `agent-ws status` command routing in `lib/agent-ws/commands.sh`
-- [ ] T057 [US3] Implement quick project health summary in `lib/agent-ws/audit.sh`
-- [ ] T058 [US3] Implement `agent-ws audit` command routing for current or specified paths in `lib/agent-ws/commands.sh`
-- [ ] T059 [US3] Implement deep audit checks for expected files, metadata presence, metadata validity, stale metadata, and template availability in `lib/agent-ws/audit.sh`
-- [ ] T060 [US3] Implement legacy signal reporting for `.agent/` and `bin/agent-workspace` in `lib/agent-ws/audit.sh`
-- [ ] T061 [US3] Implement partial-state recovery guidance output in `lib/agent-ws/audit.sh`
-- [ ] T062 [US3] Add status and audit usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
+- [ ] T059 [US3] Implement `agent-ws status` command routing in `lib/agent-ws/commands.sh`
+- [ ] T060 [US3] Implement quick project health summary in `lib/agent-ws/audit.sh`
+- [ ] T061 [US3] Implement `agent-ws audit` command routing for current or specified paths in `lib/agent-ws/commands.sh`
+- [ ] T062 [US3] Implement deep audit checks for expected files, metadata presence, metadata validity, stale metadata, and template availability in `lib/agent-ws/audit.sh`
+- [ ] T063 [US3] Implement legacy signal reporting for `.agent/` and `bin/agent-workspace` in `lib/agent-ws/audit.sh`
+- [ ] T064 [US3] Implement partial-state recovery guidance output in `lib/agent-ws/audit.sh`
+- [ ] T065 [US3] Add status and audit usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
 
 **Checkpoint**: User Story 3 is independently functional for one project and multi-path audit inputs.
 
@@ -150,17 +153,17 @@
 
 ### Tests for User Story 4
 
-- [ ] T063 [P] [US4] Add integration test for discovery classification in `tests/integration/test_discover.sh`
-- [ ] T064 [P] [US4] Add integration test for discovery skip directories in `tests/integration/test_discover_skip_dirs.sh`
-- [ ] T065 [P] [US4] Add integration test proving discovery does not maintain a registry in `tests/integration/test_discover_no_registry.sh`
+- [ ] T066 [P] [US4] Add integration test for discovery classification in `tests/integration/test_discover.sh`
+- [ ] T067 [P] [US4] Add integration test for discovery skip directories in `tests/integration/test_discover_skip_dirs.sh`
+- [ ] T068 [P] [US4] Add integration test proving discovery does not maintain a registry in `tests/integration/test_discover_no_registry.sh`
 
 ### Implementation for User Story 4
 
-- [ ] T066 [US4] Implement `agent-ws discover` command routing in `lib/agent-ws/commands.sh`
-- [ ] T067 [US4] Implement discovery traversal with skip rules for `.git`, `node_modules`, `.venv`, generated output, and heavy folders in `lib/agent-ws/discovery.sh`
-- [ ] T068 [US4] Implement discovery signal scoring for `.agent-workspace/`, legacy `.agent/`, `bin/agent-workspace`, and known active files in `lib/agent-ws/discovery.sh`
-- [ ] T069 [US4] Implement strong and uncertain discovery output with signal lists in `lib/agent-ws/discovery.sh`
-- [ ] T070 [US4] Add discover usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
+- [ ] T069 [US4] Implement `agent-ws discover` command routing in `lib/agent-ws/commands.sh`
+- [ ] T070 [US4] Implement discovery traversal with skip rules for `.git`, `node_modules`, `.venv`, generated output, and heavy folders in `lib/agent-ws/discovery.sh`
+- [ ] T071 [US4] Implement discovery signal scoring for `.agent-workspace/`, legacy `.agent/`, `bin/agent-workspace`, and known active files in `lib/agent-ws/discovery.sh`
+- [ ] T072 [US4] Implement strong and uncertain discovery output with signal lists in `lib/agent-ws/discovery.sh`
+- [ ] T073 [US4] Add discover usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
 
 **Checkpoint**: User Story 4 is independently functional for explicit scan roots.
 
@@ -174,25 +177,25 @@
 
 ### Tests for User Story 5
 
-- [ ] T071 [P] [US5] Add integration test for read-only diff behavior in `tests/integration/test_diff.sh`
-- [ ] T072 [P] [US5] Add integration test for conservative sync dry-run preserving active files in `tests/integration/test_sync_dry_run.sh`
-- [ ] T073 [P] [US5] Add integration test for safe non-conflicting sync apply behavior in `tests/integration/test_sync_apply_safe.sh`
-- [ ] T074 [P] [US5] Add integration test for update latest stable selection rules in `tests/integration/test_update_latest_stable.sh`
-- [ ] T075 [P] [US5] Add integration test for update failure preserving previous command in `tests/integration/test_update_failure_preserves_current.sh`
+- [ ] T074 [P] [US5] Add integration test for read-only diff behavior in `tests/integration/test_diff.sh`
+- [ ] T075 [P] [US5] Add integration test for conservative sync dry-run preserving active files in `tests/integration/test_sync_dry_run.sh`
+- [ ] T076 [P] [US5] Add integration test for safe non-conflicting sync apply behavior in `tests/integration/test_sync_apply_safe.sh`
+- [ ] T077 [P] [US5] Add integration test for update latest stable selection rules in `tests/integration/test_update_latest_stable.sh`
+- [ ] T078 [P] [US5] Add integration test for update failure preserving previous command in `tests/integration/test_update_failure_preserves_current.sh`
 
 ### Implementation for User Story 5
 
-- [ ] T076 [US5] Implement `agent-ws diff` command routing in `lib/agent-ws/commands.sh`
-- [ ] T077 [US5] Implement active-file to global-template comparison in `lib/agent-ws/diff.sh`
-- [ ] T078 [US5] Implement stale metadata and unavailable template reporting for diff in `lib/agent-ws/diff.sh`
-- [ ] T079 [US5] Implement `agent-ws sync` command routing with `--dry-run` and `--apply` in `lib/agent-ws/commands.sh`
-- [ ] T080 [US5] Implement conservative sync behavior for metadata and comparison baselines in `lib/agent-ws/sync.sh`
-- [ ] T081 [US5] Implement active-file preservation and conflict stopping in `lib/agent-ws/sync.sh`
-- [ ] T082 [US5] Implement `agent-ws update` command routing with optional `--version` in `lib/agent-ws/commands.sh`
-- [ ] T083 [US5] Implement Git/GitHub stable release or tag lookup excluding pre-release, alpha, beta, and release-candidate versions in `lib/agent-ws/update.sh`
-- [ ] T084 [US5] Implement staged update download, validation, and replacement in `lib/agent-ws/update.sh`
-- [ ] T085 [US5] Implement update failure handling that preserves the current working command in `lib/agent-ws/update.sh`
-- [ ] T086 [US5] Add diff, sync, and update usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
+- [ ] T079 [US5] Implement `agent-ws diff` command routing in `lib/agent-ws/commands.sh`
+- [ ] T080 [US5] Implement active-file to global-template comparison in `lib/agent-ws/diff.sh`
+- [ ] T081 [US5] Implement stale metadata and unavailable template reporting for diff in `lib/agent-ws/diff.sh`
+- [ ] T082 [US5] Implement `agent-ws sync` command routing with `--dry-run` and `--apply` in `lib/agent-ws/commands.sh`
+- [ ] T083 [US5] Implement conservative sync behavior for metadata and comparison baselines in `lib/agent-ws/sync.sh`
+- [ ] T084 [US5] Implement active-file preservation and conflict stopping in `lib/agent-ws/sync.sh`
+- [ ] T085 [US5] Implement `agent-ws update` command routing with optional `--version` in `lib/agent-ws/commands.sh`
+- [ ] T086 [US5] Implement Git/GitHub stable release or tag lookup excluding pre-release, alpha, beta, and release-candidate versions in `lib/agent-ws/update.sh`
+- [ ] T087 [US5] Implement staged update download, validation, and replacement in `lib/agent-ws/update.sh`
+- [ ] T088 [US5] Implement update failure handling that preserves the current working command in `lib/agent-ws/update.sh`
+- [ ] T089 [US5] Add diff, sync, and update usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
 
 **Checkpoint**: User Story 5 is independently functional without changing active project-owned files by default.
 
@@ -200,26 +203,26 @@
 
 ## Phase 8: User Story 6 - Migrate From Current Local Model (Priority: P3)
 
-**Goal**: A developer with older local Agent Workspace projects can follow migration documentation and optionally run a dry-run migration helper that preserves active files and memory.
+**Goal**: A developer with older local Agent Workspace projects can follow migration documentation and run a dry-run migration helper that preserves active files and memory.
 
 **Independent Test**: Use a legacy fixture containing `bin/agent-workspace`, `.agent/`, active instructions, and memory; follow docs or run `agent-ws migrate --dry-run`; verify active files are preserved and old project-local template caches are not inspected or used.
 
 ### Tests for User Story 6
 
-- [ ] T087 [P] [US6] Add integration test for migration dry-run preview in `tests/integration/test_migrate_dry_run.sh`
-- [ ] T088 [P] [US6] Add integration test for migration apply preserving active files and memory in `tests/integration/test_migrate_apply_preserves_active_files.sh`
-- [ ] T089 [P] [US6] Add integration test proving migration does not inspect old project-local template cache contents in `tests/integration/test_migrate_ignores_old_template_cache.sh`
+- [ ] T090 [P] [US6] Add integration test for migration dry-run preview in `tests/integration/test_migrate_dry_run.sh`
+- [ ] T091 [P] [US6] Add integration test for migration apply preserving active files and memory in `tests/integration/test_migrate_apply_preserves_active_files.sh`
+- [ ] T092 [P] [US6] Add integration test proving migration does not inspect old project-local template cache contents in `tests/integration/test_migrate_ignores_old_template_cache.sh`
 
 ### Implementation for User Story 6
 
-- [ ] T090 [US6] Write migration documentation section in `README.md`
-- [ ] T091 [US6] Implement optional `agent-ws migrate` command routing in `lib/agent-ws/commands.sh`
-- [ ] T092 [US6] Implement migration dry-run report for legacy `.agent/` and `bin/agent-workspace` signals in `lib/agent-ws/migrate.sh`
-- [ ] T093 [US6] Implement optional migration apply path that requires `--apply` and preserves active files and memory in `lib/agent-ws/migrate.sh`
-- [ ] T094 [US6] Implement legacy metadata creation during migration when safe in `lib/agent-ws/migrate.sh`
-- [ ] T095 [US6] Add migrate usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
+- [ ] T093 [US6] Write migration documentation section in `README.md`
+- [ ] T094 [US6] Implement `agent-ws migrate` command routing in `lib/agent-ws/commands.sh`
+- [ ] T095 [US6] Implement migration dry-run report for legacy `.agent/` and `bin/agent-workspace` signals in `lib/agent-ws/migrate.sh`
+- [ ] T096 [US6] Implement migration apply path that requires `--apply` and preserves active files and memory in `lib/agent-ws/migrate.sh`
+- [ ] T097 [US6] Implement legacy metadata creation during migration when safe in `lib/agent-ws/migrate.sh`
+- [ ] T098 [US6] Add migrate usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
 
-**Checkpoint**: User Story 6 is independently functional as documentation-first migration with safe optional automation.
+**Checkpoint**: User Story 6 is independently functional as documentation plus safe migration helper automation.
 
 ---
 
@@ -231,17 +234,17 @@
 
 ### Tests for User Story 7
 
-- [ ] T096 [P] [US7] Add README quickstart smoke validation in `tests/smoke/test_readme_quickstart.sh`
-- [ ] T097 [P] [US7] Add documentation grep check that README introduces one primary quickstart before advanced options in `tests/smoke/test_readme_structure.sh`
+- [ ] T099 [P] [US7] Add README quickstart smoke validation in `tests/smoke/test_readme_quickstart.sh`
+- [ ] T100 [P] [US7] Add documentation grep check that README introduces one primary quickstart before advanced options in `tests/smoke/test_readme_structure.sh`
 
 ### Implementation for User Story 7
 
-- [ ] T098 [US7] Rewrite README overview and primary quickstart around `agent-ws` in `README.md`
-- [ ] T099 [US7] Document install and update flow from Git/GitHub stable releases or tags in `README.md`
-- [ ] T100 [US7] Document `agent-ws init`, `add-agent`, `status`, `audit`, `discover`, `diff`, `sync`, `update`, and `migrate` command summaries in `README.md`
-- [ ] T101 [US7] Document `.agent-workspace/` metadata ownership and privacy rules in `README.md`
-- [ ] T102 [US7] Document that templates are global and active instruction files are project-owned in `README.md`
-- [ ] T103 [US7] Move advanced non-interactive and custom options after the primary quickstart in `README.md`
+- [ ] T101 [US7] Rewrite README overview and primary quickstart around `agent-ws` in `README.md`
+- [ ] T102 [US7] Document install and update flow from Git/GitHub stable releases or tags in `README.md`
+- [ ] T103 [US7] Document `agent-ws init`, `add-agent`, `status`, `audit`, `discover`, `diff`, `sync`, `update`, and `migrate` command summaries in `README.md`
+- [ ] T104 [US7] Document `.agent-workspace/` metadata ownership and privacy rules in `README.md`
+- [ ] T105 [US7] Document that templates are global and active instruction files are project-owned in `README.md`
+- [ ] T106 [US7] Move advanced non-interactive and custom options after the primary quickstart in `README.md`
 
 **Checkpoint**: User Story 7 is independently functional as user-facing documentation.
 
@@ -251,14 +254,15 @@
 
 **Purpose**: Final validation, cleanup, and consistency checks across all stories.
 
-- [ ] T104 [P] Run shell syntax checks for `bin/agent-ws`, `install.sh`, and `lib/agent-ws/*.sh`
-- [ ] T105 [P] Run all integration tests in `tests/integration/`
-- [ ] T106 [P] Run all smoke tests in `tests/smoke/`
-- [ ] T107 Review code comments and docstrings for public entrypoints and non-obvious shell logic in `bin/agent-ws` and `lib/agent-ws/*.sh`
-- [ ] T108 Remove obsolete debug output and temporary scaffolding from `bin/agent-ws`, `install.sh`, and `lib/agent-ws/*.sh`
-- [ ] T109 Validate quickstart scenarios from `specs/001-agent-workspace-cli/quickstart.md`
-- [ ] T110 Verify generated docs and implementation do not describe new project-local template caches in `README.md` and `specs/001-agent-workspace-cli/*.md`
-- [ ] T111 Review task completion against `specs/001-agent-workspace-cli/contracts/cli.md` and `specs/001-agent-workspace-cli/contracts/metadata.md`
+- [ ] T107 [P] Run shell syntax checks for `bin/agent-ws`, `install.sh`, and `lib/agent-ws/*.sh`
+- [ ] T108 [P] Run all integration tests in `tests/integration/`
+- [ ] T109 [P] Add lightweight timing validation for init, add-agent, and update scenarios in `tests/smoke/test_timing_targets.sh`
+- [ ] T110 [P] Run all smoke tests in `tests/smoke/`
+- [ ] T111 Review code comments and docstrings for public entrypoints and non-obvious shell logic in `bin/agent-ws` and `lib/agent-ws/*.sh`
+- [ ] T112 Remove obsolete debug output and temporary scaffolding from `bin/agent-ws`, `install.sh`, and `lib/agent-ws/*.sh`
+- [ ] T113 Validate quickstart scenarios from `specs/001-agent-workspace-cli/quickstart.md`
+- [ ] T114 Verify generated docs and implementation do not describe new project-local template caches in `README.md` and `specs/001-agent-workspace-cli/*.md`
+- [ ] T115 Review task completion against `specs/001-agent-workspace-cli/contracts/cli.md` and `specs/001-agent-workspace-cli/contracts/metadata.md`
 
 ---
 
@@ -270,8 +274,8 @@
 - **Phase 2 Foundational**: Depends on Phase 1; blocks every user story.
 - **Phase 3 US1 Initialization**: Depends on Phase 2; MVP scope.
 - **Phase 4 US2 Add Agent**: Depends on Phase 2 and is easiest after US1 metadata/init exists.
-- **Phase 5 US3 Status/Audit**: Depends on Phase 2; benefits from US1 fixtures but can be built with fixtures independently.
-- **Phase 6 US4 Discovery**: Depends on Phase 2; can proceed after fixture helpers exist.
+- **Phase 5 US3 Status/Audit**: Depends on Phase 2; benefits from US1 fixtures but can be built with the explicit fixture matrix independently.
+- **Phase 6 US4 Discovery**: Depends on Phase 2; can proceed after fixture helpers and the explicit fixture matrix exist.
 - **Phase 7 US5 Diff/Sync/Update**: Depends on Phase 2 and metadata/template helpers.
 - **Phase 8 US6 Migration**: Depends on Phase 2 and audit/metadata helpers.
 - **Phase 9 US7 README**: Depends on command contract and can proceed alongside later implementation, but final README validation depends on implemented commands.
@@ -281,10 +285,10 @@
 
 - **US1 (P1)**: First MVP story; no other story dependency after foundation.
 - **US2 (P1)**: Depends on foundation; practically uses US1 metadata/init behavior for end-to-end validation.
-- **US3 (P2)**: Depends on foundation; can test against fixtures before all commands exist.
-- **US4 (P2)**: Depends on foundation and fixture helpers.
+- **US3 (P2)**: Depends on foundation; can test against the explicit fixture matrix before all commands exist.
+- **US4 (P2)**: Depends on foundation and fixture helpers with the explicit fixture matrix.
 - **US5 (P3)**: Depends on metadata/template helpers and benefits from US1 outputs.
-- **US6 (P3)**: Depends on metadata helpers; migration automation is optional but documentation is required.
+- **US6 (P3)**: Depends on metadata helpers; migration documentation and safe helper automation are required.
 - **US7 (P3)**: Documentation story can start early, but final validation depends on implemented command behavior.
 
 ### Within Each User Story
@@ -298,8 +302,8 @@
 
 ## Parallel Opportunities
 
-- Setup module placeholder tasks T004–T014 can run in parallel after T001.
-- Foundational smoke and fixture tasks T025–T026 can run in parallel with helper implementation tasks T015–T024 where files do not overlap.
+- Setup module placeholder tasks T006–T016 can run in parallel after T001.
+- Foundational smoke and fixture tasks T027–T028 can run in parallel with helper implementation tasks T017–T026 where files do not overlap.
 - Test tasks within each user story are parallelizable because they target separate test files.
 - After Phase 2, US3 status/audit, US4 discovery, US6 migration docs, and US7 README can proceed in parallel with minimal file overlap.
 - US5 update tests and diff/sync tests can be split across separate files and implemented independently after template and metadata helpers exist.
@@ -309,24 +313,24 @@
 ### User Story 1
 
 ```bash
-Task: "T027 [P] [US1] Add integration test for current-directory initialization in tests/integration/test_init_current.sh"
-Task: "T028 [P] [US1] Add integration test for named-directory initialization in tests/integration/test_init_named_project.sh"
-Task: "T030 [P] [US1] Add integration test for metadata privacy and required fields in tests/integration/test_metadata_contract.sh"
+Task: "T030 [P] [US1] Add integration test for current-directory initialization in tests/integration/test_init_current.sh"
+Task: "T031 [P] [US1] Add integration test for named-directory initialization in tests/integration/test_init_named_project.sh"
+Task: "T033 [P] [US1] Add integration test for metadata privacy and required fields in tests/integration/test_metadata_contract.sh"
 ```
 
 ### User Story 3
 
 ```bash
-Task: "T052 [P] [US3] Add integration test for quick current-project status in tests/integration/test_status.sh"
-Task: "T053 [P] [US3] Add integration test for audit on managed, partial, and legacy fixtures in tests/integration/test_audit.sh"
-Task: "T054 [P] [US3] Add integration test for invalid and stale metadata reporting in tests/integration/test_metadata_status_audit.sh"
+Task: "T055 [P] [US3] Add integration test for quick current-project status in tests/integration/test_status.sh"
+Task: "T056 [P] [US3] Add integration test for audit on managed, partial, and legacy fixtures in tests/integration/test_audit.sh"
+Task: "T057 [P] [US3] Add integration test for invalid and stale metadata reporting in tests/integration/test_metadata_status_audit.sh"
 ```
 
 ### User Story 7
 
 ```bash
-Task: "T096 [P] [US7] Add README quickstart smoke validation in tests/smoke/test_readme_quickstart.sh"
-Task: "T097 [P] [US7] Add documentation grep check that README introduces one primary quickstart before advanced options in tests/smoke/test_readme_structure.sh"
+Task: "T099 [P] [US7] Add README quickstart smoke validation in tests/smoke/test_readme_quickstart.sh"
+Task: "T100 [P] [US7] Add documentation grep check that README introduces one primary quickstart before advanced options in tests/smoke/test_readme_structure.sh"
 ```
 
 ---
@@ -348,7 +352,7 @@ Task: "T097 [P] [US7] Add documentation grep check that README introduces one pr
 3. US2 → add-agent lifecycle.
 4. US3 + US4 → status/audit/discovery lifecycle visibility.
 5. US5 → diff/sync/update safe maintenance.
-6. US6 → migration documentation and optional helper.
+6. US6 → migration documentation and safe helper.
 7. US7 → final user-facing README flow.
 
 ### Parallel Team Strategy
@@ -366,6 +370,6 @@ With multiple implementers:
 - `[P]` tasks target different files or independent test files.
 - `[US#]` labels map directly to user stories in `spec.md`.
 - Tests are integration/smoke shell tests because this is a Bash CLI.
-- Migration automation is optional; documentation is required.
+- Migration documentation and the safe migration helper are required for MVP.
 - Old project-local template caches are outside supported product logic and must not influence migration behavior.
 - Active instruction files and memory are project-owned and must not be overwritten silently.

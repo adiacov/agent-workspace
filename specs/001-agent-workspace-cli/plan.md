@@ -66,7 +66,7 @@ bin/
 └── agent-ws              # global CLI command source/installed executable name
 
 install.sh                # installs or updates agent-ws from the repository/release payload
-bootstrap.sh              # compatibility shim or documented legacy entrypoint during transition
+bootstrap.sh              # legacy bootstrap entrypoint updated to point users to install.sh / agent-ws
 
 lib/
 └── agent-ws/
@@ -78,7 +78,7 @@ lib/
     ├── diff.sh           # active-file/template comparison helpers
     ├── sync.sh           # conservative sync/refresh helpers
     ├── update.sh         # Git/GitHub stable release/tag update helpers with staged replacement
-    └── migrate.sh        # optional legacy project migration preview/apply helpers that ignore old template caches
+    └── migrate.sh        # legacy project migration preview/apply helpers that ignore old template caches
 
 templates/
 ├── default/
@@ -93,7 +93,7 @@ tests/
 README.md
 ```
 
-**Structure Decision**: Keep Bash as the implementation language and split the current monolithic script into small shell modules under `lib/agent-ws/`, with `bin/agent-ws` as the global executable entrypoint. Keep repository templates under `templates/` and use them as the global installed template source. Add `install.sh` for Git/GitHub release installation/update. Keep `bootstrap.sh` only as a transition/compatibility path if needed, not as the primary user flow.
+**Structure Decision**: Keep Bash as the implementation language and split the current monolithic script into small shell modules under `lib/agent-ws/`, with `bin/agent-ws` as the global executable entrypoint. Keep repository templates under `templates/` and use them as the global installed template source. Add `install.sh` for Git/GitHub release installation/update. Update `bootstrap.sh` as a legacy transition entrypoint that directs users to `install.sh` and `agent-ws`, not as the primary user flow.
 
 ## Complexity Tracking
 
