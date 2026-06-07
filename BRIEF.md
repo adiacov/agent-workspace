@@ -39,7 +39,9 @@ This works for initialization, but new needs have appeared:
 - checking whether a specific project is using the structure correctly;
 - comparing project instruction files against current templates;
 - syncing/upgrading instruction files safely;
-- doing this from Agent Workspace itself, not from `life-os`.
+- doing this from Agent Workspace itself, not from `life-os`;
+- releasing important Agent Workspace CLI/template changes through GitHub/git versions;
+- updating an existing project-local `bin/agent-workspace` to a released version, either specified explicitly or latest stable by default.
 
 Important architectural boundary:
 
@@ -152,7 +154,8 @@ Agent Workspace as a CLI should own reusable mechanisms, not project-specific me
 | Final merge of project-specific instructions | user/project agent | Human/project-context judgment is required. |
 | Global personal project registry | not `agent-workspace` | Agent Workspace can discover projects, but should not maintain personal meaning/status. |
 | Project purpose/status/strategy | not `agent-workspace` | Belongs to project-local memory or external planning systems. |
-| Installed local CLI copy lifecycle | `agent-workspace` should help | A future command may update `bin/agent-workspace` safely. |
+| Installed local CLI copy lifecycle | `agent-workspace` should help | CLI should support safe self/update flow for `bin/agent-workspace` from released GitHub/git versions. |
+| Releases/versioning | `agent-workspace` | Important CLI/template changes should be released using git/GitHub tags or releases. |
 
 Core rule:
 
@@ -228,6 +231,7 @@ Candidate commands:
 agent-workspace discover PATH...
 agent-workspace audit PATH...
 agent-workspace sync PATH...
+agent-workspace update-cli [--version VERSION]
 ```
 
 Potential meanings:
@@ -235,6 +239,7 @@ Potential meanings:
 - `discover`: find projects that appear to use Agent Workspace under one or more root paths.
 - `audit PATH...`: check discovered or specified projects for structure/version/drift.
 - `sync PATH...`: apply safe updates to specified projects, with explicit confirmation and no blind overwrites.
+- `update-cli [--version VERSION]`: update the project-local `bin/agent-workspace` from a released git/GitHub version; if no version is provided, update to the latest stable release.
 
 ## Discovery ideas
 
@@ -395,7 +400,11 @@ Suggested MVP:
 4. Add `agent-workspace sync --templates-only [PATH...]`:
    - refreshes `.agent/templates/` from current source templates;
    - does not modify active instruction files.
-5. Document manual safe merge workflow for active instruction files.
+5. Add release-aware CLI updating:
+   - important changes are published as git/GitHub releases or tags;
+   - `agent-workspace update-cli --version VERSION` installs that released CLI version;
+   - `agent-workspace update-cli` installs the latest stable released CLI version.
+6. Document manual safe merge workflow for active instruction files.
 
 Only after this MVP is proven useful should Agent Workspace attempt active-file merge/sync.
 
@@ -418,7 +427,9 @@ Only after this MVP is proven useful should Agent Workspace attempt active-file 
 5. Should active generated files contain markers/comments to support future sync?
 6. Should sync compare against remote `main`, a tagged version, or a user-specified local source path?
 7. Should `bootstrap.sh` and `bin/agent-workspace` remain duplicated bash scripts, or should there be one source of truth with a release/copy step?
-8. Should the CLI remain bash for portability, or move to another language if multi-project discovery/sync grows complex?
+8. What exact release source should `update-cli` use: GitHub releases, git tags, or both?
+9. Should `update-cli` update only `bin/agent-workspace`, or also refresh bundled templates and metadata migration logic?
+10. Should the CLI remain bash for portability, or move to another language if multi-project discovery/sync grows complex?
 
 ## Recommended next discussion
 
