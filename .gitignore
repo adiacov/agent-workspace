@@ -6,10 +6,6 @@ posts/
 
 # Local agent workspace for developing this repository
 .agent/
-AGENTS.md
-CLAUDE.md
-STATE.md
-BRAINSTORM.md
 
 # Local/private identity or secrets
 USER_PROFILE.md
@@ -31,4 +27,3 @@ sessions/archive/*.md
 # Uncomment if project memory should stay private
 STATE.md
 BRAINSTORM.md
-SPEC.md
