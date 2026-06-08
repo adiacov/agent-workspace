@@ -254,15 +254,15 @@
 
 **Purpose**: Final validation, cleanup, and consistency checks across all stories.
 
-- [ ] T107 [P] Run shell syntax checks for `bin/agent-ws`, `install.sh`, and `lib/agent-ws/*.sh`
-- [ ] T108 [P] Run all integration tests in `tests/integration/`
-- [ ] T109 [P] Add lightweight timing validation for init, add-agent, and update scenarios in `tests/smoke/test_timing_targets.sh`
-- [ ] T110 [P] Run all smoke tests in `tests/smoke/`
-- [ ] T111 Review code comments and docstrings for public entrypoints and non-obvious shell logic in `bin/agent-ws` and `lib/agent-ws/*.sh`
-- [ ] T112 Remove obsolete debug output and temporary scaffolding from `bin/agent-ws`, `install.sh`, and `lib/agent-ws/*.sh`
-- [ ] T113 Validate quickstart scenarios from `specs/001-agent-workspace-cli/quickstart.md`
-- [ ] T114 Verify generated docs and implementation do not describe new project-local template caches in `README.md` and `specs/001-agent-workspace-cli/*.md`
-- [ ] T115 Review task completion against `specs/001-agent-workspace-cli/contracts/cli.md` and `specs/001-agent-workspace-cli/contracts/metadata.md`
+- [X] T107 [P] Run shell syntax checks for `bin/agent-ws`, `install.sh`, and `lib/agent-ws/*.sh`
+- [X] T108 [P] Run all integration tests in `tests/integration/`
+- [X] T109 [P] Add lightweight timing validation for init, add-agent, and update scenarios in `tests/smoke/test_timing_targets.sh`
+- [X] T110 [P] Run all smoke tests in `tests/smoke/`
+- [X] T111 Review code comments and docstrings for public entrypoints and non-obvious shell logic in `bin/agent-ws` and `lib/agent-ws/*.sh`
+- [X] T112 Remove obsolete debug output and temporary scaffolding from `bin/agent-ws`, `install.sh`, and `lib/agent-ws/*.sh`
+- [X] T113 Validate quickstart scenarios from `specs/001-agent-workspace-cli/quickstart.md`
+- [X] T114 Verify generated docs and implementation do not describe new project-local template caches in `README.md` and `specs/001-agent-workspace-cli/*.md`
+- [X] T115 Review task completion against `specs/001-agent-workspace-cli/contracts/cli.md` and `specs/001-agent-workspace-cli/contracts/metadata.md`
 
 ---
 

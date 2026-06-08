@@ -21,9 +21,10 @@ printf 'smoke: install.sh help\n'
 printf 'smoke: bootstrap transition message\n'
 "$ROOT/bootstrap.sh" >/dev/null
 
-if [ -x "$ROOT/tests/smoke/test_failure_messages.sh" ]; then
-  printf 'smoke: failure message quality\n'
-  "$ROOT/tests/smoke/test_failure_messages.sh"
-fi
+for smoke_test in "$ROOT"/tests/smoke/test_*.sh; do
+  [ -x "$smoke_test" ] || continue
+  printf 'smoke: %s\n' "$(basename "$smoke_test")"
+  "$smoke_test"
+done
 
 printf 'smoke: ok\n'
