@@ -209,18 +209,18 @@
 
 ### Tests for User Story 6
 
-- [ ] T090 [P] [US6] Add integration test for migration dry-run preview in `tests/integration/test_migrate_dry_run.sh`
-- [ ] T091 [P] [US6] Add integration test for migration apply preserving active files and memory in `tests/integration/test_migrate_apply_preserves_active_files.sh`
-- [ ] T092 [P] [US6] Add integration test proving migration does not inspect old project-local template cache contents in `tests/integration/test_migrate_ignores_old_template_cache.sh`
+- [X] T090 [P] [US6] Add integration test for migration dry-run preview in `tests/integration/test_migrate_dry_run.sh`
+- [X] T091 [P] [US6] Add integration test for migration apply preserving active files and memory in `tests/integration/test_migrate_apply_preserves_active_files.sh`
+- [X] T092 [P] [US6] Add integration test proving migration does not inspect old project-local template cache contents in `tests/integration/test_migrate_ignores_old_template_cache.sh`
 
 ### Implementation for User Story 6
 
-- [ ] T093 [US6] Write migration documentation section in `README.md`
-- [ ] T094 [US6] Implement `agent-ws migrate` command routing in `lib/agent-ws/commands.sh`
-- [ ] T095 [US6] Implement migration dry-run report for legacy `.agent/` and `bin/agent-workspace` signals in `lib/agent-ws/migrate.sh`
-- [ ] T096 [US6] Implement migration apply path that requires `--apply` and preserves active files and memory in `lib/agent-ws/migrate.sh`
-- [ ] T097 [US6] Implement legacy metadata creation during migration when safe in `lib/agent-ws/migrate.sh`
-- [ ] T098 [US6] Add migrate usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
+- [X] T093 [US6] Write migration documentation section in `README.md`
+- [X] T094 [US6] Implement `agent-ws migrate` command routing in `lib/agent-ws/commands.sh`
+- [X] T095 [US6] Implement migration dry-run report for legacy `.agent/` and `bin/agent-workspace` signals in `lib/agent-ws/migrate.sh`
+- [X] T096 [US6] Implement migration apply path that requires `--apply` and preserves active files and memory in `lib/agent-ws/migrate.sh`
+- [X] T097 [US6] Implement legacy metadata creation during migration when safe in `lib/agent-ws/migrate.sh`
+- [X] T098 [US6] Add migrate usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
 
 **Checkpoint**: User Story 6 is independently functional as documentation plus safe migration helper automation.
 

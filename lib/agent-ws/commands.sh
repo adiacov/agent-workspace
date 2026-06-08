@@ -97,7 +97,13 @@ Selects a stable Git/GitHub release or tag and preserves the current command on 
 Without --version, uses the latest stable release, excluding alpha, beta, rc, and pre-release versions.
 USAGE
       ;;
-    migrate) printf '%s\n' 'Usage: agent-ws migrate [path] [--dry-run|--apply]' ;;
+    migrate) cat <<'USAGE'
+Usage: agent-ws migrate [path] [--dry-run|--apply]
+
+Helps migrate a legacy project from .agent/ and bin/agent-workspace to the global agent-ws model.
+Defaults to --dry-run, preserves active instruction files and memory, and ignores old .agent/templates/ cache contents.
+USAGE
+      ;;
     *) agent_ws_die "unknown help topic: $command" "run 'agent-ws help' to see available commands." ;;
   esac
 }
@@ -227,7 +233,7 @@ agent_ws_main() {
       if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" = "--help" ]; then
         agent_ws_command_usage migrate
       else
-        agent_ws_dispatch_unimplemented "$AGENT_WS_COMMAND"
+        agent_ws_cmd_migrate
       fi
       ;;
     *)
@@ -411,4 +417,21 @@ agent_ws_cmd_update() {
     agent_ws_die "update does not accept positional paths" "use --version to select a release."
   fi
   agent_ws_update_command "$AGENT_WS_VERSION" "$AGENT_WS_DRY_RUN"
+}
+
+agent_ws_cmd_migrate() {
+  local mode target
+  if [ "$AGENT_WS_APPLY" -eq 1 ] && [ "$AGENT_WS_DRY_RUN" -eq 1 ]; then
+    agent_ws_die "migrate accepts only one of --dry-run or --apply" "review with --dry-run, then rerun with --apply if safe."
+  fi
+  if [ "$AGENT_WS_APPLY" -eq 1 ]; then
+    mode="apply"
+  else
+    mode="dry-run"
+  fi
+  target="${AGENT_WS_PATHS[0]:-.}"
+  if [ "${#AGENT_WS_PATHS[@]}" -gt 1 ]; then
+    agent_ws_die "migrate accepts at most one project path" "run 'agent-ws help migrate' for usage."
+  fi
+  agent_ws_migrate_project "$target" "$mode"
 }

@@ -121,3 +121,38 @@ Initialized projects receive a local template cache at:
 ```
 
 You can edit `.agent/templates/`, delete generated files, and rerun `init` or `add-agent` to regenerate customized outputs.
+
+## Migration from the older project-local model
+
+Agent Workspace is moving from the older project-local command model to the global
+`agent-ws` command.
+
+Older projects may contain:
+
+- `.agent/`
+- `.agent/templates/`
+- `bin/agent-workspace`
+- active instruction files such as `AGENTS.md`, `CLAUDE.md`, or Cursor rules
+- memory files such as `STATE.md` and `BRAINSTORM.md`
+
+The migration rule is conservative:
+
+- active instruction files are project-owned and must be preserved;
+- memory files are project-owned and must be preserved;
+- `.agent-workspace/workspace.json` may be created as committed non-private metadata;
+- `bin/agent-workspace` is a legacy local command copy and may be removed only with explicit apply intent;
+- old project-local template caches under `.agent/templates/` are outside the supported global model and are not inspected, migrated, or used for decisions. You may delete them manually after reviewing your project.
+
+Preview migration first:
+
+```bash
+agent-ws migrate --dry-run /path/to/legacy-project
+```
+
+Apply only after reviewing the preview:
+
+```bash
+agent-ws migrate --apply /path/to/legacy-project
+```
+
+The migration helper preserves active instruction files and memory by default.
