@@ -23,15 +23,15 @@ assert_under() {
 "$ROOT/install.sh" --prefix "$TMPBIN" >/dev/null
 
 start="$(date +%s)"
-(cd "$PROJECT" && "$TMPBIN/agent-ws" init --profile code --agents pi --no-prompt >/dev/null)
+(cd "$PROJECT" && "$TMPBIN/bin/agent-ws" init --profile code --agents pi --no-prompt >/dev/null)
 assert_under 'init' "$(elapsed_seconds "$start")" 120
 
 start="$(date +%s)"
-(cd "$PROJECT" && "$TMPBIN/agent-ws" add-agent --agents claude --no-prompt >/dev/null)
+(cd "$PROJECT" && "$TMPBIN/bin/agent-ws" add-agent --agents claude --no-prompt >/dev/null)
 assert_under 'add-agent' "$(elapsed_seconds "$start")" 60
 
 start="$(date +%s)"
-AGENT_WS_TEST_RELEASES='v1.0.0 v1.0.1 v2.0.0-rc1' "$TMPBIN/agent-ws" update --dry-run >/dev/null
+AGENT_WS_TEST_RELEASES='v1.0.0 v1.0.1 v2.0.0-rc1' "$TMPBIN/bin/agent-ws" update --dry-run >/dev/null
 assert_under 'update dry-run' "$(elapsed_seconds "$start")" 120
 
 printf 'timing targets: ok\n'

@@ -8,10 +8,10 @@ trap 'rm -rf "$TMPBIN" "$PROJECT"' EXIT
 "$ROOT/install.sh" --prefix "$TMPBIN" >/dev/null
 (
   cd "$PROJECT"
-  "$TMPBIN/agent-ws" init --profile general --agents pi --no-prompt >/dev/null
+  "$TMPBIN/bin/agent-ws" init --profile general --agents pi --no-prompt >/dev/null
   before="$(sha256sum AGENTS.md | awk '{print $1}')"
   printf '\n# Local project note\n' >> AGENTS.md
-  "$TMPBIN/agent-ws" diff . >diff.out
+  "$TMPBIN/bin/agent-ws" diff . >diff.out
   after="$(sha256sum AGENTS.md | awk '{print $1}')"
   test "$before" != "$after" || fail 'test setup did not modify AGENTS.md'
   assert_contains 'diff: AGENTS.md' diff.out

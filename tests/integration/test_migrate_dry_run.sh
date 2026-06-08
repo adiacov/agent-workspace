@@ -8,7 +8,7 @@ trap 'rm -rf "$TMPBIN" "$LEGACY"' EXIT
 "$ROOT/install.sh" --prefix "$TMPBIN" >/dev/null
 mkdir -p "$LEGACY/.agent" "$LEGACY/bin"
 touch "$LEGACY/bin/agent-workspace" "$LEGACY/AGENTS.md" "$LEGACY/STATE.md" "$LEGACY/BRAINSTORM.md"
-"$TMPBIN/agent-ws" migrate --dry-run "$LEGACY" >migrate.out
+"$TMPBIN/bin/agent-ws" migrate --dry-run "$LEGACY" >migrate.out
 assert_contains 'migration: dry-run' migrate.out
 assert_contains 'legacy: .agent/' migrate.out
 assert_contains 'legacy: bin/agent-workspace' migrate.out

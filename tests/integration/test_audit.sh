@@ -11,7 +11,7 @@ trap 'rm -rf "$TMPBIN" "$FIXTURES"' EXIT
 
 "$ROOT/install.sh" --prefix "$TMPBIN" >/dev/null
 build_fixture_matrix "$FIXTURES"
-"$TMPBIN/agent-ws" audit "$FIXTURES/managed" "$FIXTURES/partial" "$FIXTURES/legacy" >audit.out
+"$TMPBIN/bin/agent-ws" audit "$FIXTURES/managed" "$FIXTURES/partial" "$FIXTURES/legacy" >audit.out
 assert_contains "Audit: $FIXTURES/managed" audit.out
 assert_contains 'metadata: present' audit.out
 assert_contains "Audit: $FIXTURES/partial" audit.out

@@ -17,6 +17,9 @@ agent_ws_usage() {
 Usage: agent-ws <command> [options] [path]
 
 Primary flow:
+  agent-ws init
+
+Non-interactive flow:
   agent-ws init --profile code --agents pi --no-prompt
 
 Commands:
@@ -45,6 +48,15 @@ Usage: agent-ws init [project-name|path] [--profile general|code] [--agents list
 Initializes the current directory or creates and initializes a named project directory.
 Creates default files, selected agent files, and .agent-workspace/workspace.json.
 Existing active files are skipped, not overwritten.
+
+Options:
+  --profile general|code   Project type. general creates core workflow/memory files; code also creates ENGINEERING.md.
+  --agents list           Agent adapters to create. Supports pi, codex, claude, cursor, custom. Commas or spaces are accepted.
+  --custom-path path      Project-relative output path for the custom agent adapter.
+  --no-prompt             Non-interactive mode. Requires --profile and --agents.
+
+Interactive behavior:
+  If --profile or --agents are omitted, init prompts for them unless --no-prompt is used.
 USAGE
       ;;
     add-agent) cat <<'USAGE'
@@ -52,6 +64,13 @@ Usage: agent-ws add-agent [agent] [--agents list] [--custom-path path] [--no-pro
 
 Adds one or more agent instruction entrypoints to an initialized project.
 Uses global templates, preserves existing files, and updates metadata for newly created files.
+
+Options:
+  --agents list           Agent adapters to add. Supports pi, codex, claude, cursor, custom. Commas or spaces are accepted.
+  --custom-path path      Project-relative output path for the custom agent adapter.
+  --no-prompt             Non-interactive mode. Requires an agent through --agents or positional argument.
+
+If no agent is provided and prompting is possible, add-agent asks which agent to add.
 USAGE
       ;;
     status) cat <<'USAGE'
@@ -59,6 +78,9 @@ Usage: agent-ws status [path]
 
 Shows a quick current-project health summary without modifying files.
 Reports core files, known agent files, profile files, metadata, global template availability, and legacy signals.
+
+Arguments:
+  path                    Optional project path. Defaults to current directory.
 USAGE
       ;;
     audit) cat <<'USAGE'
@@ -66,6 +88,9 @@ Usage: agent-ws audit [path...]
 
 Performs deeper checks for one or more projects without modifying files.
 Reports missing files, metadata validity, stale metadata, legacy structure, template availability, and recovery guidance.
+
+Arguments:
+  path...                 Optional project paths. Defaults to current directory.
 USAGE
       ;;
     discover) cat <<'USAGE'
@@ -74,6 +99,9 @@ Usage: agent-ws discover <root...>
 Scans explicit roots for likely Agent Workspace projects without maintaining a registry.
 Reports strong and uncertain matches with the signals that caused detection.
 Skips heavy directories such as .git, node_modules, .venv, dist, and build.
+
+Arguments:
+  root...                 Required scan roots.
 USAGE
       ;;
     diff) cat <<'USAGE'
@@ -81,13 +109,23 @@ Usage: agent-ws diff [path]
 
 Performs read-only comparison of active generated files with global templates.
 Reports stale metadata, unavailable templates, and unknown mappings without modifying files.
+
+Arguments:
+  path                    Optional project path. Defaults to current directory.
 USAGE
       ;;
     sync) cat <<'USAGE'
 Usage: agent-ws sync [path] [--dry-run|--apply]
 
-Runs conservative maintenance without overwriting active instruction files or memory.
---dry-run reports intended checks; --apply applies only safe non-active-file updates.
+Runs conservative maintenance for already-global Agent Workspace projects.
+It validates metadata/template references and comparison baselines. It is not legacy migration.
+It never overwrites active instruction files or memory.
+
+Options:
+  --dry-run               Preview maintenance checks. Default.
+  --apply                 Apply only safe non-active-file updates.
+
+Use migrate, not sync, for older projects with .agent/ or bin/agent-workspace.
 USAGE
       ;;
     update) cat <<'USAGE'
@@ -95,12 +133,16 @@ Usage: agent-ws update [--version version] [--dry-run]
 
 Selects a stable Git/GitHub release or tag and preserves the current command on failures.
 Without --version, uses the latest stable release, excluding alpha, beta, rc, and pre-release versions.
+
+Options:
+  --version version       Install a specific stable release/tag.
+  --dry-run               Show selected release without replacing the command.
 USAGE
       ;;
     migrate) cat <<'USAGE'
 Usage: agent-ws migrate [path] [--dry-run|--apply]
 
-Helps migrate a legacy project from .agent/ and bin/agent-workspace to the global agent-ws model.
+Helps migrate from the older project-local model with .agent/ and bin/agent-workspace to the global agent-ws model.
 Defaults to --dry-run, preserves active instruction files and memory, and ignores old .agent/templates/ cache contents.
 USAGE
       ;;
@@ -160,6 +202,59 @@ agent_ws_parse_args() {
 agent_ws_dispatch_unimplemented() {
   local command="$1"
   agent_ws_die "command '$command' is not implemented yet" "continue with the implementation phase for '$command', or run 'agent-ws help $command' for planned usage."
+}
+
+agent_ws_can_prompt() {
+  return 0
+}
+
+agent_ws_prompt_read() {
+  local prompt="$1" value=""
+  printf '%s' "$prompt" >&2
+  if [ -r /dev/tty ] 2>/dev/null && IFS= read -r value < /dev/tty 2>/dev/null; then
+    printf '%s\n' "$value"
+    return 0
+  fi
+  if IFS= read -r value; then
+    printf '%s\n' "$value"
+    return 0
+  fi
+  agent_ws_die "prompt input is unavailable" "rerun with explicit options such as --profile, --agents, and --no-prompt."
+}
+
+agent_ws_prompt_profile() {
+  local value
+  value="$(agent_ws_prompt_read 'Project profile [general/code] (general): ')"
+  case "${value:-general}" in
+    general|code) printf '%s\n' "${value:-general}" ;;
+    *) agent_ws_die "unsupported profile: $value" "choose general or code." ;;
+  esac
+}
+
+agent_ws_prompt_agents() {
+  local value
+  value="$(agent_ws_prompt_read 'Agents [pi,codex,claude,cursor,custom] (pi): ')"
+  printf '%s\n' "${value:-pi}"
+}
+
+agent_ws_agents_include_custom() {
+  local agent
+  while IFS= read -r agent; do
+    [ "$agent" = "custom" ] && return 0
+  done <<< "$(agent_ws_split_agents "$1")"
+  return 1
+}
+
+agent_ws_prompt_custom_path_if_needed() {
+  local agents="$1" value
+  if agent_ws_agents_include_custom "$agents" && [ -z "$AGENT_WS_CUSTOM_PATH" ]; then
+    if [ "$AGENT_WS_NO_PROMPT" -eq 1 ]; then
+      agent_ws_die "--custom-path is required for custom agent with --no-prompt" "provide a project-root-relative custom instruction path."
+    fi
+    agent_ws_can_prompt || agent_ws_die "--custom-path is required when prompting is unavailable" "provide a project-root-relative custom instruction path."
+    value="$(agent_ws_prompt_read 'Custom agent path (INSTRUCTIONS.md): ')"
+    AGENT_WS_CUSTOM_PATH="${value:-INSTRUCTIONS.md}"
+  fi
 }
 
 agent_ws_main() {
@@ -279,17 +374,26 @@ agent_ws_existing_project_root() {
 
 agent_ws_cmd_init() {
   local profile agents target project_root template_dir records_file generated_json
-  profile="${AGENT_WS_PROFILE:-general}"
+  profile="${AGENT_WS_PROFILE:-}"
   agents="${AGENT_WS_AGENTS:-}"
 
+  if [ -z "$profile" ]; then
+    if [ "$AGENT_WS_NO_PROMPT" -eq 1 ]; then
+      agent_ws_die "--profile is required with --no-prompt" "provide --profile general or --profile code."
+    fi
+    agent_ws_can_prompt || agent_ws_die "--profile is required when prompting is unavailable" "provide --profile general or --profile code."
+    profile="$(agent_ws_prompt_profile)"
+  fi
   [ "$profile" = "general" ] || [ "$profile" = "code" ] || agent_ws_die "unsupported profile: $profile" "choose --profile general or --profile code."
   if [ -z "$agents" ]; then
     if [ "$AGENT_WS_NO_PROMPT" -eq 1 ]; then
       agent_ws_die "--agents is required with --no-prompt" "provide --agents pi, codex, claude, cursor, or custom."
     fi
-    agent_ws_warn "no --agents provided; defaulting to pi"
-    agents="pi"
+    agent_ws_can_prompt || agent_ws_die "--agents is required when prompting is unavailable" "provide --agents pi, codex, claude, cursor, or custom."
+    agents="$(agent_ws_prompt_agents)"
   fi
+
+  agent_ws_prompt_custom_path_if_needed "$agents"
 
   if [ "${#AGENT_WS_PATHS[@]}" -gt 1 ]; then
     agent_ws_die "init accepts at most one project path" "run 'agent-ws help init' for usage."
@@ -334,9 +438,11 @@ agent_ws_cmd_add_agent() {
     if [ "$AGENT_WS_NO_PROMPT" -eq 1 ]; then
       agent_ws_die "--agents or positional agent is required with --no-prompt" "provide --agents pi, codex, claude, cursor, or custom."
     fi
-    agent_ws_warn "no --agents provided; defaulting to pi"
-    agents="pi"
+    agent_ws_can_prompt || agent_ws_die "agent selection is required when prompting is unavailable" "provide --agents pi, codex, claude, cursor, or custom."
+    agents="$(agent_ws_prompt_agents)"
   fi
+
+  agent_ws_prompt_custom_path_if_needed "$agents"
 
   project_root="$(agent_ws_existing_project_root ".")"
   [ -f "$(agent_ws_metadata_path "$project_root")" ] || agent_ws_die "workspace metadata is missing" "run 'agent-ws init' before adding agents."

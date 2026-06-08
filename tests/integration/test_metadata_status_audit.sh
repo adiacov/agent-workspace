@@ -11,7 +11,7 @@ trap 'rm -rf "$TMPBIN" "$FIXTURES"' EXIT
 
 "$ROOT/install.sh" --prefix "$TMPBIN" >/dev/null
 build_fixture_matrix "$FIXTURES"
-"$TMPBIN/agent-ws" audit "$FIXTURES/invalid-metadata" "$FIXTURES/stale-metadata" >audit.out
+"$TMPBIN/bin/agent-ws" audit "$FIXTURES/invalid-metadata" "$FIXTURES/stale-metadata" >audit.out
 assert_contains "Audit: $FIXTURES/invalid-metadata" audit.out
 assert_contains 'metadata: invalid' audit.out
 assert_contains 'recovery: inspect or recreate .agent-workspace/workspace.json' audit.out

@@ -8,9 +8,9 @@ trap 'rm -rf "$TMPBIN" "$PROJECT"' EXIT
 "$ROOT/install.sh" --prefix "$TMPBIN" >/dev/null
 (
   cd "$PROJECT"
-  "$TMPBIN/agent-ws" init --profile general --agents pi --no-prompt >/dev/null
+  "$TMPBIN/bin/agent-ws" init --profile general --agents pi --no-prompt >/dev/null
   before="$(sha256sum AGENTS.md | awk '{print $1}')"
-  "$TMPBIN/agent-ws" sync --apply . >sync.out
+  "$TMPBIN/bin/agent-ws" sync --apply . >sync.out
   after="$(sha256sum AGENTS.md | awk '{print $1}')"
   test "$before" = "$after" || fail 'sync --apply changed active file'
   assert_contains 'sync: apply' sync.out

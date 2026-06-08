@@ -12,7 +12,7 @@ trap 'rm -rf "$TMPBIN" "$PROJECT"' EXIT
 "$ROOT/install.sh" --prefix "$TMPBIN" >/dev/null
 (
   cd "$PROJECT"
-  "$TMPBIN/agent-ws" init --profile code --agents pi --no-prompt >/dev/null
+  "$TMPBIN/bin/agent-ws" init --profile code --agents pi --no-prompt >/dev/null
   assert_file_exists .agent-workspace/workspace.json
   python3 - .agent-workspace/workspace.json <<'PY'
 import json, re, sys

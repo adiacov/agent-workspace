@@ -12,8 +12,8 @@ trap 'rm -rf "$TMPBIN" "$PROJECT"' EXIT
 "$ROOT/install.sh" --prefix "$TMPBIN" >/dev/null
 (
   cd "$PROJECT"
-  "$TMPBIN/agent-ws" init --profile general --agents claude --no-prompt >/dev/null
-  if "$TMPBIN/agent-ws" add-agent --agents pi,codex --no-prompt >conflict.out 2>&1; then
+  "$TMPBIN/bin/agent-ws" init --profile general --agents claude --no-prompt >/dev/null
+  if "$TMPBIN/bin/agent-ws" add-agent --agents pi,codex --no-prompt >conflict.out 2>&1; then
     fail 'duplicate destination should fail before writing'
   fi
   assert_contains 'destination conflict' conflict.out

@@ -14,11 +14,11 @@ trap 'rm -rf "$TMPBIN" "$PROJECT"' EXIT
   cd "$PROJECT"
   printf 'local instructions\n' > AGENTS.md
   before="$(sha256sum AGENTS.md | awk '{print $1}')"
-  "$TMPBIN/agent-ws" init --profile code --agents pi --no-prompt >init.out
+  "$TMPBIN/bin/agent-ws" init --profile code --agents pi --no-prompt >init.out
   after="$(sha256sum AGENTS.md | awk '{print $1}')"
   test "$before" = "$after" || fail 'AGENTS.md was overwritten'
   assert_contains 'skip existing AGENTS.md' init.out
-  "$TMPBIN/agent-ws" init --profile code --agents pi --no-prompt >rerun.out
+  "$TMPBIN/bin/agent-ws" init --profile code --agents pi --no-prompt >rerun.out
   assert_contains 'skip existing WORKFLOWS.md' rerun.out
   assert_contains 'skip existing AGENTS.md' rerun.out
 )

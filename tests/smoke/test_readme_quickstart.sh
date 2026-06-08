@@ -5,8 +5,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 README="$ROOT/README.md"
 
 for needle in \
-  './install.sh --prefix "$TMPBIN"' \
-  'agent-ws init --profile code --agents pi --no-prompt' \
+  './install.sh' \
+  'agent-ws init' \
   'agent-ws add-agent --agents claude --no-prompt' \
   '.agent-workspace/workspace.json' \
   'agent-ws migrate --dry-run' \
@@ -23,8 +23,8 @@ trap 'rm -rf "$TMPBIN" "$TMPPROJECT"' EXIT
 "$ROOT/install.sh" --prefix "$TMPBIN" >/dev/null
 (
   cd "$TMPPROJECT"
-  "$TMPBIN/agent-ws" init --profile code --agents pi --no-prompt >/dev/null
-  "$TMPBIN/agent-ws" add-agent --agents claude --no-prompt >/dev/null
+  "$TMPBIN/bin/agent-ws" init --profile code --agents pi --no-prompt >/dev/null
+  "$TMPBIN/bin/agent-ws" add-agent --agents claude --no-prompt >/dev/null
   test -f .agent-workspace/workspace.json
   test -f AGENTS.md
   test -f CLAUDE.md

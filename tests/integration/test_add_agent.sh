@@ -12,9 +12,9 @@ trap 'rm -rf "$TMPBIN" "$PROJECT"' EXIT
 "$ROOT/install.sh" --prefix "$TMPBIN" >/dev/null
 (
   cd "$PROJECT"
-  "$TMPBIN/agent-ws" init --profile general --agents pi --no-prompt >/dev/null
+  "$TMPBIN/bin/agent-ws" init --profile general --agents pi --no-prompt >/dev/null
   assert_not_exists CLAUDE.md
-  "$TMPBIN/agent-ws" add-agent --agents claude --no-prompt >add.out
+  "$TMPBIN/bin/agent-ws" add-agent --agents claude --no-prompt >add.out
   assert_file_exists CLAUDE.md
   assert_contains 'created CLAUDE.md' add.out
   python3 - .agent-workspace/workspace.json <<'PY'

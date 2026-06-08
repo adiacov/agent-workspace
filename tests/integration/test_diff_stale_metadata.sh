@@ -8,7 +8,7 @@ trap 'rm -rf "$TMPBIN" "$PROJECT"' EXIT
 "$ROOT/install.sh" --prefix "$TMPBIN" >/dev/null
 (
   cd "$PROJECT"
-  "$TMPBIN/agent-ws" init --profile general --agents pi --no-prompt >/dev/null
+  "$TMPBIN/bin/agent-ws" init --profile general --agents pi --no-prompt >/dev/null
   python3 - .agent-workspace/workspace.json <<'PY'
 import json, sys
 p=sys.argv[1]
@@ -16,7 +16,7 @@ d=json.load(open(p))
 d['templateRevision']='missing-test-revision'
 open(p,'w').write(json.dumps(d))
 PY
-  "$TMPBIN/agent-ws" diff . >diff.out
+  "$TMPBIN/bin/agent-ws" diff . >diff.out
   assert_contains 'metadata: stale' diff.out
   assert_contains 'active files remain project-owned' diff.out
 )

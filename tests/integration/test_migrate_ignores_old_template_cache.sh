@@ -9,7 +9,7 @@ trap 'rm -rf "$TMPBIN" "$LEGACY"' EXIT
 mkdir -p "$LEGACY/.agent/templates/default" "$LEGACY/bin"
 printf 'do not inspect me\n' > "$LEGACY/.agent/templates/default/SECRET_SENTINEL.md"
 touch "$LEGACY/bin/agent-workspace" "$LEGACY/AGENTS.md" "$LEGACY/STATE.md" "$LEGACY/BRAINSTORM.md"
-"$TMPBIN/agent-ws" migrate --dry-run "$LEGACY" >migrate.out
+"$TMPBIN/bin/agent-ws" migrate --dry-run "$LEGACY" >migrate.out
 assert_contains 'old project-local template caches are ignored' migrate.out
 if grep -F 'SECRET_SENTINEL' migrate.out >/dev/null; then
   fail 'migration inspected old project-local template cache contents'

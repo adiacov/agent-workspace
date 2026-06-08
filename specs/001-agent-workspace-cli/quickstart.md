@@ -17,7 +17,7 @@ From the repository checkout, make the planned global command available in a tem
 TMPBIN="$(mktemp -d)"
 # Implementation should provide either install.sh or an equivalent development install command.
 ./install.sh --prefix "$TMPBIN"
-export PATH="$TMPBIN:$PATH"
+export PATH="$TMPBIN/bin:$PATH"
 agent-ws help
 ```
 
@@ -100,7 +100,7 @@ Expected outcome:
 ```bash
 ROOT="$(mktemp -d)"
 mkdir -p "$ROOT/managed" "$ROOT/legacy" "$ROOT/plain"
-(cd "$ROOT/managed" && agent-ws init --agents pi --no-prompt)
+(cd "$ROOT/managed" && agent-ws init --profile general --agents pi --no-prompt)
 mkdir -p "$ROOT/legacy/.agent" "$ROOT/legacy/bin"
 touch "$ROOT/legacy/bin/agent-workspace" "$ROOT/legacy/AGENTS.md"
 agent-ws discover "$ROOT"

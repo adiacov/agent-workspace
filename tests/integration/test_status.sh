@@ -12,8 +12,8 @@ trap 'rm -rf "$TMPBIN" "$PROJECT"' EXIT
 "$ROOT/install.sh" --prefix "$TMPBIN" >/dev/null
 (
   cd "$PROJECT"
-  "$TMPBIN/agent-ws" init --profile code --agents pi --no-prompt >/dev/null
-  "$TMPBIN/agent-ws" status >status.out
+  "$TMPBIN/bin/agent-ws" init --profile code --agents pi --no-prompt >/dev/null
+  "$TMPBIN/bin/agent-ws" status >status.out
   assert_contains 'Status:' status.out
   assert_contains 'metadata: present' status.out
   assert_contains 'template source: present' status.out

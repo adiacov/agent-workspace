@@ -12,7 +12,7 @@ trap 'rm -rf "$TMPBIN" "$PROJECT"' EXIT
 "$ROOT/install.sh" --prefix "$TMPBIN" >/dev/null
 (
   cd "$PROJECT"
-  "$TMPBIN/agent-ws" init --profile general --agents pi --no-prompt >/dev/null
+  "$TMPBIN/bin/agent-ws" init --profile general --agents pi --no-prompt >/dev/null
   assert_not_exists .agent
   assert_not_exists .agent/templates
   assert_not_exists bin/agent-workspace

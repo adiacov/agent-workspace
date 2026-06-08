@@ -4,20 +4,21 @@ Agent Workspace standardizes project setup for AI-assisted development. It provi
 
 ## Primary quickstart
 
-From this repository checkout, install the development command into a temporary or user-level bin directory:
+From this repository checkout, install the command for your user:
 
 ```bash
-TMPBIN="$(mktemp -d)"
-./install.sh --prefix "$TMPBIN"
-export PATH="$TMPBIN:$PATH"
+./install.sh
+export PATH="$HOME/.local/bin:$PATH"
 agent-ws help
 ```
 
-Initialize the current project with the code profile and Pi instructions:
+Initialize the current project:
 
 ```bash
-agent-ws init --profile code --agents pi --no-prompt
+agent-ws init
 ```
+
+`init` asks for project profile and agent choices.
 
 Add another agent later without reinitializing the project:
 
@@ -74,7 +75,7 @@ agent-ws sync [path] --dry-run
 agent-ws sync [path] --apply
 ```
 
-Runs conservative maintenance. It does not overwrite active instruction files or memory.
+Runs conservative maintenance for projects already using the global model. It validates metadata/template references and comparison baselines. It is not for legacy `.agent/` migration and does not overwrite active instruction files or memory.
 
 ```bash
 agent-ws update [--version VERSION]
@@ -87,7 +88,7 @@ agent-ws migrate --dry-run /path/to/legacy-project
 agent-ws migrate --apply /path/to/legacy-project
 ```
 
-Previews or applies safe migration from the older project-local model.
+Previews or applies safe migration from the older project-local model with `.agent/` and `bin/agent-workspace`.
 
 Use command-specific help for concise usage:
 
@@ -146,13 +147,27 @@ Ownership boundary:
 
 The intended product model is a global/user-level `agent-ws` command that can be run from anywhere. Projects do not receive a project-local command copy.
 
-For development from this checkout:
+Default user install:
 
 ```bash
-./install.sh --prefix "$HOME/.local/bin"
+./install.sh
 ```
 
-Ensure the chosen directory is on `PATH` before running `agent-ws`.
+This installs:
+
+```text
+$HOME/.local/bin/agent-ws
+$HOME/.local/lib/agent-ws/
+$HOME/.local/share/agent-ws/templates/
+```
+
+If you choose another install root, pass `--prefix`:
+
+```bash
+./install.sh --prefix "$HOME/.local"
+```
+
+Ensure `PREFIX/bin` is on `PATH` before running `agent-ws`.
 
 Release-aware updates use Git/GitHub stable releases or tags:
 
@@ -209,6 +224,12 @@ Supported agents:
 - `claude`
 - `cursor`
 - `custom`
+
+Non-interactive setup for scripts:
+
+```bash
+agent-ws init --profile code --agents pi --no-prompt
+```
 
 Multiple agents can be selected with commas or spaces:
 

@@ -9,11 +9,7 @@ trap 'rm -rf "$TMPBIN" "$PROJECT"' EXIT
 (
   cd "$PROJECT"
   "$TMPBIN/bin/agent-ws" init --profile general --agents pi --no-prompt >/dev/null
-  printf '\n# Local project note\n' >> AGENTS.md
-  before="$(sha256sum AGENTS.md | awk '{print $1}')"
-  "$TMPBIN/bin/agent-ws" sync --dry-run . >sync.out
-  after="$(sha256sum AGENTS.md | awk '{print $1}')"
-  test "$before" = "$after" || fail 'sync --dry-run changed active file'
-  assert_contains 'sync: dry-run' sync.out
-  assert_contains 'active files unchanged' sync.out
+  if grep -F 'USER_PROFILE.md' .gitignore >/dev/null; then
+    fail 'generated .gitignore should not contain USER_PROFILE.md'
+  fi
 )

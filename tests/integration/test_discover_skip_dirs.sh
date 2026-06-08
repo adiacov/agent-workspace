@@ -17,7 +17,7 @@ printf '{}\n' > "$SCAN/.venv/fake/.agent-workspace/workspace.json"
 printf '{}\n' > "$SCAN/dist/fake/.agent-workspace/workspace.json"
 printf '{}\n' > "$SCAN/build/fake/.agent-workspace/workspace.json"
 printf '{}\n' > "$SCAN/real/.agent-workspace/workspace.json"
-"$TMPBIN/agent-ws" discover "$SCAN" >discover.out
+"$TMPBIN/bin/agent-ws" discover "$SCAN" >discover.out
 assert_contains "$SCAN/real strong" discover.out
 for skipped in node_modules .git .venv dist build; do
   if grep -F "$SCAN/$skipped/fake" discover.out >/dev/null; then

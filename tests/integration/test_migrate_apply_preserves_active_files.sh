@@ -13,7 +13,7 @@ printf 'brainstorm memory\n' > "$LEGACY/BRAINSTORM.md"
 touch "$LEGACY/bin/agent-workspace"
 before_agents="$(sha256sum "$LEGACY/AGENTS.md" | awk '{print $1}')"
 before_state="$(sha256sum "$LEGACY/STATE.md" | awk '{print $1}')"
-"$TMPBIN/agent-ws" migrate --apply "$LEGACY" >migrate.out
+"$TMPBIN/bin/agent-ws" migrate --apply "$LEGACY" >migrate.out
 after_agents="$(sha256sum "$LEGACY/AGENTS.md" | awk '{print $1}')"
 after_state="$(sha256sum "$LEGACY/STATE.md" | awk '{print $1}')"
 test "$before_agents" = "$after_agents" || fail 'AGENTS.md changed during migration'

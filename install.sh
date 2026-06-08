@@ -6,17 +6,23 @@ die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 
 usage() {
   cat <<'USAGE'
-Usage: ./install.sh --prefix PREFIX
+Usage: ./install.sh [--prefix PREFIX]
 
-Installs the development checkout payload into PREFIX:
-  PREFIX/agent-ws
+Installs agent-ws for the current user by default.
+
+Default prefix:
+  $HOME/.local
+
+Installed layout:
+  PREFIX/bin/agent-ws
   PREFIX/lib/agent-ws/
-  PREFIX/templates/
+  PREFIX/share/agent-ws/templates/
 
-Example:
-  TMPBIN="$(mktemp -d)"
-  ./install.sh --prefix "$TMPBIN"
-  PATH="$TMPBIN:$PATH" agent-ws help
+Examples:
+  ./install.sh
+  ./install.sh --prefix "$HOME/.local"
+
+After install, ensure PREFIX/bin is on PATH.
 USAGE
 }
 
@@ -31,7 +37,7 @@ copy_dir() {
   cp -R "$src" "$dst"
 }
 
-PREFIX=""
+PREFIX="${HOME:-}/.local"
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --prefix)
@@ -49,19 +55,20 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
-[ -n "$PREFIX" ] || die "--prefix is required"
+[ -n "$PREFIX" ] || die "unable to determine install prefix; pass --prefix PREFIX"
 
 ROOT="$(repo_root)"
 [ -f "$ROOT/bin/agent-ws" ] || die "missing bin/agent-ws in repository checkout"
 [ -d "$ROOT/lib/agent-ws" ] || die "missing lib/agent-ws in repository checkout"
 [ -d "$ROOT/templates" ] || die "missing templates in repository checkout"
 
-mkdir -p "$PREFIX"
-cp "$ROOT/bin/agent-ws" "$PREFIX/agent-ws"
-chmod +x "$PREFIX/agent-ws"
+mkdir -p "$PREFIX/bin" "$PREFIX/lib" "$PREFIX/share/agent-ws"
+cp "$ROOT/bin/agent-ws" "$PREFIX/bin/agent-ws"
+chmod +x "$PREFIX/bin/agent-ws"
 copy_dir "$ROOT/lib/agent-ws" "$PREFIX/lib/agent-ws"
-copy_dir "$ROOT/templates" "$PREFIX/templates"
+copy_dir "$ROOT/templates" "$PREFIX/share/agent-ws/templates"
 
-say "installed agent-ws to $PREFIX/agent-ws"
+say "installed agent-ws to $PREFIX/bin/agent-ws"
 say "installed libraries to $PREFIX/lib/agent-ws"
-say "installed templates to $PREFIX/templates"
+say "installed templates to $PREFIX/share/agent-ws/templates"
+say "ensure $PREFIX/bin is on PATH"

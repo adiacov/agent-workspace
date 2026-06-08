@@ -12,7 +12,7 @@ trap 'rm -rf "$TMPBIN" "$WORK"' EXIT
 "$ROOT/install.sh" --prefix "$TMPBIN" >/dev/null
 (
   cd "$WORK"
-  "$TMPBIN/agent-ws" init sample-project --profile general --agents claude --no-prompt >/dev/null
+  "$TMPBIN/bin/agent-ws" init sample-project --profile general --agents claude --no-prompt >/dev/null
   assert_dir_exists sample-project
   assert_file_exists sample-project/WORKFLOWS.md
   assert_file_exists sample-project/STATE.md
