@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+agent_ws_script_dir() {
+  cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P
+}
+
+AGENT_WS_BIN_DIR="$(agent_ws_script_dir)"
+if [ -d "$AGENT_WS_BIN_DIR/../lib/agent-ws" ]; then
+  AGENT_WS_LIB_DIR="$(cd "$AGENT_WS_BIN_DIR/../lib/agent-ws" && pwd -P)"
+elif [ -d "$AGENT_WS_BIN_DIR/lib/agent-ws" ]; then
+  AGENT_WS_LIB_DIR="$(cd "$AGENT_WS_BIN_DIR/lib/agent-ws" && pwd -P)"
+else
+  printf 'error: unable to locate agent-ws library directory\n' >&2
+  printf 'next: reinstall agent-ws or run it from a repository checkout\n' >&2
+  exit 1
+fi
+
+# shellcheck source=../lib/agent-ws/commands.sh
+. "$AGENT_WS_LIB_DIR/commands.sh"
+
+agent_ws_main "$@"

@@ -1,7 +1,13 @@
 .DS_Store
+Thumbs.db
 .env
 .env.*
+.env*
 *.log
+*.tmp
+*.swp
+.vscode/
+.idea/
 posts/
 
 # Local agent workspace for developing this repository

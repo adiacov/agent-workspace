@@ -18,22 +18,22 @@
 
 **Purpose**: Create the global CLI source layout, test harness skeleton, and installation entrypoints.
 
-- [ ] T001 Create global CLI source directories `lib/agent-ws/`, `tests/integration/`, `tests/fixtures/`, and `tests/smoke/`
-- [ ] T002 Create executable global CLI entrypoint skeleton in `bin/agent-ws`
-- [ ] T003 Create development installer skeleton in `install.sh`
-- [ ] T004 Implement `install.sh --prefix` to install `bin/agent-ws`, `lib/agent-ws/`, and `templates/` into a global or temporary prefix in `install.sh`
-- [ ] T005 Update legacy bootstrap transition behavior to point users toward `install.sh` and `agent-ws` in `bootstrap.sh`
-- [ ] T006 [P] Create command dispatch module placeholder in `lib/agent-ws/commands.sh`
-- [ ] T007 [P] Create template source module placeholder in `lib/agent-ws/templates.sh`
-- [ ] T008 [P] Create metadata module placeholder in `lib/agent-ws/metadata.sh`
-- [ ] T009 [P] Create discovery module placeholder in `lib/agent-ws/discovery.sh`
-- [ ] T010 [P] Create audit module placeholder in `lib/agent-ws/audit.sh`
-- [ ] T011 [P] Create diff module placeholder in `lib/agent-ws/diff.sh`
-- [ ] T012 [P] Create sync module placeholder in `lib/agent-ws/sync.sh`
-- [ ] T013 [P] Create update module placeholder in `lib/agent-ws/update.sh`
-- [ ] T014 [P] Create migration module placeholder in `lib/agent-ws/migrate.sh`
-- [ ] T015 [P] Create shared integration test helpers in `tests/integration/helpers.sh`
-- [ ] T016 [P] Create smoke test runner skeleton in `tests/smoke/run-smoke.sh`
+- [X] T001 Create global CLI source directories `lib/agent-ws/`, `tests/integration/`, `tests/fixtures/`, and `tests/smoke/`
+- [X] T002 Create executable global CLI entrypoint skeleton in `bin/agent-ws`
+- [X] T003 Create development installer skeleton in `install.sh`
+- [X] T004 Implement `install.sh --prefix` to install `bin/agent-ws`, `lib/agent-ws/`, and `templates/` into a global or temporary prefix in `install.sh`
+- [X] T005 Update legacy bootstrap transition behavior to point users toward `install.sh` and `agent-ws` in `bootstrap.sh`
+- [X] T006 [P] Create command dispatch module placeholder in `lib/agent-ws/commands.sh`
+- [X] T007 [P] Create template source module placeholder in `lib/agent-ws/templates.sh`
+- [X] T008 [P] Create metadata module placeholder in `lib/agent-ws/metadata.sh`
+- [X] T009 [P] Create discovery module placeholder in `lib/agent-ws/discovery.sh`
+- [X] T010 [P] Create audit module placeholder in `lib/agent-ws/audit.sh`
+- [X] T011 [P] Create diff module placeholder in `lib/agent-ws/diff.sh`
+- [X] T012 [P] Create sync module placeholder in `lib/agent-ws/sync.sh`
+- [X] T013 [P] Create update module placeholder in `lib/agent-ws/update.sh`
+- [X] T014 [P] Create migration module placeholder in `lib/agent-ws/migrate.sh`
+- [X] T015 [P] Create shared integration test helpers in `tests/integration/helpers.sh`
+- [X] T016 [P] Create smoke test runner skeleton in `tests/smoke/run-smoke.sh`
 
 ---
 
