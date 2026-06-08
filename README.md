@@ -4,6 +4,8 @@ Agent Workspace standardizes the project setup needed to work with AI coding age
 
 It generates agent-specific instruction entrypoints, project memory files, and privacy-aware defaults so each project starts with a consistent collaboration structure. This reduces repeated manual setup and helps keep context portable when switching between agents or adding a new agent later.
 
+Note: Current tool is an older way of installing agent-workspace on a project. Next step is to create a CLI tool, which is installed globally on a machine (linux OS). A migration command is supposed to be created for migration from old to new structure.
+
 ## Install / initialize
 
 Run from the root of the project you want to initialize:
