@@ -153,17 +153,17 @@
 
 ### Tests for User Story 4
 
-- [ ] T066 [P] [US4] Add integration test for discovery classification in `tests/integration/test_discover.sh`
-- [ ] T067 [P] [US4] Add integration test for discovery skip directories in `tests/integration/test_discover_skip_dirs.sh`
-- [ ] T068 [P] [US4] Add integration test proving discovery does not maintain a registry in `tests/integration/test_discover_no_registry.sh`
+- [X] T066 [P] [US4] Add integration test for discovery classification in `tests/integration/test_discover.sh`
+- [X] T067 [P] [US4] Add integration test for discovery skip directories in `tests/integration/test_discover_skip_dirs.sh`
+- [X] T068 [P] [US4] Add integration test proving discovery does not maintain a registry in `tests/integration/test_discover_no_registry.sh`
 
 ### Implementation for User Story 4
 
-- [ ] T069 [US4] Implement `agent-ws discover` command routing in `lib/agent-ws/commands.sh`
-- [ ] T070 [US4] Implement discovery traversal with skip rules for `.git`, `node_modules`, `.venv`, generated output, and heavy folders in `lib/agent-ws/discovery.sh`
-- [ ] T071 [US4] Implement discovery signal scoring for `.agent-workspace/`, legacy `.agent/`, `bin/agent-workspace`, and known active files in `lib/agent-ws/discovery.sh`
-- [ ] T072 [US4] Implement strong and uncertain discovery output with signal lists in `lib/agent-ws/discovery.sh`
-- [ ] T073 [US4] Add discover usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
+- [X] T069 [US4] Implement `agent-ws discover` command routing in `lib/agent-ws/commands.sh`
+- [X] T070 [US4] Implement discovery traversal with skip rules for `.git`, `node_modules`, `.venv`, generated output, and heavy folders in `lib/agent-ws/discovery.sh`
+- [X] T071 [US4] Implement discovery signal scoring for `.agent-workspace/`, legacy `.agent/`, `bin/agent-workspace`, and known active files in `lib/agent-ws/discovery.sh`
+- [X] T072 [US4] Implement strong and uncertain discovery output with signal lists in `lib/agent-ws/discovery.sh`
+- [X] T073 [US4] Add discover usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
 
 **Checkpoint**: User Story 4 is independently functional for explicit scan roots.
 

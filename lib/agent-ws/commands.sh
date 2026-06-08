@@ -68,7 +68,14 @@ Performs deeper checks for one or more projects without modifying files.
 Reports missing files, metadata validity, stale metadata, legacy structure, template availability, and recovery guidance.
 USAGE
       ;;
-    discover) printf '%s\n' 'Usage: agent-ws discover <root...>' ;;
+    discover) cat <<'USAGE'
+Usage: agent-ws discover <root...>
+
+Scans explicit roots for likely Agent Workspace projects without maintaining a registry.
+Reports strong and uncertain matches with the signals that caused detection.
+Skips heavy directories such as .git, node_modules, .venv, dist, and build.
+USAGE
+      ;;
     diff) printf '%s\n' 'Usage: agent-ws diff [path]' ;;
     sync) printf '%s\n' 'Usage: agent-ws sync [path] [--dry-run|--apply]' ;;
     update) printf '%s\n' 'Usage: agent-ws update [--version version]' ;;
@@ -170,7 +177,14 @@ agent_ws_main() {
         agent_ws_cmd_audit
       fi
       ;;
-    discover|diff|sync|update|migrate)
+    discover)
+      if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" = "--help" ]; then
+        agent_ws_command_usage discover
+      else
+        agent_ws_cmd_discover
+      fi
+      ;;
+    diff|sync|update|migrate)
       if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" = "--help" ]; then
         agent_ws_command_usage "$AGENT_WS_COMMAND"
       else
@@ -319,4 +333,11 @@ agent_ws_cmd_audit() {
   for path in "${AGENT_WS_PATHS[@]}"; do
     agent_ws_audit_project "$path"
   done
+}
+
+agent_ws_cmd_discover() {
+  if [ "${#AGENT_WS_PATHS[@]}" -eq 0 ]; then
+    agent_ws_die "discover requires at least one root path" "run 'agent-ws discover <root...>'."
+  fi
+  agent_ws_discover "${AGENT_WS_PATHS[@]}"
 }
