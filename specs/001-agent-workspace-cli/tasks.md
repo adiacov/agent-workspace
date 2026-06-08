@@ -177,25 +177,25 @@
 
 ### Tests for User Story 5
 
-- [ ] T074 [P] [US5] Add integration test for read-only diff behavior in `tests/integration/test_diff.sh`
-- [ ] T075 [P] [US5] Add integration test for conservative sync dry-run preserving active files in `tests/integration/test_sync_dry_run.sh`
-- [ ] T076 [P] [US5] Add integration test for safe non-conflicting sync apply behavior in `tests/integration/test_sync_apply_safe.sh`
-- [ ] T077 [P] [US5] Add integration test for update latest stable selection rules in `tests/integration/test_update_latest_stable.sh`
-- [ ] T078 [P] [US5] Add integration test for update failure preserving previous command in `tests/integration/test_update_failure_preserves_current.sh`
+- [X] T074 [P] [US5] Add integration test for read-only diff behavior in `tests/integration/test_diff.sh`
+- [X] T075 [P] [US5] Add integration test for conservative sync dry-run preserving active files in `tests/integration/test_sync_dry_run.sh`
+- [X] T076 [P] [US5] Add integration test for safe non-conflicting sync apply behavior in `tests/integration/test_sync_apply_safe.sh`
+- [X] T077 [P] [US5] Add integration test for update latest stable selection rules in `tests/integration/test_update_latest_stable.sh`
+- [X] T078 [P] [US5] Add integration test for update failure preserving previous command in `tests/integration/test_update_failure_preserves_current.sh`
 
 ### Implementation for User Story 5
 
-- [ ] T079 [US5] Implement `agent-ws diff` command routing in `lib/agent-ws/commands.sh`
-- [ ] T080 [US5] Implement active-file to global-template comparison in `lib/agent-ws/diff.sh`
-- [ ] T081 [US5] Implement stale metadata and unavailable template reporting for diff in `lib/agent-ws/diff.sh`
-- [ ] T082 [US5] Implement `agent-ws sync` command routing with `--dry-run` and `--apply` in `lib/agent-ws/commands.sh`
-- [ ] T083 [US5] Implement conservative sync behavior for metadata and comparison baselines in `lib/agent-ws/sync.sh`
-- [ ] T084 [US5] Implement active-file preservation and conflict stopping in `lib/agent-ws/sync.sh`
-- [ ] T085 [US5] Implement `agent-ws update` command routing with optional `--version` in `lib/agent-ws/commands.sh`
-- [ ] T086 [US5] Implement Git/GitHub stable release or tag lookup excluding pre-release, alpha, beta, and release-candidate versions in `lib/agent-ws/update.sh`
-- [ ] T087 [US5] Implement staged update download, validation, and replacement in `lib/agent-ws/update.sh`
-- [ ] T088 [US5] Implement update failure handling that preserves the current working command in `lib/agent-ws/update.sh`
-- [ ] T089 [US5] Add diff, sync, and update usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
+- [X] T079 [US5] Implement `agent-ws diff` command routing in `lib/agent-ws/commands.sh`
+- [X] T080 [US5] Implement active-file to global-template comparison in `lib/agent-ws/diff.sh`
+- [X] T081 [US5] Implement stale metadata and unavailable template reporting for diff in `lib/agent-ws/diff.sh`
+- [X] T082 [US5] Implement `agent-ws sync` command routing with `--dry-run` and `--apply` in `lib/agent-ws/commands.sh`
+- [X] T083 [US5] Implement conservative sync behavior for metadata and comparison baselines in `lib/agent-ws/sync.sh`
+- [X] T084 [US5] Implement active-file preservation and conflict stopping in `lib/agent-ws/sync.sh`
+- [X] T085 [US5] Implement `agent-ws update` command routing with optional `--version` in `lib/agent-ws/commands.sh`
+- [X] T086 [US5] Implement Git/GitHub stable release or tag lookup excluding pre-release, alpha, beta, and release-candidate versions in `lib/agent-ws/update.sh`
+- [X] T087 [US5] Implement staged update download, validation, and replacement in `lib/agent-ws/update.sh`
+- [X] T088 [US5] Implement update failure handling that preserves the current working command in `lib/agent-ws/update.sh`
+- [X] T089 [US5] Add diff, sync, and update usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
 
 **Checkpoint**: User Story 5 is independently functional without changing active project-owned files by default.
 

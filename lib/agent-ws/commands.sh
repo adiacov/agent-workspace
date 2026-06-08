@@ -76,9 +76,27 @@ Reports strong and uncertain matches with the signals that caused detection.
 Skips heavy directories such as .git, node_modules, .venv, dist, and build.
 USAGE
       ;;
-    diff) printf '%s\n' 'Usage: agent-ws diff [path]' ;;
-    sync) printf '%s\n' 'Usage: agent-ws sync [path] [--dry-run|--apply]' ;;
-    update) printf '%s\n' 'Usage: agent-ws update [--version version]' ;;
+    diff) cat <<'USAGE'
+Usage: agent-ws diff [path]
+
+Performs read-only comparison of active generated files with global templates.
+Reports stale metadata, unavailable templates, and unknown mappings without modifying files.
+USAGE
+      ;;
+    sync) cat <<'USAGE'
+Usage: agent-ws sync [path] [--dry-run|--apply]
+
+Runs conservative maintenance without overwriting active instruction files or memory.
+--dry-run reports intended checks; --apply applies only safe non-active-file updates.
+USAGE
+      ;;
+    update) cat <<'USAGE'
+Usage: agent-ws update [--version version] [--dry-run]
+
+Selects a stable Git/GitHub release or tag and preserves the current command on failures.
+Without --version, uses the latest stable release, excluding alpha, beta, rc, and pre-release versions.
+USAGE
+      ;;
     migrate) printf '%s\n' 'Usage: agent-ws migrate [path] [--dry-run|--apply]' ;;
     *) agent_ws_die "unknown help topic: $command" "run 'agent-ws help' to see available commands." ;;
   esac
@@ -184,9 +202,30 @@ agent_ws_main() {
         agent_ws_cmd_discover
       fi
       ;;
-    diff|sync|update|migrate)
+    diff)
       if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" = "--help" ]; then
-        agent_ws_command_usage "$AGENT_WS_COMMAND"
+        agent_ws_command_usage diff
+      else
+        agent_ws_cmd_diff
+      fi
+      ;;
+    sync)
+      if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" = "--help" ]; then
+        agent_ws_command_usage sync
+      else
+        agent_ws_cmd_sync
+      fi
+      ;;
+    update)
+      if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" = "--help" ]; then
+        agent_ws_command_usage update
+      else
+        agent_ws_cmd_update
+      fi
+      ;;
+    migrate)
+      if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" = "--help" ]; then
+        agent_ws_command_usage migrate
       else
         agent_ws_dispatch_unimplemented "$AGENT_WS_COMMAND"
       fi
@@ -340,4 +379,36 @@ agent_ws_cmd_discover() {
     agent_ws_die "discover requires at least one root path" "run 'agent-ws discover <root...>'."
   fi
   agent_ws_discover "${AGENT_WS_PATHS[@]}"
+}
+
+agent_ws_cmd_diff() {
+  local target="${AGENT_WS_PATHS[0]:-.}"
+  if [ "${#AGENT_WS_PATHS[@]}" -gt 1 ]; then
+    agent_ws_die "diff accepts at most one project path" "run 'agent-ws help diff' for usage."
+  fi
+  agent_ws_diff_project "$target"
+}
+
+agent_ws_cmd_sync() {
+  local mode target
+  if [ "$AGENT_WS_APPLY" -eq 1 ] && [ "$AGENT_WS_DRY_RUN" -eq 1 ]; then
+    agent_ws_die "sync accepts only one of --dry-run or --apply" "choose either --dry-run or --apply."
+  fi
+  if [ "$AGENT_WS_APPLY" -eq 1 ]; then
+    mode="apply"
+  else
+    mode="dry-run"
+  fi
+  target="${AGENT_WS_PATHS[0]:-.}"
+  if [ "${#AGENT_WS_PATHS[@]}" -gt 1 ]; then
+    agent_ws_die "sync accepts at most one project path" "run 'agent-ws help sync' for usage."
+  fi
+  agent_ws_sync_project "$target" "$mode"
+}
+
+agent_ws_cmd_update() {
+  if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ]; then
+    agent_ws_die "update does not accept positional paths" "use --version to select a release."
+  fi
+  agent_ws_update_command "$AGENT_WS_VERSION" "$AGENT_WS_DRY_RUN"
 }
