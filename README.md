@@ -1,131 +1,171 @@
 # agent-workspace
 
-Agent Workspace standardizes the project setup needed to work with AI coding agents.
+Agent Workspace standardizes project setup for AI-assisted development. It provides a global `agent-ws` command, reusable templates, project memory files, and agent-specific instruction entrypoints.
 
-It generates agent-specific instruction entrypoints, project memory files, and privacy-aware defaults so each project starts with a consistent collaboration structure. This reduces repeated manual setup and helps keep context portable when switching between agents or adding a new agent later.
+The tool itself is installed once for a user or machine. Individual projects receive only their active project files and committed, privacy-safe metadata.
 
-Note: Current tool is an older way of installing agent-workspace on a project. Next step is to create a CLI tool, which is installed globally on a machine (linux OS). A migration command is supposed to be created for migration from old to new structure.
+## Primary quickstart
 
-## Install / initialize
-
-Run from the root of the project you want to initialize:
+From this repository checkout, install the development command into a temporary or user-level bin directory:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/bootstrap.sh | bash
+TMPBIN="$(mktemp -d)"
+./install.sh --prefix "$TMPBIN"
+export PATH="$TMPBIN:$PATH"
+agent-ws help
 ```
 
-By default, bootstrap uses the `general` workspace profile and asks which agent adapter to generate. To initialize non-interactively, pass the adapter explicitly:
+Initialize the current project with the code profile and Pi instructions:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/bootstrap.sh \
-  | bash -s -- --agents claude
+agent-ws init --profile code --agents pi --no-prompt
 ```
 
-Choose a workspace profile with `--profile` or `AGENT_WORKSPACE_PROFILE`:
+Add another agent later without reinitializing the project:
 
 ```bash
-agent-workspace init --profile code --agents pi
-agent-workspace init --profile general
-AGENT_WORKSPACE_PROFILE=code agent-workspace init
+agent-ws add-agent --agents claude --no-prompt
 ```
 
-Supported agents are: `pi`, `codex`, `claude`, `cursor`, and `custom`.
+After initialization, project metadata is stored at:
 
-Multiple agents can be selected with commas or spaces:
+```text
+.agent-workspace/workspace.json
+```
+
+## Commands
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/bootstrap.sh \
-  | bash -s -- --agents "pi claude"
+agent-ws init [project-name|path] --profile general --agents pi --no-prompt
 ```
 
-For `custom`, provide an output path if you do not want the default `INSTRUCTIONS.md`:
+Initializes the current directory or creates and initializes a named project directory.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/bootstrap.sh \
-  | bash -s -- --agents custom --custom-path .my-agent/instructions.md
+agent-ws add-agent --agents claude --no-prompt
 ```
 
-The bootstrap command:
+Adds one or more agent instruction entrypoints using global templates and preserves existing files.
 
-1. runs `git init` if needed, or stops if the current directory is inside another git repository but is not that repository root
-2. copies templates into `.agent/templates/`
-3. creates `STATE.md`, `BRAINSTORM.md`, and `.gitignore` if missing
-4. installs `bin/agent-workspace`
-5. asks which agent instruction files to generate, unless `--agents` or `AGENT_WORKSPACE_AGENTS` is provided
+```bash
+agent-ws status [path]
+```
 
-Existing files are skipped, never overwritten.
+Shows a quick health summary for one project.
 
-Workspace profiles:
+```bash
+agent-ws audit [path...]
+```
 
-- `general` is the default profile. It generates the standard memory files only and does not generate or cache `ENGINEERING.md`.
-- `code` adds coding-project engineering guidance by caching `.agent/templates/profiles/software/ENGINEERING.md` and generating root `ENGINEERING.md` if missing. The old `software` profile name is still accepted as a deprecated alias.
+Performs deeper checks for missing files, metadata validity, stale metadata, legacy structure, template availability, and recovery guidance.
 
-## Generated files
+```bash
+agent-ws discover <root...>
+```
 
-Depending on selected agents, Agent Workspace can generate:
+Scans explicit roots for likely Agent Workspace projects and reports strong or uncertain matches with signals.
 
-- `AGENTS.md` for Pi / Codex-style agents
+```bash
+agent-ws diff [path]
+```
+
+Shows read-only differences between active generated files and available global templates.
+
+```bash
+agent-ws sync [path] --dry-run
+agent-ws sync [path] --apply
+```
+
+Runs conservative maintenance. It does not overwrite active instruction files or memory.
+
+```bash
+agent-ws update [--version VERSION]
+```
+
+Updates the global command from a stable Git/GitHub release or tag when release support is available. Without `--version`, the latest stable release is the newest tag or release that is not pre-release and does not include alpha, beta, or release-candidate suffixes.
+
+```bash
+agent-ws migrate --dry-run /path/to/legacy-project
+agent-ws migrate --apply /path/to/legacy-project
+```
+
+Previews or applies safe migration from the older project-local model.
+
+Use command-specific help for concise usage:
+
+```bash
+agent-ws help init
+agent-ws help add-agent
+agent-ws help migrate
+```
+
+## What gets created in a project
+
+Depending on profile and selected agents, `agent-ws init` creates active project-owned files such as:
+
+- `WORKFLOWS.md`
+- `STATE.md`
+- `BRAINSTORM.md`
+- `.gitignore`
+- `ENGINEERING.md` for the `code` profile
+- `AGENTS.md` for Pi/Codex-style agents
 - `CLAUDE.md` for Claude Code
 - `.cursor/rules/agent-workspace.mdc` for Cursor
-- a custom instruction file at a path you choose
+- a custom instruction file at a project-relative path you choose
+- `.agent-workspace/workspace.json`
 
-It also generates private memory files:
+Existing active files are skipped, never silently overwritten.
 
-- `STATE.md` — current situation, active work, next actions
-- `BRAINSTORM.md` — durable reasoning, decisions, observations
+New initialization does not create `.agent/`, `.agent/templates/`, or `bin/agent-workspace`.
 
-The default generated `.gitignore` ignores `.agent/`, `STATE.md`, and `BRAINSTORM.md`.
+## Metadata and ownership
 
-## Local CLI
+Agent Workspace stores committed metadata under `.agent-workspace/`:
 
-After bootstrap, use the local CLI:
+```text
+.agent-workspace/workspace.json
+```
+
+Metadata contains non-private setup facts only, such as:
+
+- metadata schema version
+- tool name/version when available
+- selected profile
+- selected agents
+- generated file mappings
+- template or release revision when available
+- created/updated timestamps
+
+Metadata must not contain secrets, private memory contents, personal project registry meaning, or machine-specific absolute paths.
+
+Ownership boundary:
+
+- Agent Workspace owns reusable mechanisms and global templates.
+- The target project owns final active instruction files and memory.
+- Active files may contain local project-specific edits and are preserved by default.
+
+## Install and update model
+
+The intended product model is a global/user-level `agent-ws` command that can be run from anywhere. Projects do not receive a project-local command copy.
+
+For development from this checkout:
 
 ```bash
-./bin/agent-workspace status
-./bin/agent-workspace add-agent
-./bin/agent-workspace add-agent --agents cursor
-./bin/agent-workspace init --agents claude
-./bin/agent-workspace init --profile code --agents pi
-./bin/agent-workspace init --profile general
-AGENT_WORKSPACE_PROFILE=code ./bin/agent-workspace init
+./install.sh --prefix "$HOME/.local/bin"
 ```
 
-`init` repeats the bootstrap behavior using the local CLI. You do not need to run it immediately after the curl bootstrap.
+Ensure the chosen directory is on `PATH` before running `agent-ws`.
 
-`add-agent` uses `.agent/templates/` to generate additional agent instruction files later.
+Release-aware updates use Git/GitHub stable releases or tags:
 
-## Customizing for your own workflow
-
-Agent Workspace is intentionally plain and open source. If the defaults do not match how you work, clone or fork the repository and adapt the templates, supported adapters, or bootstrap behavior for your own needs.
-
-The main customization points are:
-
-- `templates/default/` for memory files and `.gitignore` defaults
-- `templates/adapters/` for agent-specific instruction files
-- `bootstrap.sh` for initialization behavior
-
-## Templates
-
-Repository templates live in:
-
-```text
-templates/default/
-templates/adapters/
-templates/profiles/
+```bash
+agent-ws update
+agent-ws update --version v1.2.3
 ```
 
-Initialized projects receive a local template cache at:
-
-```text
-.agent/templates/
-```
-
-You can edit `.agent/templates/`, delete generated files, and rerun `init` or `add-agent` to regenerate customized outputs.
+Failed updates preserve the currently working `agent-ws` command.
 
 ## Migration from the older project-local model
-
-Agent Workspace is moving from the older project-local command model to the global
-`agent-ws` command.
 
 Older projects may contain:
 
@@ -156,3 +196,45 @@ agent-ws migrate --apply /path/to/legacy-project
 ```
 
 The migration helper preserves active instruction files and memory by default.
+
+## Advanced options
+
+Supported profiles:
+
+- `general`: default memory and workflow files
+- `code`: includes engineering guidance in `ENGINEERING.md`
+
+Supported agents:
+
+- `pi`
+- `codex`
+- `claude`
+- `cursor`
+- `custom`
+
+Multiple agents can be selected with commas or spaces:
+
+```bash
+agent-ws init --profile code --agents "pi claude" --no-prompt
+agent-ws add-agent --agents pi,claude --no-prompt
+```
+
+For a custom agent, provide a project-root-relative output path:
+
+```bash
+agent-ws add-agent --agents custom --custom-path docs/CUSTOM_AGENT.md --no-prompt
+```
+
+Absolute paths and paths that escape the project root are rejected.
+
+## Templates
+
+Repository templates live in:
+
+```text
+templates/default/
+templates/adapters/
+templates/profiles/
+```
+
+The installed `agent-ws` command uses global templates from the installed payload or selected release source. Projects customize behavior by editing their active instruction files after initialization.

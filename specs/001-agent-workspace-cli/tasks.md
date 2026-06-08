@@ -234,17 +234,17 @@
 
 ### Tests for User Story 7
 
-- [ ] T099 [P] [US7] Add README quickstart smoke validation in `tests/smoke/test_readme_quickstart.sh`
-- [ ] T100 [P] [US7] Add documentation grep check that README introduces one primary quickstart before advanced options in `tests/smoke/test_readme_structure.sh`
+- [X] T099 [P] [US7] Add README quickstart smoke validation in `tests/smoke/test_readme_quickstart.sh`
+- [X] T100 [P] [US7] Add documentation grep check that README introduces one primary quickstart before advanced options in `tests/smoke/test_readme_structure.sh`
 
 ### Implementation for User Story 7
 
-- [ ] T101 [US7] Rewrite README overview and primary quickstart around `agent-ws` in `README.md`
-- [ ] T102 [US7] Document install and update flow from Git/GitHub stable releases or tags in `README.md`
-- [ ] T103 [US7] Document `agent-ws init`, `add-agent`, `status`, `audit`, `discover`, `diff`, `sync`, `update`, and `migrate` command summaries in `README.md`
-- [ ] T104 [US7] Document `.agent-workspace/` metadata ownership and privacy rules in `README.md`
-- [ ] T105 [US7] Document that templates are global and active instruction files are project-owned in `README.md`
-- [ ] T106 [US7] Move advanced non-interactive and custom options after the primary quickstart in `README.md`
+- [X] T101 [US7] Rewrite README overview and primary quickstart around `agent-ws` in `README.md`
+- [X] T102 [US7] Document install and update flow from Git/GitHub stable releases or tags in `README.md`
+- [X] T103 [US7] Document `agent-ws init`, `add-agent`, `status`, `audit`, `discover`, `diff`, `sync`, `update`, and `migrate` command summaries in `README.md`
+- [X] T104 [US7] Document `.agent-workspace/` metadata ownership and privacy rules in `README.md`
+- [X] T105 [US7] Document that templates are global and active instruction files are project-owned in `README.md`
+- [X] T106 [US7] Move advanced non-interactive and custom options after the primary quickstart in `README.md`
 
 **Checkpoint**: User Story 7 is independently functional as user-facing documentation.
 
