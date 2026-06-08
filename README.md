@@ -2,8 +2,6 @@
 
 Agent Workspace standardizes project setup for AI-assisted development. It provides a global `agent-ws` command, reusable templates, project memory files, and agent-specific instruction entrypoints.
 
-The tool itself is installed once for a user or machine. Individual projects receive only their active project files and committed, privacy-safe metadata.
-
 ## Primary quickstart
 
 From this repository checkout, install the development command into a temporary or user-level bin directory:
