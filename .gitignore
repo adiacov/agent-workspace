@@ -8,13 +8,8 @@ Thumbs.db
 *.swp
 .vscode/
 .idea/
-posts/
-
-# Local agent workspace for developing this repository
-.agent/
 
 # Local/private identity or secrets
-USER_PROFILE.md
 LOCAL.md
 PRIVATE.md
 secrets/
