@@ -43,19 +43,19 @@
 
 **⚠️ CRITICAL**: No user story implementation should begin until this phase is complete.
 
-- [ ] T017 Implement CLI module loading and command dispatch in `bin/agent-ws` and `lib/agent-ws/commands.sh`
-- [ ] T018 Implement shared output, warning, error, and exit helpers in `lib/agent-ws/commands.sh`
-- [ ] T019 Implement argument parsing primitives for command, options, path, `--no-prompt`, `--profile`, `--agents`, `--custom-path`, `--dry-run`, `--apply`, and `--version` in `lib/agent-ws/commands.sh`
-- [ ] T020 Implement global template source resolution for repository checkout, installed payload, and selected release source in `lib/agent-ws/templates.sh`
-- [ ] T021 Implement safe copy-skip helper that creates parent directories and never overwrites active files in `lib/agent-ws/templates.sh`
-- [ ] T022 Implement project root and git-root safety helpers in `lib/agent-ws/commands.sh`
-- [ ] T023 Implement metadata JSON write helper with staged file replacement in `lib/agent-ws/metadata.sh`
-- [ ] T024 Implement metadata JSON read, invalid detection, stale revision detection, and privacy-safe field validation in `lib/agent-ws/metadata.sh`
-- [ ] T025 Implement supported profiles and agent adapter mappings in `lib/agent-ws/templates.sh`
-- [ ] T026 Implement custom path validation that rejects absolute paths and parent-directory escapes in `lib/agent-ws/templates.sh`
-- [ ] T027 [P] Add shell syntax smoke checks for all shell entrypoints in `tests/smoke/run-smoke.sh`
-- [ ] T028 [P] Add fixture builder helpers and an explicit fixture matrix for clean, partial, legacy, managed, invalid-metadata, and stale-metadata projects in `tests/integration/helpers.sh`
-- [ ] T029 [P] Add representative failure-message quality tests for clear explanation and next action in `tests/smoke/test_failure_messages.sh`
+- [X] T017 Implement CLI module loading and command dispatch in `bin/agent-ws` and `lib/agent-ws/commands.sh`
+- [X] T018 Implement shared output, warning, error, and exit helpers in `lib/agent-ws/commands.sh`
+- [X] T019 Implement argument parsing primitives for command, options, path, `--no-prompt`, `--profile`, `--agents`, `--custom-path`, `--dry-run`, `--apply`, and `--version` in `lib/agent-ws/commands.sh`
+- [X] T020 Implement global template source resolution for repository checkout, installed payload, and selected release source in `lib/agent-ws/templates.sh`
+- [X] T021 Implement safe copy-skip helper that creates parent directories and never overwrites active files in `lib/agent-ws/templates.sh`
+- [X] T022 Implement project root and git-root safety helpers in `lib/agent-ws/commands.sh`
+- [X] T023 Implement metadata JSON write helper with staged file replacement in `lib/agent-ws/metadata.sh`
+- [X] T024 Implement metadata JSON read, invalid detection, stale revision detection, and privacy-safe field validation in `lib/agent-ws/metadata.sh`
+- [X] T025 Implement supported profiles and agent adapter mappings in `lib/agent-ws/templates.sh`
+- [X] T026 Implement custom path validation that rejects absolute paths and parent-directory escapes in `lib/agent-ws/templates.sh`
+- [X] T027 [P] Add shell syntax smoke checks for all shell entrypoints in `tests/smoke/run-smoke.sh`
+- [X] T028 [P] Add fixture builder helpers and an explicit fixture matrix for clean, partial, legacy, managed, invalid-metadata, and stale-metadata projects in `tests/integration/helpers.sh`
+- [X] T029 [P] Add representative failure-message quality tests for clear explanation and next action in `tests/smoke/test_failure_messages.sh`
 
 **Checkpoint**: Foundation ready — user story implementation can now begin.
 

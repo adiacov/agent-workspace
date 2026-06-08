@@ -1,44 +1,163 @@
 #!/usr/bin/env bash
-# Command dispatch and shared command helpers for agent-ws.
+# Command dispatch, output helpers, argument parsing, and project safety helpers.
 
 agent_ws_say() { printf '%s\n' "$*"; }
 agent_ws_warn() { printf 'warning: %s\n' "$*" >&2; }
-agent_ws_die() { printf 'error: %s\n' "$*" >&2; exit 1; }
+agent_ws_error() { printf 'error: %s\n' "$*" >&2; }
+agent_ws_next() { printf 'next: %s\n' "$*" >&2; }
+agent_ws_die() {
+  local message="$1" next="${2:-run 'agent-ws help' to see available commands.}"
+  agent_ws_error "$message"
+  agent_ws_next "$next"
+  exit 1
+}
 
 agent_ws_usage() {
   cat <<'USAGE'
 Usage: agent-ws <command> [options] [path]
 
 Commands:
-  init        Initialize a project workspace (implemented in a later phase)
-  add-agent   Add an agent entrypoint (implemented in a later phase)
-  status      Show current project status (implemented in a later phase)
-  audit       Audit one or more projects (implemented in a later phase)
-  discover    Discover Agent Workspace projects (implemented in a later phase)
-  diff        Compare active files with templates (implemented in a later phase)
-  sync        Conservative maintenance (implemented in a later phase)
-  update      Update the global command (implemented in a later phase)
-  migrate     Preview/apply legacy migration (implemented in a later phase)
+  init        Initialize a project workspace
+  add-agent   Add an agent entrypoint
+  status      Show current project status
+  audit       Audit one or more projects
+  discover    Discover Agent Workspace projects
+  diff        Compare active files with templates
+  sync        Conservative maintenance
+  update      Update the global command
+  migrate     Preview/apply legacy migration
   help        Show this help text
+
+Run `agent-ws help <command>` for command-specific usage once that command is implemented.
 USAGE
 }
 
-agent_ws_main() {
+agent_ws_command_usage() {
   local command="${1:-help}"
-  if [ "$#" -gt 0 ]; then
-    shift
-  fi
-
   case "$command" in
+    help) agent_ws_usage ;;
+    init) printf '%s\n' 'Usage: agent-ws init [project-name|path] [--profile general|code] [--agents list] [--custom-path path] [--no-prompt]' ;;
+    add-agent) printf '%s\n' 'Usage: agent-ws add-agent [agent] [--agents list] [--custom-path path] [--no-prompt]' ;;
+    status) printf '%s\n' 'Usage: agent-ws status [path]' ;;
+    audit) printf '%s\n' 'Usage: agent-ws audit [path...]' ;;
+    discover) printf '%s\n' 'Usage: agent-ws discover <root...>' ;;
+    diff) printf '%s\n' 'Usage: agent-ws diff [path]' ;;
+    sync) printf '%s\n' 'Usage: agent-ws sync [path] [--dry-run|--apply]' ;;
+    update) printf '%s\n' 'Usage: agent-ws update [--version version]' ;;
+    migrate) printf '%s\n' 'Usage: agent-ws migrate [path] [--dry-run|--apply]' ;;
+    *) agent_ws_die "unknown help topic: $command" "run 'agent-ws help' to see available commands." ;;
+  esac
+}
+
+agent_ws_reset_args() {
+  AGENT_WS_COMMAND=""
+  AGENT_WS_PROFILE=""
+  AGENT_WS_AGENTS=""
+  AGENT_WS_CUSTOM_PATH=""
+  AGENT_WS_NO_PROMPT=0
+  AGENT_WS_DRY_RUN=0
+  AGENT_WS_APPLY=0
+  AGENT_WS_VERSION=""
+  AGENT_WS_PATHS=()
+}
+
+agent_ws_parse_args() {
+  agent_ws_reset_args
+  AGENT_WS_COMMAND="${1:-help}"
+  if [ "$#" -gt 0 ]; then shift; fi
+
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --profile)
+        [ "$#" -ge 2 ] || agent_ws_die "--profile requires a value" "choose --profile general or --profile code."
+        AGENT_WS_PROFILE="$2"; shift 2 ;;
+      --agents)
+        [ "$#" -ge 2 ] || agent_ws_die "--agents requires a value" "provide a comma-separated or space-separated agent list."
+        AGENT_WS_AGENTS="$2"; shift 2 ;;
+      --custom-path)
+        [ "$#" -ge 2 ] || agent_ws_die "--custom-path requires a value" "provide a project-root-relative destination path."
+        AGENT_WS_CUSTOM_PATH="$2"; shift 2 ;;
+      --no-prompt)
+        AGENT_WS_NO_PROMPT=1; shift ;;
+      --dry-run)
+        AGENT_WS_DRY_RUN=1; shift ;;
+      --apply)
+        AGENT_WS_APPLY=1; shift ;;
+      --version)
+        [ "$#" -ge 2 ] || agent_ws_die "--version requires a value" "provide an available Git/GitHub release or tag."
+        AGENT_WS_VERSION="$2"; shift 2 ;;
+      -h|--help)
+        AGENT_WS_PATHS+=("--help"); shift ;;
+      --)
+        shift; while [ "$#" -gt 0 ]; do AGENT_WS_PATHS+=("$1"); shift; done ;;
+      --*)
+        agent_ws_die "unknown option: $1" "run 'agent-ws help ${AGENT_WS_COMMAND}' for valid options." ;;
+      *)
+        AGENT_WS_PATHS+=("$1"); shift ;;
+    esac
+  done
+}
+
+agent_ws_dispatch_unimplemented() {
+  local command="$1"
+  agent_ws_die "command '$command' is not implemented yet" "continue with the implementation phase for '$command', or run 'agent-ws help $command' for planned usage."
+}
+
+agent_ws_main() {
+  agent_ws_parse_args "$@"
+
+  case "$AGENT_WS_COMMAND" in
     help|-h|--help)
-      agent_ws_usage
+      if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" != "--help" ]; then
+        agent_ws_command_usage "${AGENT_WS_PATHS[0]}"
+      else
+        agent_ws_usage
+      fi
       ;;
     init|add-agent|status|audit|discover|diff|sync|update|migrate)
-      agent_ws_die "command '$command' is not implemented yet. Next: complete the corresponding implementation phase."
+      if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" = "--help" ]; then
+        agent_ws_command_usage "$AGENT_WS_COMMAND"
+      else
+        agent_ws_dispatch_unimplemented "$AGENT_WS_COMMAND"
+      fi
       ;;
     *)
       agent_ws_usage >&2
-      agent_ws_die "unknown command: $command. Next: run 'agent-ws help' to see available commands."
+      agent_ws_die "unknown command: $AGENT_WS_COMMAND" "run 'agent-ws help' to see available commands."
       ;;
   esac
+}
+
+agent_ws_abs_path() {
+  local path="$1"
+  if [ -d "$path" ]; then
+    cd "$path" && pwd -P
+  else
+    mkdir -p "$(dirname "$path")"
+    local dir base
+    dir="$(cd "$(dirname "$path")" && pwd -P)"
+    base="$(basename "$path")"
+    printf '%s/%s\n' "$dir" "$base"
+  fi
+}
+
+agent_ws_git_root() {
+  git -C "${1:-.}" rev-parse --show-toplevel 2>/dev/null || return 1
+}
+
+agent_ws_project_root_for_init() {
+  local target="${1:-.}" abs git_root
+  abs="$(agent_ws_abs_path "$target")"
+  if git_root="$(agent_ws_git_root "$abs")"; then
+    if [ "$abs" != "$git_root" ]; then
+      agent_ws_die "refusing to initialize inside a parent git repository" "run from the repository root '$git_root' or initialize a directory outside that repository."
+    fi
+  fi
+  printf '%s\n' "$abs"
+}
+
+agent_ws_existing_project_root() {
+  local target="${1:-.}"
+  [ -d "$target" ] || agent_ws_die "project path does not exist: $target" "choose an existing project path."
+  agent_ws_abs_path "$target"
 }

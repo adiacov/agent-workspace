@@ -16,7 +16,22 @@ else
   exit 1
 fi
 
-# shellcheck source=../lib/agent-ws/commands.sh
-. "$AGENT_WS_LIB_DIR/commands.sh"
+# Source library modules before command dispatch so command implementations can
+# call shared helpers without each module knowing the executable layout.
+for agent_ws_module in \
+  templates.sh \
+  metadata.sh \
+  discovery.sh \
+  audit.sh \
+  diff.sh \
+  sync.sh \
+  update.sh \
+  migrate.sh \
+  commands.sh
+ do
+  # shellcheck source=/dev/null
+  . "$AGENT_WS_LIB_DIR/$agent_ws_module"
+done
+unset agent_ws_module
 
 agent_ws_main "$@"
