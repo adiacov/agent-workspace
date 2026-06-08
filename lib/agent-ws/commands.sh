@@ -54,8 +54,20 @@ Adds one or more agent instruction entrypoints to an initialized project.
 Uses global templates, preserves existing files, and updates metadata for newly created files.
 USAGE
       ;;
-    status) printf '%s\n' 'Usage: agent-ws status [path]' ;;
-    audit) printf '%s\n' 'Usage: agent-ws audit [path...]' ;;
+    status) cat <<'USAGE'
+Usage: agent-ws status [path]
+
+Shows a quick current-project health summary without modifying files.
+Reports core files, known agent files, profile files, metadata, global template availability, and legacy signals.
+USAGE
+      ;;
+    audit) cat <<'USAGE'
+Usage: agent-ws audit [path...]
+
+Performs deeper checks for one or more projects without modifying files.
+Reports missing files, metadata validity, stale metadata, legacy structure, template availability, and recovery guidance.
+USAGE
+      ;;
     discover) printf '%s\n' 'Usage: agent-ws discover <root...>' ;;
     diff) printf '%s\n' 'Usage: agent-ws diff [path]' ;;
     sync) printf '%s\n' 'Usage: agent-ws sync [path] [--dry-run|--apply]' ;;
@@ -144,7 +156,21 @@ agent_ws_main() {
         agent_ws_cmd_add_agent
       fi
       ;;
-    status|audit|discover|diff|sync|update|migrate)
+    status)
+      if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" = "--help" ]; then
+        agent_ws_command_usage status
+      else
+        agent_ws_cmd_status
+      fi
+      ;;
+    audit)
+      if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" = "--help" ]; then
+        agent_ws_command_usage audit
+      else
+        agent_ws_cmd_audit
+      fi
+      ;;
+    discover|diff|sync|update|migrate)
       if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" = "--help" ]; then
         agent_ws_command_usage "$AGENT_WS_COMMAND"
       else
@@ -274,4 +300,23 @@ agent_ws_cmd_add_agent() {
     agent_ws_say "metadata unchanged; no new agent files created"
   fi
   agent_ws_say "added agent support to $project_root"
+}
+
+agent_ws_cmd_status() {
+  local target="${AGENT_WS_PATHS[0]:-.}"
+  if [ "${#AGENT_WS_PATHS[@]}" -gt 1 ]; then
+    agent_ws_die "status accepts at most one project path" "run 'agent-ws help status' for usage."
+  fi
+  agent_ws_status_project "$target"
+}
+
+agent_ws_cmd_audit() {
+  local path
+  if [ "${#AGENT_WS_PATHS[@]}" -eq 0 ]; then
+    agent_ws_audit_project "."
+    return 0
+  fi
+  for path in "${AGENT_WS_PATHS[@]}"; do
+    agent_ws_audit_project "$path"
+  done
 }

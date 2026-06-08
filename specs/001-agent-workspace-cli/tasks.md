@@ -126,20 +126,20 @@
 
 ### Tests for User Story 3
 
-- [ ] T055 [P] [US3] Add integration test for quick current-project status in `tests/integration/test_status.sh`
-- [ ] T056 [P] [US3] Add integration test for audit on managed, partial, and legacy fixtures in `tests/integration/test_audit.sh`
-- [ ] T057 [P] [US3] Add integration test for invalid and stale metadata reporting in `tests/integration/test_metadata_status_audit.sh`
-- [ ] T058 [P] [US3] Add integration test for partial-state recovery guidance in `tests/integration/test_audit_recovery_guidance.sh`
+- [X] T055 [P] [US3] Add integration test for quick current-project status in `tests/integration/test_status.sh`
+- [X] T056 [P] [US3] Add integration test for audit on managed, partial, and legacy fixtures in `tests/integration/test_audit.sh`
+- [X] T057 [P] [US3] Add integration test for invalid and stale metadata reporting in `tests/integration/test_metadata_status_audit.sh`
+- [X] T058 [P] [US3] Add integration test for partial-state recovery guidance in `tests/integration/test_audit_recovery_guidance.sh`
 
 ### Implementation for User Story 3
 
-- [ ] T059 [US3] Implement `agent-ws status` command routing in `lib/agent-ws/commands.sh`
-- [ ] T060 [US3] Implement quick project health summary in `lib/agent-ws/audit.sh`
-- [ ] T061 [US3] Implement `agent-ws audit` command routing for current or specified paths in `lib/agent-ws/commands.sh`
-- [ ] T062 [US3] Implement deep audit checks for expected files, metadata presence, metadata validity, stale metadata, and template availability in `lib/agent-ws/audit.sh`
-- [ ] T063 [US3] Implement legacy signal reporting for `.agent/` and `bin/agent-workspace` in `lib/agent-ws/audit.sh`
-- [ ] T064 [US3] Implement partial-state recovery guidance output in `lib/agent-ws/audit.sh`
-- [ ] T065 [US3] Add status and audit usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
+- [X] T059 [US3] Implement `agent-ws status` command routing in `lib/agent-ws/commands.sh`
+- [X] T060 [US3] Implement quick project health summary in `lib/agent-ws/audit.sh`
+- [X] T061 [US3] Implement `agent-ws audit` command routing for current or specified paths in `lib/agent-ws/commands.sh`
+- [X] T062 [US3] Implement deep audit checks for expected files, metadata presence, metadata validity, stale metadata, and template availability in `lib/agent-ws/audit.sh`
+- [X] T063 [US3] Implement legacy signal reporting for `.agent/` and `bin/agent-workspace` in `lib/agent-ws/audit.sh`
+- [X] T064 [US3] Implement partial-state recovery guidance output in `lib/agent-ws/audit.sh`
+- [X] T065 [US3] Add status and audit usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
 
 **Checkpoint**: User Story 3 is independently functional for one project and multi-path audit inputs.
 

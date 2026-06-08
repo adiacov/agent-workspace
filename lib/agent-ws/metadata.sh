@@ -195,5 +195,17 @@ agent_ws_metadata_status() {
     printf '%s\n' stale
     return 0
   fi
+  if python3 - "$metadata_file" <<'PY'
+import json, sys
+try:
+    rev = json.load(open(sys.argv[1], encoding='utf-8')).get('templateRevision', '')
+except Exception:
+    sys.exit(1)
+sys.exit(0 if rev and rev.startswith('missing-') else 1)
+PY
+  then
+    printf '%s\n' stale
+    return 0
+  fi
   printf '%s\n' present
 }
