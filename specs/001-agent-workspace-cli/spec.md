@@ -166,8 +166,8 @@ A new user can read the README and quickly understand what Agent Workspace is, h
 - **FR-002a**: Initialization MUST NOT create a project-local template cache by default; later commands MUST use canonical templates from the global installation or selected release source.
 - **FR-003**: Initialization MUST support a default general profile and a code profile that adds engineering guidance.
 - **FR-004**: Initialization MUST support non-interactive selection of supported agents and profile so automated or agent-driven setup can run without prompts.
-- **FR-005**: The CLI MUST support adding supported agent instruction entrypoints after initialization using canonical templates from the global installation or selected release source.
-- **FR-006**: The CLI MUST support a custom agent instruction entrypoint using a developer-provided project-root-relative destination.
+- **FR-005**: The CLI MUST support adding supported agent instruction entrypoints after initialization using canonical templates from the global installation or selected release source; if required templates are missing, invalid, or inaccessible, the command MUST stop before writing partial output and report how to restore or select a valid template source.
+- **FR-006**: The CLI MUST support a custom agent instruction entrypoint using a developer-provided project-root-relative destination that is neither absolute nor able to escape the project root through parent-directory traversal.
 - **FR-007**: The CLI MUST place generated active agent files at locations expected by each supported agent.
 - **FR-008**: The CLI MUST never silently overwrite existing active files or memory files.
 - **FR-009**: The CLI MUST clearly report created, skipped, missing, and failed actions for user-facing commands.
@@ -177,8 +177,8 @@ A new user can read the README and quickly understand what Agent Workspace is, h
 - **FR-011b**: New initialization MUST NOT create the generic `.agent/` directory by default.
 - **FR-012**: The CLI MUST audit current or specified projects with deeper checks than status, including expected structure, missing files, legacy layout, metadata validity, stale metadata, global template source availability, and likely drift between active files and available templates.
 - **FR-013**: The CLI MUST discover likely Agent Workspace projects under developer-provided root paths using explicit metadata and legacy signal scoring.
-- **FR-014**: Discovery MUST distinguish strong matches, uncertain matches, and non-matches and report the signals used for classification.
-- **FR-015**: Discovery MUST skip common heavy or irrelevant directories such as dependency folders, virtual environments, generated output folders, and version-control internals.
+- **FR-014**: Discovery MUST distinguish strong matches, uncertain matches, and non-matches and report the signals used for classification. Explicit `.agent-workspace/` metadata or multiple legacy Agent Workspace signals, such as `.agent/` plus `bin/agent-workspace` or known active instruction files, count as strong matches; isolated weak generic files such as only `AGENTS.md`, `STATE.md`, or `BRAINSTORM.md` count as uncertain unless corroborated by stronger signals.
+- **FR-015**: Discovery MUST skip common heavy or irrelevant directories such as dependency folders, virtual environments, generated output folders, and version-control internals, and is expected to remain responsive for tens to low hundreds of local projects under explicitly provided roots.
 - **FR-016**: The CLI MUST support read-only comparison of active generated files against available templates and report differences without changing files.
 - **FR-017**: The CLI MUST support a conservative sync mode that refreshes global template/release references, metadata, or comparison baselines without modifying active instruction files or memory unless explicit apply intent is provided for a safe non-conflicting change.
 - **FR-018**: The CLI MUST require explicit developer intent before applying any change to active instruction files after initialization.
@@ -188,7 +188,7 @@ A new user can read the README and quickly understand what Agent Workspace is, h
 - **FR-020b**: Update MUST preserve the currently working installed `agent-ws` until the new version is fully installed and validated; failed updates MUST leave the current command usable.
 - **FR-023**: New project initialization MUST NOT generate or maintain a project-local `bin/agent-workspace` command copy.
 - **FR-021**: The CLI MUST preserve the boundary that Agent Workspace owns reusable mechanisms and templates while the target project owns final active instruction files and memory.
-- **FR-022**: The CLI MUST provide help or usage guidance for every user-facing command, including initialization, adding agents, status, audit, discovery, template comparison, sync, and command update.
+- **FR-022**: The CLI MUST provide help or usage guidance for every user-facing command, including `init`, `add-agent`, `status`, `audit`, `discover`, `diff`, `sync`, `update`, `migrate`, and `help`; command requirements are defined by the CLI contract and MUST include scope, accepted inputs/options, mutating vs read-only behavior, and expected outcomes.
 - **FR-024**: The project documentation MUST include a migration section explaining how to move from the older `.agent/` and `bin/agent-workspace` approach to the new `agent-ws` and `.agent-workspace/` model.
 - **FR-025**: Migration documentation and a migration helper are required for MVP; the helper MUST default to dry-run, preview intended changes, require explicit apply for destructive actions, and preserve active instruction files and memory by default.
 - **FR-025a**: Migration logic and documentation MUST NOT rely on or manage old project-local template caches; those caches are outside the supported target model and may be deleted manually by the user.
@@ -212,14 +212,14 @@ A new user can read the README and quickly understand what Agent Workspace is, h
 - **SC-001**: A developer can install or confirm `agent-ws`, then initialize a clean project with one profile and one agent in under 2 minutes, including verification that expected files were created.
 - **SC-002**: Re-running initialization or agent addition on an already initialized project preserves 100% of existing active files and reports each skipped destination.
 - **SC-003**: A developer can add a second supported agent to an initialized project in under 1 minute using global templates without manually copying template files.
-- **SC-004**: Project audit correctly identifies missing core files, missing metadata, and missing global template source availability in at least 95% of representative initialized, partial, and legacy project fixtures.
-- **SC-005**: Discovery classifies projects with explicit metadata or strong legacy signals with at least 95% accuracy across representative directory trees.
+- **SC-004**: Project audit correctly identifies missing core files, missing metadata, invalid metadata, stale metadata, legacy signals, and missing global template source availability in at least 95% of representative clean, initialized, partial, legacy, invalid-metadata, and stale-metadata fixtures.
+- **SC-005**: Discovery classifies projects with explicit metadata, strong legacy signals, weak generic signals, no signals, and skipped heavy directories with at least 95% accuracy across representative directory trees.
 - **SC-006**: Conservative sync or global template refresh completes without changing active instruction files or memory in 100% of tested projects that contain local modifications.
 - **SC-007**: Developers can view template-vs-active-file differences before applying changes in 100% of projects where comparable templates are available.
 - **SC-008**: The globally installed `agent-ws` command can be updated to a selected stable released version in under 2 minutes when that release is available, and failed updates leave the previous working command usable.
-- **SC-009**: At least 90% of command failures in validation scenarios include a clear explanation and a next action the developer can take.
+- **SC-009**: At least 90% of command failures in validation scenarios include a clear explanation of what failed and a next action the developer can take, such as selecting a valid path, restoring templates, choosing an available release, rerunning audit, or using `--apply` only after reviewing a dry-run.
 - **SC-010**: A developer can migrate a representative legacy local project using the documented migration guidance and safe migration helper without losing active instruction files or memory.
-- **SC-011**: A new user can complete the README primary quickstart without needing to choose between multiple redundant initialization methods.
+- **SC-011**: A new user can complete the README primary quickstart without needing to choose between multiple redundant initialization methods; the first-time flow must present one recommended install command, one current-directory initialization command, and one add-agent example before advanced alternatives.
 
 ## Assumptions
 

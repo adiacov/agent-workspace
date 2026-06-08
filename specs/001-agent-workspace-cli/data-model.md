@@ -122,7 +122,9 @@ Output record for scanning roots for Agent Workspace projects.
 **Validation rules**:
 
 - Metadata under `.agent-workspace/` is a strong signal.
-- Legacy `.agent/`, `bin/agent-workspace`, and known active files contribute to confidence scoring.
+- Multiple legacy Agent Workspace signals, such as `.agent/` plus `bin/agent-workspace` or known active instruction files, are strong legacy evidence.
+- Isolated weak generic files, such as only `AGENTS.md`, `STATE.md`, or `BRAINSTORM.md`, are uncertain evidence unless corroborated by stronger signals.
+- Directories with no metadata or Agent Workspace signals are non-matches and should not be reported by default.
 - Heavy folders and version-control internals are skipped during traversal.
 
 ## Migration Plan Record
