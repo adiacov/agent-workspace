@@ -10,20 +10,51 @@ agent_ws_metadata_now() {
   date -u '+%Y-%m-%dT%H:%M:%SZ'
 }
 
+agent_ws_metadata_generated_json_from_records() {
+  local records_file="$1"
+  python3 - "$records_file" <<'PY'
+import json, sys
+out = {}
+with open(sys.argv[1], encoding='utf-8') as fh:
+    for raw in fh:
+        raw = raw.rstrip('\n')
+        if not raw or '|' not in raw:
+            continue
+        path, kind, template, agent = (raw.split('|', 3) + [''])[:4]
+        item = {"kind": kind, "template": template}
+        if agent:
+            item["agent"] = agent
+        out[path] = item
+print(json.dumps(out, sort_keys=True))
+PY
+}
+
 agent_ws_metadata_write() {
-  local project_root="$1" profile="$2" agents="$3" generated_files_json="${4:-{}}"
-  local metadata_dir metadata_file tmp now tool_version template_revision
+  local project_root="$1" profile="$2" agents="$3" generated_files_json="${4:-}"
+  local metadata_dir metadata_file tmp now tool_version template_revision created_at
+  [ -n "$generated_files_json" ] || generated_files_json='{}'
   metadata_dir="$project_root/.agent-workspace"
   metadata_file="$metadata_dir/workspace.json"
   tmp="$metadata_file.tmp.$$"
   now="$(agent_ws_metadata_now)"
-  tool_version="${AGENT_WS_VERSION:-unknown}"
+  tool_version="${AGENT_WS_TOOL_VERSION:-unknown}"
   template_revision="${AGENT_WS_TEMPLATE_REVISION:-unknown}"
+  created_at="$now"
+  if [ -f "$metadata_file" ]; then
+    created_at="$(python3 - "$metadata_file" "$now" <<'PY'
+import json, sys
+try:
+    print(json.load(open(sys.argv[1], encoding='utf-8')).get('createdAt') or sys.argv[2])
+except Exception:
+    print(sys.argv[2])
+PY
+)"
+  fi
   mkdir -p "$metadata_dir"
 
-  python3 - "$profile" "$agents" "$generated_files_json" "$now" "$tool_version" "$template_revision" > "$tmp" <<'PY'
+  python3 - "$profile" "$agents" "$generated_files_json" "$created_at" "$now" "$tool_version" "$template_revision" > "$tmp" <<'PY'
 import json, sys
-profile, agents_raw, generated_raw, now, tool_version, template_revision = sys.argv[1:]
+profile, agents_raw, generated_raw, created_at, updated_at, tool_version, template_revision = sys.argv[1:]
 agents = [a for a in agents_raw.replace(',', ' ').split() if a]
 try:
     generated = json.loads(generated_raw)
@@ -37,8 +68,8 @@ print(json.dumps({
     "profile": profile or "general",
     "agents": agents,
     "generatedFiles": generated,
-    "createdAt": now,
-    "updatedAt": now,
+    "createdAt": created_at,
+    "updatedAt": updated_at,
 }, indent=2, sort_keys=True))
 PY
   mv "$tmp" "$metadata_file"

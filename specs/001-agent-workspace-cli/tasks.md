@@ -69,24 +69,24 @@
 
 ### Tests for User Story 1
 
-- [ ] T030 [P] [US1] Add integration test for current-directory initialization in `tests/integration/test_init_current.sh`
-- [ ] T031 [P] [US1] Add integration test for named-directory initialization in `tests/integration/test_init_named_project.sh`
-- [ ] T032 [P] [US1] Add integration test for initialization no-overwrite behavior in `tests/integration/test_init_no_overwrite.sh`
-- [ ] T033 [P] [US1] Add integration test for metadata privacy and required fields in `tests/integration/test_metadata_contract.sh`
-- [ ] T034 [P] [US1] Add integration test proving `.agent/`, project-local template cache, and `bin/agent-workspace` are not created in `tests/integration/test_no_legacy_outputs.sh`
+- [X] T030 [P] [US1] Add integration test for current-directory initialization in `tests/integration/test_init_current.sh`
+- [X] T031 [P] [US1] Add integration test for named-directory initialization in `tests/integration/test_init_named_project.sh`
+- [X] T032 [P] [US1] Add integration test for initialization no-overwrite behavior in `tests/integration/test_init_no_overwrite.sh`
+- [X] T033 [P] [US1] Add integration test for metadata privacy and required fields in `tests/integration/test_metadata_contract.sh`
+- [X] T034 [P] [US1] Add integration test proving `.agent/`, project-local template cache, and `bin/agent-workspace` are not created in `tests/integration/test_no_legacy_outputs.sh`
 
 ### Implementation for User Story 1
 
-- [ ] T035 [US1] Implement `agent-ws init` command routing in `lib/agent-ws/commands.sh`
-- [ ] T036 [US1] Implement current-directory initialization flow with git-root safety in `lib/agent-ws/commands.sh`
-- [ ] T037 [US1] Implement named project directory creation and initialization flow in `lib/agent-ws/commands.sh`
-- [ ] T038 [US1] Implement default file generation from global templates in `lib/agent-ws/templates.sh`
-- [ ] T039 [US1] Implement profile-specific generation for `general` and `code` profiles in `lib/agent-ws/templates.sh`
-- [ ] T040 [US1] Implement selected agent file generation during initialization in `lib/agent-ws/templates.sh`
-- [ ] T041 [US1] Implement `.agent-workspace/workspace.json` metadata creation during initialization in `lib/agent-ws/metadata.sh`
-- [ ] T042 [US1] Implement metadata generated-file mapping updates for initialization outputs in `lib/agent-ws/metadata.sh`
-- [ ] T043 [US1] Implement non-interactive `--no-prompt`, `--profile`, and `--agents` initialization behavior in `lib/agent-ws/commands.sh`
-- [ ] T044 [US1] Add init usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
+- [X] T035 [US1] Implement `agent-ws init` command routing in `lib/agent-ws/commands.sh`
+- [X] T036 [US1] Implement current-directory initialization flow with git-root safety in `lib/agent-ws/commands.sh`
+- [X] T037 [US1] Implement named project directory creation and initialization flow in `lib/agent-ws/commands.sh`
+- [X] T038 [US1] Implement default file generation from global templates in `lib/agent-ws/templates.sh`
+- [X] T039 [US1] Implement profile-specific generation for `general` and `code` profiles in `lib/agent-ws/templates.sh`
+- [X] T040 [US1] Implement selected agent file generation during initialization in `lib/agent-ws/templates.sh`
+- [X] T041 [US1] Implement `.agent-workspace/workspace.json` metadata creation during initialization in `lib/agent-ws/metadata.sh`
+- [X] T042 [US1] Implement metadata generated-file mapping updates for initialization outputs in `lib/agent-ws/metadata.sh`
+- [X] T043 [US1] Implement non-interactive `--no-prompt`, `--profile`, and `--agents` initialization behavior in `lib/agent-ws/commands.sh`
+- [X] T044 [US1] Add init usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
 
 **Checkpoint**: User Story 1 is independently functional and provides the MVP.
 

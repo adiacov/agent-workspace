@@ -112,3 +112,55 @@ agent_ws_validate_project_relative_path() {
   esac
   printf '%s\n' "$path"
 }
+
+agent_ws_copy_template_spec() {
+  local project_root="$1" rel="$2" dst_rel="$3" kind="$4" agent="${5:-}"
+  local src dst
+  agent_ws_validate_project_relative_path "$dst_rel" >/dev/null
+  src="$(agent_ws_require_template "$rel")"
+  dst="$project_root/$dst_rel"
+  if [ -e "$dst" ]; then
+    agent_ws_say "skip existing $dst_rel"
+  else
+    mkdir -p "$(dirname "$dst")"
+    cp "$src" "$dst"
+    agent_ws_say "created $dst_rel"
+  fi
+  if [ -n "${AGENT_WS_GENERATED_RECORDS_FILE:-}" ]; then
+    printf '%s|%s|%s|%s\n' "$dst_rel" "$kind" "$rel" "$agent" >> "$AGENT_WS_GENERATED_RECORDS_FILE"
+  fi
+}
+
+agent_ws_generate_default_files() {
+  local project_root="$1" spec rel dst kind
+  while IFS= read -r spec; do
+    [ -n "$spec" ] || continue
+    IFS=: read -r rel dst kind <<EOF
+$spec
+EOF
+    agent_ws_copy_template_spec "$project_root" "$rel" "$dst" "$kind" ""
+  done <<< "$(agent_ws_default_template_files)"
+}
+
+agent_ws_generate_profile_files() {
+  local project_root="$1" profile="$2" spec rel dst kind
+  while IFS= read -r spec; do
+    [ -n "$spec" ] || continue
+    IFS=: read -r rel dst kind <<EOF
+$spec
+EOF
+    agent_ws_copy_template_spec "$project_root" "$rel" "$dst" "$kind" ""
+  done <<< "$(agent_ws_profile_template_files "$profile")"
+}
+
+agent_ws_generate_agent_files() {
+  local project_root="$1" agents="$2" custom_path="${3:-}" agent spec rel dst kind requires_custom
+  while IFS= read -r agent; do
+    [ -n "$agent" ] || continue
+    spec="$(agent_ws_adapter_template "$agent" "$custom_path")"
+    IFS=: read -r rel dst kind requires_custom <<EOF
+$spec
+EOF
+    agent_ws_copy_template_spec "$project_root" "$rel" "$dst" "$kind" "$agent"
+  done <<< "$(agent_ws_split_agents "$agents")"
+}

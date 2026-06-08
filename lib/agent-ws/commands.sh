@@ -16,6 +16,9 @@ agent_ws_usage() {
   cat <<'USAGE'
 Usage: agent-ws <command> [options] [path]
 
+Primary flow:
+  agent-ws init --profile code --agents pi --no-prompt
+
 Commands:
   init        Initialize a project workspace
   add-agent   Add an agent entrypoint
@@ -28,7 +31,7 @@ Commands:
   migrate     Preview/apply legacy migration
   help        Show this help text
 
-Run `agent-ws help <command>` for command-specific usage once that command is implemented.
+Run `agent-ws help <command>` for command-specific usage.
 USAGE
 }
 
@@ -36,7 +39,14 @@ agent_ws_command_usage() {
   local command="${1:-help}"
   case "$command" in
     help) agent_ws_usage ;;
-    init) printf '%s\n' 'Usage: agent-ws init [project-name|path] [--profile general|code] [--agents list] [--custom-path path] [--no-prompt]' ;;
+    init) cat <<'USAGE'
+Usage: agent-ws init [project-name|path] [--profile general|code] [--agents list] [--custom-path path] [--no-prompt]
+
+Initializes the current directory or creates and initializes a named project directory.
+Creates default files, selected agent files, and .agent-workspace/workspace.json.
+Existing active files are skipped, not overwritten.
+USAGE
+      ;;
     add-agent) printf '%s\n' 'Usage: agent-ws add-agent [agent] [--agents list] [--custom-path path] [--no-prompt]' ;;
     status) printf '%s\n' 'Usage: agent-ws status [path]' ;;
     audit) printf '%s\n' 'Usage: agent-ws audit [path...]' ;;
@@ -114,7 +124,14 @@ agent_ws_main() {
         agent_ws_usage
       fi
       ;;
-    init|add-agent|status|audit|discover|diff|sync|update|migrate)
+    init)
+      if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" = "--help" ]; then
+        agent_ws_command_usage init
+      else
+        agent_ws_cmd_init
+      fi
+      ;;
+    add-agent|status|audit|discover|diff|sync|update|migrate)
       if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" = "--help" ]; then
         agent_ws_command_usage "$AGENT_WS_COMMAND"
       else
@@ -160,4 +177,46 @@ agent_ws_existing_project_root() {
   local target="${1:-.}"
   [ -d "$target" ] || agent_ws_die "project path does not exist: $target" "choose an existing project path."
   agent_ws_abs_path "$target"
+}
+
+agent_ws_cmd_init() {
+  local profile agents target project_root template_dir records_file generated_json
+  profile="${AGENT_WS_PROFILE:-general}"
+  agents="${AGENT_WS_AGENTS:-}"
+
+  [ "$profile" = "general" ] || [ "$profile" = "code" ] || agent_ws_die "unsupported profile: $profile" "choose --profile general or --profile code."
+  if [ -z "$agents" ]; then
+    if [ "$AGENT_WS_NO_PROMPT" -eq 1 ]; then
+      agent_ws_die "--agents is required with --no-prompt" "provide --agents pi, codex, claude, cursor, or custom."
+    fi
+    agent_ws_warn "no --agents provided; defaulting to pi"
+    agents="pi"
+  fi
+
+  if [ "${#AGENT_WS_PATHS[@]}" -gt 1 ]; then
+    agent_ws_die "init accepts at most one project path" "run 'agent-ws help init' for usage."
+  fi
+
+  target="${AGENT_WS_PATHS[0]:-.}"
+  if [ "$target" = "." ]; then
+    project_root="$(agent_ws_project_root_for_init ".")"
+  else
+    mkdir -p "$target"
+    project_root="$(agent_ws_abs_path "$target")"
+  fi
+
+  template_dir="$(agent_ws_template_source_dir)"
+  AGENT_WS_TEMPLATE_REVISION="$(agent_ws_template_revision "$template_dir")"
+
+  agent_ws_say "initializing $project_root"
+  records_file="$(mktemp)"
+  AGENT_WS_GENERATED_RECORDS_FILE="$records_file"
+  agent_ws_generate_default_files "$project_root"
+  agent_ws_generate_profile_files "$project_root" "$profile"
+  agent_ws_generate_agent_files "$project_root" "$agents" "$AGENT_WS_CUSTOM_PATH"
+  unset AGENT_WS_GENERATED_RECORDS_FILE
+  generated_json="$(agent_ws_metadata_generated_json_from_records "$records_file")"
+  rm -f "$records_file"
+  agent_ws_metadata_write "$project_root" "$profile" "$agents" "$generated_json"
+  agent_ws_say "initialized $project_root"
 }
