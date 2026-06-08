@@ -100,19 +100,19 @@
 
 ### Tests for User Story 2
 
-- [ ] T045 [P] [US2] Add integration test for adding a supported agent after initialization in `tests/integration/test_add_agent.sh`
-- [ ] T046 [P] [US2] Add integration test for add-agent no-overwrite behavior in `tests/integration/test_add_agent_no_overwrite.sh`
-- [ ] T047 [P] [US2] Add integration test for custom agent path validation in `tests/integration/test_custom_agent_path.sh`
-- [ ] T048 [P] [US2] Add integration test for multiple agents targeting the same destination without silent overwrite in `tests/integration/test_agent_destination_conflict.sh`
+- [X] T045 [P] [US2] Add integration test for adding a supported agent after initialization in `tests/integration/test_add_agent.sh`
+- [X] T046 [P] [US2] Add integration test for add-agent no-overwrite behavior in `tests/integration/test_add_agent_no_overwrite.sh`
+- [X] T047 [P] [US2] Add integration test for custom agent path validation in `tests/integration/test_custom_agent_path.sh`
+- [X] T048 [P] [US2] Add integration test for multiple agents targeting the same destination without silent overwrite in `tests/integration/test_agent_destination_conflict.sh`
 
 ### Implementation for User Story 2
 
-- [ ] T049 [US2] Implement `agent-ws add-agent` command routing in `lib/agent-ws/commands.sh`
-- [ ] T050 [US2] Implement add-agent template copy flow using global template source in `lib/agent-ws/templates.sh`
-- [ ] T051 [US2] Implement add-agent metadata update for newly generated files in `lib/agent-ws/metadata.sh`
-- [ ] T052 [US2] Implement custom agent output flow using project-root-relative destination paths in `lib/agent-ws/templates.sh`
-- [ ] T053 [US2] Implement duplicate destination detection and clear skip/conflict reporting in `lib/agent-ws/templates.sh`
-- [ ] T054 [US2] Add add-agent usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
+- [X] T049 [US2] Implement `agent-ws add-agent` command routing in `lib/agent-ws/commands.sh`
+- [X] T050 [US2] Implement add-agent template copy flow using global template source in `lib/agent-ws/templates.sh`
+- [X] T051 [US2] Implement add-agent metadata update for newly generated files in `lib/agent-ws/metadata.sh`
+- [X] T052 [US2] Implement custom agent output flow using project-root-relative destination paths in `lib/agent-ws/templates.sh`
+- [X] T053 [US2] Implement duplicate destination detection and clear skip/conflict reporting in `lib/agent-ws/templates.sh`
+- [X] T054 [US2] Add add-agent usage text to `agent-ws help` in `lib/agent-ws/commands.sh`
 
 **Checkpoint**: User Story 2 is independently functional after the foundational phase and can be validated on any initialized project.
 

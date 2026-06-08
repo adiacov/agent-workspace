@@ -83,6 +83,50 @@ agent_ws_metadata_read() {
   cat "$metadata_file"
 }
 
+agent_ws_metadata_update_generated() {
+  local project_root="$1" agents="$2" generated_files_json="${3:-}"
+  local metadata_file tmp now template_revision tool_version
+  [ -n "$generated_files_json" ] || generated_files_json='{}'
+  metadata_file="$(agent_ws_metadata_path "$project_root")"
+  [ -f "$metadata_file" ] || agent_ws_die "workspace metadata is missing" "run 'agent-ws init' before adding agents."
+  tmp="$metadata_file.tmp.$$"
+  now="$(agent_ws_metadata_now)"
+  template_revision="${AGENT_WS_TEMPLATE_REVISION:-unknown}"
+  tool_version="${AGENT_WS_TOOL_VERSION:-unknown}"
+  python3 - "$metadata_file" "$agents" "$generated_files_json" "$now" "$tool_version" "$template_revision" > "$tmp" <<'PY'
+import json, sys
+path, agents_raw, generated_raw, now, tool_version, template_revision = sys.argv[1:]
+try:
+    data = json.load(open(path, encoding='utf-8'))
+except Exception as exc:
+    print(f"invalid metadata: {exc}", file=sys.stderr)
+    sys.exit(1)
+try:
+    generated = json.loads(generated_raw)
+except json.JSONDecodeError:
+    generated = {}
+existing_agents = list(data.get('agents') or [])
+for agent in [a for a in agents_raw.replace(',', ' ').split() if a]:
+    if agent not in existing_agents:
+        existing_agents.append(agent)
+data['agents'] = existing_agents
+data.setdefault('generatedFiles', {})
+data['generatedFiles'].update(generated)
+data.setdefault('schemaVersion', 1)
+data['toolName'] = 'agent-ws'
+data.setdefault('profile', 'general')
+data.setdefault('createdAt', now)
+data['updatedAt'] = now
+if not data.get('toolVersion'):
+    data['toolVersion'] = tool_version or 'unknown'
+if not data.get('templateRevision') or data.get('templateRevision') == 'unknown':
+    data['templateRevision'] = template_revision or 'unknown'
+print(json.dumps(data, indent=2, sort_keys=True))
+PY
+  mv "$tmp" "$metadata_file"
+  agent_ws_say "updated $metadata_file"
+}
+
 agent_ws_metadata_validate_json() {
   local metadata_file="$1"
   [ -f "$metadata_file" ] || return 2

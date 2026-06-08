@@ -119,15 +119,19 @@ agent_ws_copy_template_spec() {
   agent_ws_validate_project_relative_path "$dst_rel" >/dev/null
   src="$(agent_ws_require_template "$rel")"
   dst="$project_root/$dst_rel"
+  local created=0
   if [ -e "$dst" ]; then
     agent_ws_say "skip existing $dst_rel"
   else
     mkdir -p "$(dirname "$dst")"
     cp "$src" "$dst"
     agent_ws_say "created $dst_rel"
+    created=1
   fi
   if [ -n "${AGENT_WS_GENERATED_RECORDS_FILE:-}" ]; then
-    printf '%s|%s|%s|%s\n' "$dst_rel" "$kind" "$rel" "$agent" >> "$AGENT_WS_GENERATED_RECORDS_FILE"
+    if [ "${AGENT_WS_RECORD_CREATED_ONLY:-0}" -eq 0 ] || [ "$created" -eq 1 ]; then
+      printf '%s|%s|%s|%s\n' "$dst_rel" "$kind" "$rel" "$agent" >> "$AGENT_WS_GENERATED_RECORDS_FILE"
+    fi
   fi
 }
 
@@ -153,8 +157,27 @@ EOF
   done <<< "$(agent_ws_profile_template_files "$profile")"
 }
 
+agent_ws_agent_destination_conflict_check() {
+  local agents="$1" custom_path="${2:-}" agent spec rel dst kind requires_custom seen_file
+  seen_file="$(mktemp)"
+  while IFS= read -r agent; do
+    [ -n "$agent" ] || continue
+    spec="$(agent_ws_adapter_template "$agent" "$custom_path")"
+    IFS=: read -r rel dst kind requires_custom <<EOF
+$spec
+EOF
+    if awk -F '|' -v dst="$dst" '$1 == dst { found=1 } END { exit found ? 0 : 1 }' "$seen_file"; then
+      rm -f "$seen_file"
+      agent_ws_die "destination conflict for $dst" "select agents one at a time or choose a custom path that does not collide."
+    fi
+    printf '%s|%s|%s\n' "$dst" "$agent" "$rel" >> "$seen_file"
+  done <<< "$(agent_ws_split_agents "$agents")"
+  rm -f "$seen_file"
+}
+
 agent_ws_generate_agent_files() {
   local project_root="$1" agents="$2" custom_path="${3:-}" agent spec rel dst kind requires_custom
+  agent_ws_agent_destination_conflict_check "$agents" "$custom_path"
   while IFS= read -r agent; do
     [ -n "$agent" ] || continue
     spec="$(agent_ws_adapter_template "$agent" "$custom_path")"

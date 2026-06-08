@@ -47,7 +47,13 @@ Creates default files, selected agent files, and .agent-workspace/workspace.json
 Existing active files are skipped, not overwritten.
 USAGE
       ;;
-    add-agent) printf '%s\n' 'Usage: agent-ws add-agent [agent] [--agents list] [--custom-path path] [--no-prompt]' ;;
+    add-agent) cat <<'USAGE'
+Usage: agent-ws add-agent [agent] [--agents list] [--custom-path path] [--no-prompt]
+
+Adds one or more agent instruction entrypoints to an initialized project.
+Uses global templates, preserves existing files, and updates metadata for newly created files.
+USAGE
+      ;;
     status) printf '%s\n' 'Usage: agent-ws status [path]' ;;
     audit) printf '%s\n' 'Usage: agent-ws audit [path...]' ;;
     discover) printf '%s\n' 'Usage: agent-ws discover <root...>' ;;
@@ -131,7 +137,14 @@ agent_ws_main() {
         agent_ws_cmd_init
       fi
       ;;
-    add-agent|status|audit|discover|diff|sync|update|migrate)
+    add-agent)
+      if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" = "--help" ]; then
+        agent_ws_command_usage add-agent
+      else
+        agent_ws_cmd_add_agent
+      fi
+      ;;
+    status|audit|discover|diff|sync|update|migrate)
       if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" = "--help" ]; then
         agent_ws_command_usage "$AGENT_WS_COMMAND"
       else
@@ -219,4 +232,46 @@ agent_ws_cmd_init() {
   rm -f "$records_file"
   agent_ws_metadata_write "$project_root" "$profile" "$agents" "$generated_json"
   agent_ws_say "initialized $project_root"
+}
+
+agent_ws_cmd_add_agent() {
+  local agents project_root template_dir records_file generated_json
+  agents="${AGENT_WS_AGENTS:-}"
+
+  if [ -z "$agents" ] && [ "${#AGENT_WS_PATHS[@]}" -gt 0 ]; then
+    agents="${AGENT_WS_PATHS[0]}"
+    if [ "${#AGENT_WS_PATHS[@]}" -gt 1 ]; then
+      agent_ws_die "add-agent accepts one positional agent or --agents" "run 'agent-ws help add-agent' for usage."
+    fi
+  fi
+
+  if [ -z "$agents" ]; then
+    if [ "$AGENT_WS_NO_PROMPT" -eq 1 ]; then
+      agent_ws_die "--agents or positional agent is required with --no-prompt" "provide --agents pi, codex, claude, cursor, or custom."
+    fi
+    agent_ws_warn "no --agents provided; defaulting to pi"
+    agents="pi"
+  fi
+
+  project_root="$(agent_ws_existing_project_root ".")"
+  [ -f "$(agent_ws_metadata_path "$project_root")" ] || agent_ws_die "workspace metadata is missing" "run 'agent-ws init' before adding agents."
+
+  template_dir="$(agent_ws_template_source_dir)"
+  AGENT_WS_TEMPLATE_REVISION="$(agent_ws_template_revision "$template_dir")"
+
+  agent_ws_say "adding agent support to $project_root"
+  records_file="$(mktemp)"
+  AGENT_WS_GENERATED_RECORDS_FILE="$records_file"
+  AGENT_WS_RECORD_CREATED_ONLY=1
+  agent_ws_generate_agent_files "$project_root" "$agents" "$AGENT_WS_CUSTOM_PATH"
+  unset AGENT_WS_GENERATED_RECORDS_FILE
+  unset AGENT_WS_RECORD_CREATED_ONLY
+  generated_json="$(agent_ws_metadata_generated_json_from_records "$records_file")"
+  rm -f "$records_file"
+  if [ "$generated_json" != "{}" ]; then
+    agent_ws_metadata_update_generated "$project_root" "$agents" "$generated_json"
+  else
+    agent_ws_say "metadata unchanged; no new agent files created"
+  fi
+  agent_ws_say "added agent support to $project_root"
 }
