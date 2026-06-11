@@ -64,9 +64,20 @@ install_is_stable_version() {
   esac
 }
 
-install_latest_stable() {
+install_release_list_contains() {
+  local requested="$1" candidate
+  [ -n "${AGENT_WS_TEST_RELEASES:-}" ] || return 0
+  for candidate in ${AGENT_WS_TEST_RELEASES}; do
+    [ "$candidate" = "$requested" ] && return 0
+  done
+  return 1
+}
+
+install_select_version() {
   local version stable=""
   if [ -n "${AGENT_WS_VERSION:-}" ]; then
+    install_is_stable_version "$AGENT_WS_VERSION" || install_error "release resolution" "requested version is not a stable vMAJOR.MINOR.PATCH release: $AGENT_WS_VERSION" "choose a stable release such as v0.1.0."
+    install_release_list_contains "$AGENT_WS_VERSION" || install_error "release resolution" "requested release is unavailable: $AGENT_WS_VERSION" "choose an available stable release."
     printf '%s\n' "$AGENT_WS_VERSION"
     return 0
   fi
@@ -92,14 +103,21 @@ install_stage_cleanup() {
 }
 
 install_validate_candidate() {
-  local candidate_prefix="$1" command
+  local candidate_prefix="$1" expected_version="${2:-}" command reported_version
   command="$candidate_prefix/bin/agent-ws"
   [ -x "$command" ] || install_error "validation" "candidate command is not executable: $command" "check the release payload layout."
-  if ! "$command" version >/dev/null 2>&1; then
-    # Phase 2 introduces the validation hook before the version command is wired
+  if ! reported_version="$($command version 2>/dev/null)"; then
+    # Phase 2 introduced the validation hook before the version command was wired
     # into the active CLI. Fall back to help for existing local installs so the
-    # helper can be adopted without breaking current development flows.
+    # helper remains compatible with older development payloads.
     "$command" help >/dev/null 2>&1 || install_error "validation" "candidate command cannot run" "check the staged payload before activation."
+    return 0
+  fi
+  if [ -n "$expected_version" ]; then
+    case "$reported_version" in
+      *"$expected_version"*) ;;
+      *) install_error "validation" "candidate reported '$reported_version', expected $expected_version" "check the selected release payload." ;;
+    esac
   fi
 }
 
@@ -236,13 +254,17 @@ trap 'install_stage_cleanup "$STAGE"' EXIT
 STAGED_PREFIX="$STAGE/prefix"
 
 if [ "${AGENT_WS_FORCE_REMOTE:-0}" = "1" ] || ! install_is_checkout "$ROOT"; then
-  VERSION_TO_INSTALL="$(install_latest_stable)"
-  say "latest stable: $VERSION_TO_INSTALL"
+  VERSION_TO_INSTALL="$(install_select_version)"
+  if [ -n "${AGENT_WS_VERSION:-}" ]; then
+    say "selected version: $VERSION_TO_INSTALL"
+  else
+    say "latest stable: $VERSION_TO_INSTALL"
+  fi
   install_stage_from_archive "$VERSION_TO_INSTALL" "$STAGE" "$STAGED_PREFIX"
 else
   install_stage_from_checkout "$ROOT" "$STAGED_PREFIX"
 fi
-install_validate_candidate "$STAGED_PREFIX"
+install_validate_candidate "$STAGED_PREFIX" "${VERSION_TO_INSTALL:-}"
 install_activate_staged "$STAGED_PREFIX" "$PREFIX"
 
 say "installed agent-ws to $PREFIX/bin/agent-ws"

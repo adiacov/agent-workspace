@@ -190,13 +190,13 @@ Ensure `PREFIX/bin` is on `PATH` before running `agent-ws`.
 
 ### Pinned install
 
-Pinned install support will use the same public installer with an explicit version:
+Pinned install uses the same public installer with an explicit version:
 
 ```bash
 AGENT_WS_VERSION=v0.1.0 curl -fsSL <install-url> | bash
 ```
 
-Versions use the `vMAJOR.MINOR.PATCH` format and should match public GitHub tags/releases.
+The installer resolves exactly the requested version, validates that the staged command reports that version, and preserves any existing install if the requested release is unavailable or invalid. Versions use the `vMAJOR.MINOR.PATCH` format and should match public GitHub tags/releases.
 
 ### Version
 

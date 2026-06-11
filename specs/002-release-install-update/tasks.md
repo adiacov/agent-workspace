@@ -111,17 +111,17 @@
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T036 [P] [US3] Add pinned remote-style install integration test in `tests/integration/test_install_pinned.sh`
-- [ ] T037 [P] [US3] Add invalid pinned install preservation test in `tests/integration/test_install_pinned_failure_safety.sh`
-- [ ] T038 [P] [US3] Add pinned version environment parsing test in `tests/integration/test_install_version_env.sh`
+- [X] T036 [P] [US3] Add pinned remote-style install integration test in `tests/integration/test_install_pinned.sh`
+- [X] T037 [P] [US3] Add invalid pinned install preservation test in `tests/integration/test_install_pinned_failure_safety.sh`
+- [X] T038 [P] [US3] Add pinned version environment parsing test in `tests/integration/test_install_version_env.sh`
 
 ### Implementation for User Story 3
 
-- [ ] T039 [US3] Add `AGENT_WS_VERSION` support for pinned install selection in `install.sh`
-- [ ] T040 [US3] Implement exact release identifier validation for pinned install in `install.sh`
-- [ ] T041 [US3] Ensure pinned install validates staged reported version matches requested version in `install.sh`
-- [ ] T042 [US3] Add invalid pinned release failure messaging in `install.sh`
-- [ ] T043 [US3] Update pinned install documentation in `README.md`
+- [X] T039 [US3] Add `AGENT_WS_VERSION` support for pinned install selection in `install.sh`
+- [X] T040 [US3] Implement exact release identifier validation for pinned install in `install.sh`
+- [X] T041 [US3] Ensure pinned install validates staged reported version matches requested version in `install.sh`
+- [X] T042 [US3] Add invalid pinned release failure messaging in `install.sh`
+- [X] T043 [US3] Update pinned install documentation in `README.md`
 
 **Checkpoint**: User Story 3 supports reproducible pinned installs without weakening install failure safety.
 

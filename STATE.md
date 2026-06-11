@@ -14,11 +14,12 @@ Starting phase 002: release, install, and update hardening for the public `agent
 - Phase 2 foundational tasks T005-T016 are complete.
 - Phase 3 User Story 1 tasks T017-T027 are complete.
 - Phase 4 User Story 2 tasks T028-T035 are complete.
+- Phase 5 User Story 3 tasks T036-T043 are complete.
 - Prior CLI implementation context remains available in `specs/001-agent-workspace-cli/plan.md` when implementation details are needed.
 
 ## Next action
 
-- Continue phase 002 with Phase 5 User Story 3 tasks T036-T043.
+- Continue phase 002 with Phase 6 User Story 4 tasks T044-T058.
 - During implementation, inspect current install/update/version behavior before editing and preserve failed install/update safety.
 
 ## Blockers
