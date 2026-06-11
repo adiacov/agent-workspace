@@ -26,7 +26,7 @@ agent_ws_discovery_score_dir() {
     strong_count=$((strong_count + 1))
   fi
 
-  for weak in AGENTS.md CLAUDE.md WORKFLOWS.md STATE.md BRAINSTORM.md .cursor/rules/agent-workspace.mdc; do
+  for weak in AGENTS.md CLAUDE.md WORKFLOWS.md PROJECT.md STATE.md MEMORY.md BRAINSTORM.md .cursor/rules/agent-workspace.mdc; do
     if [ -e "$dir/$weak" ]; then
       signals="${signals}${weak},"
       weak_count=$((weak_count + 1))

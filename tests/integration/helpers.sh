@@ -73,7 +73,7 @@ fixture_legacy_project() {
 fixture_managed_project() {
   local root="$1"
   mkdir -p "$root/managed/.agent-workspace"
-  touch "$root/managed/WORKFLOWS.md" "$root/managed/STATE.md" "$root/managed/BRAINSTORM.md" "$root/managed/AGENTS.md"
+  touch "$root/managed/WORKFLOWS.md" "$root/managed/PROJECT.md" "$root/managed/STATE.md" "$root/managed/AGENTS.md"
   cat > "$root/managed/.agent-workspace/workspace.json" <<'JSON'
 {
   "schemaVersion": 1,

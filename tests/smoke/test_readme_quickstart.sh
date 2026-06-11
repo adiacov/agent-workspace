@@ -26,6 +26,9 @@ trap 'rm -rf "$TMPBIN" "$TMPPROJECT"' EXIT
   "$TMPBIN/bin/agent-ws" init --profile code --agents pi --no-prompt >/dev/null
   "$TMPBIN/bin/agent-ws" add-agent --agents claude --no-prompt >/dev/null
   test -f .agent-workspace/workspace.json
+  test -f PROJECT.md
+  test -f STATE.md
+  test ! -e BRAINSTORM.md
   test -f AGENTS.md
   test -f CLAUDE.md
 )

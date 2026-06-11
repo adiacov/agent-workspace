@@ -24,7 +24,7 @@ assert not missing, missing
 assert data['toolName']=='agent-ws'
 assert data['profile']=='code'
 assert data['agents']==['pi']
-for key in ['WORKFLOWS.md','STATE.md','BRAINSTORM.md','.gitignore','ENGINEERING.md','AGENTS.md']:
+for key in ['WORKFLOWS.md','PROJECT.md','STATE.md','.gitignore','ENGINEERING.md','AGENTS.md']:
     assert key in data['generatedFiles'], key
 text=json.dumps(data)
 assert not re.search(r'"/[^"]+"', text), text

@@ -8,7 +8,7 @@ agent_ws_migrate_has_file() {
 
 agent_ws_migrate_preserved_files() {
   local project_root="$1" rel
-  for rel in AGENTS.md CLAUDE.md .cursor/rules/agent-workspace.mdc STATE.md BRAINSTORM.md WORKFLOWS.md ENGINEERING.md; do
+  for rel in AGENTS.md CLAUDE.md .cursor/rules/agent-workspace.mdc PROJECT.md STATE.md MEMORY.md BRAINSTORM.md WORKFLOWS.md ENGINEERING.md; do
     if agent_ws_migrate_has_file "$project_root" "$rel"; then
       printf '%s\n' "$rel"
     fi
@@ -23,13 +23,14 @@ agent_ws_migrate_generated_records() {
       AGENTS.md) kind="adapter"; agent="pi"; template="adapters/pi/AGENTS.md" ;;
       CLAUDE.md) kind="adapter"; agent="claude"; template="adapters/claude/CLAUDE.md" ;;
       .cursor/rules/agent-workspace.mdc) kind="adapter"; agent="cursor"; template="adapters/cursor/.cursor/rules/agent-workspace.mdc" ;;
-      STATE.md) kind="memory"; template="default/STATE.md" ;;
-      BRAINSTORM.md) kind="memory"; template="default/BRAINSTORM.md" ;;
+      PROJECT.md) kind="context"; template="default/PROJECT.md" ;;
+      STATE.md) kind="context"; template="default/STATE.md" ;;
       WORKFLOWS.md) kind="default"; template="default/WORKFLOWS.md" ;;
       ENGINEERING.md) kind="profile"; template="profiles/software/ENGINEERING.md" ;;
     esac
     [ -n "$template" ] && printf '%s|%s|%s|%s\n' "$rel" "$kind" "$template" "$agent" >> "$records_file"
   done < <(agent_ws_migrate_preserved_files "$project_root")
+  return 0
 }
 
 agent_ws_migrate_detect_agents() {
@@ -84,6 +85,6 @@ agent_ws_migrate_project() {
   fi
 
   if [ "$mode" = "apply" ]; then
-    agent_ws_say "preserved active files and memory"
+    agent_ws_say "preserved active files and context"
   fi
 }

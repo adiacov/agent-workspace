@@ -169,7 +169,7 @@ if re.search(r'"(?:/[^"]+|[A-Za-z]:\\[^"]+)"', text):
     sys.exit(1)
 if re.search(r'(?i)(secret|token|password|credential|private[_-]?key)', text):
     sys.exit(1)
-if 'STATE.md:' in text or 'BRAINSTORM.md:' in text:
+if any(marker in text for marker in ['STATE.md:', 'MEMORY.md:', 'BRAINSTORM.md:']):
     sys.exit(1)
 sys.exit(0)
 PY

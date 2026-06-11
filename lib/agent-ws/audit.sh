@@ -128,7 +128,7 @@ agent_ws_audit_project() {
 
   if [ "$missing_count" -gt 0 ] || [ "$metadata_status" = "missing" ]; then
     agent_ws_say "partial state: yes"
-    agent_ws_say "recovery: run agent-ws init with the intended profile and agents; active files and memory are preserved"
+    agent_ws_say "recovery: run agent-ws init with the intended profile and agents; active files and context are preserved"
   else
     agent_ws_say "partial state: no"
   fi

@@ -50,7 +50,7 @@ Creates default files, selected agent files, and .agent-workspace/workspace.json
 Existing active files are skipped, not overwritten.
 
 Options:
-  --profile general|code   Project type. general creates core workflow/memory files; code also creates ENGINEERING.md.
+  --profile general|code   Project type. general creates core workflow/context files; code also creates ENGINEERING.md.
   --agents list           Agent adapters to create. Supports pi, codex, claude, cursor, custom. Commas or spaces are accepted.
   --custom-path path      Project-relative output path for the custom agent adapter.
   --no-prompt             Non-interactive mode. Requires --profile and --agents.

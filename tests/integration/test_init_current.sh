@@ -14,8 +14,8 @@ trap 'rm -rf "$TMPBIN" "$PROJECT"' EXIT
   cd "$PROJECT"
   "$TMPBIN/bin/agent-ws" init --profile code --agents pi --no-prompt >init.out
   assert_file_exists WORKFLOWS.md
+  assert_file_exists PROJECT.md
   assert_file_exists STATE.md
-  assert_file_exists BRAINSTORM.md
   assert_file_exists .gitignore
   assert_file_exists ENGINEERING.md
   assert_file_exists AGENTS.md

@@ -68,8 +68,8 @@ agent_ws_safe_copy_skip() {
 agent_ws_default_template_files() {
   printf '%s\n' \
     'default/.gitignore:.gitignore:default' \
-    'default/STATE.md:STATE.md:memory' \
-    'default/BRAINSTORM.md:BRAINSTORM.md:memory' \
+    'default/PROJECT.md:PROJECT.md:context' \
+    'default/STATE.md:STATE.md:context' \
     'default/WORKFLOWS.md:WORKFLOWS.md:default'
 }
 

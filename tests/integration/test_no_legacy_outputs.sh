@@ -16,5 +16,8 @@ trap 'rm -rf "$TMPBIN" "$PROJECT"' EXIT
   assert_not_exists .agent
   assert_not_exists .agent/templates
   assert_not_exists bin/agent-workspace
+  assert_not_exists BRAINSTORM.md
+  assert_file_exists PROJECT.md
+  assert_file_exists STATE.md
   assert_file_exists .agent-workspace/workspace.json
 )

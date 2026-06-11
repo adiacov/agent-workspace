@@ -14,4 +14,4 @@ build_fixture_matrix "$FIXTURES"
 "$TMPBIN/bin/agent-ws" audit "$FIXTURES/partial" >audit.out
 assert_contains 'partial state: yes' audit.out
 assert_contains 'recovery: run agent-ws init' audit.out
-assert_contains 'active files and memory are preserved' audit.out
+assert_contains 'active files and context are preserved' audit.out

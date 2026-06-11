@@ -19,7 +19,7 @@ after_state="$(sha256sum "$LEGACY/STATE.md" | awk '{print $1}')"
 test "$before_agents" = "$after_agents" || fail 'AGENTS.md changed during migration'
 test "$before_state" = "$after_state" || fail 'STATE.md changed during migration'
 assert_contains 'migration: apply' migrate.out
-assert_contains 'preserved active files and memory' migrate.out
+assert_contains 'preserved active files and context' migrate.out
 assert_file_exists "$LEGACY/.agent-workspace/workspace.json"
 python3 - "$LEGACY/.agent-workspace/workspace.json" <<'PY'
 import json, sys

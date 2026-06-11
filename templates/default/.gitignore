@@ -3,12 +3,12 @@
 .env.*
 *.log
 
-# Agent Workspace local cache and private project memory
+# Agent Workspace legacy local cache
 .agent/
-STATE.md
-BRAINSTORM.md
 
-# Local/private identity or secrets
+# Local/private identity, memory, or secrets
+MEMORY.md
+DECISIONS.local.md
 LOCAL.md
 PRIVATE.md
 secrets/
