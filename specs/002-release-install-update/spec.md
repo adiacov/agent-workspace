@@ -146,3 +146,4 @@ A developer reads the README and understands how to install, pin, verify, update
 - Users have standard shell tooling and network access when performing remote installation or update.
 - Package-manager distribution, native Windows installation outside WSL, hosted services, GUI workflows, and unrelated command features are out of scope for this phase.
 - Validation of a staged installation means the command can execute and report version information before activation.
+- Install and update flows do not manage credentials, secrets, or private user data; security/privacy scope for this phase is limited to preserving active installs, avoiding secret storage, and reporting failures clearly.

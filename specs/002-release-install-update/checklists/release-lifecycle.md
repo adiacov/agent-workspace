@@ -8,75 +8,75 @@
 
 ## Requirement Completeness
 
-- [ ] CHK001 Are all public lifecycle actions documented as requirements: install, pinned install, version check, update, and uninstall or cleanup? [Completeness, Spec §FR-016]
-- [ ] CHK002 Are requirements defined for both remote/curl installation and local checkout installation? [Completeness, Spec §FR-003, Spec §FR-006]
-- [ ] CHK003 Are requirements defined for installing latest stable and installing an explicitly selected release? [Completeness, Spec §FR-004, Spec §FR-005]
-- [ ] CHK004 Are requirements defined for updating to both latest stable and a selected valid release? [Completeness, Spec §FR-009, Spec §FR-010]
-- [ ] CHK005 Are installed command support-file requirements documented, not just the command executable location? [Completeness, Spec §FR-007]
-- [ ] CHK006 Are requirements defined for preserving existing active installations during both failed install and failed update attempts? [Completeness, Spec §FR-008, Spec §FR-013]
+- [x] CHK001 Are all public lifecycle actions documented as requirements: install, pinned install, version check, update, and uninstall or cleanup? [Completeness, Spec §FR-016]
+- [x] CHK002 Are requirements defined for both remote/curl installation and local checkout installation? [Completeness, Spec §FR-003, Spec §FR-006]
+- [x] CHK003 Are requirements defined for installing latest stable and installing an explicitly selected release? [Completeness, Spec §FR-004, Spec §FR-005]
+- [x] CHK004 Are requirements defined for updating to both latest stable and a selected valid release? [Completeness, Spec §FR-009, Spec §FR-010]
+- [x] CHK005 Are installed command support-file requirements documented, not just the command executable location? [Completeness, Spec §FR-007]
+- [x] CHK006 Are requirements defined for preserving existing active installations during both failed install and failed update attempts? [Completeness, Spec §FR-008, Spec §FR-013]
 
 ## Requirement Clarity
 
-- [ ] CHK007 Is the phrase "single source of version truth" tied to a concrete requirement that implementers can identify unambiguously? [Clarity, Spec §FR-001]
-- [ ] CHK008 Is "latest stable" defined clearly enough to exclude prerelease, alpha, beta, and release-candidate versions? [Clarity, Spec §FR-004, Plan §Research Summary]
-- [ ] CHK009 Is the accepted public version identifier format documented consistently across spec, plan, and installer contract? [Clarity, Spec §Assumptions, Plan §Research Summary, Contract §installer]
-- [ ] CHK010 Is "validate the staged command" defined with a minimum objective validation requirement? [Clarity, Spec §FR-012]
-- [ ] CHK011 Are failure stages named consistently enough for user-facing error requirements to be testable? [Clarity, Spec §FR-015]
-- [ ] CHK012 Is the default installation target requirement clear enough to distinguish command location, library location, template location, and version source location? [Clarity, Spec §FR-007, Contract §installer]
+- [x] CHK007 Is the phrase "single source of version truth" tied to a concrete requirement that implementers can identify unambiguously? [Clarity, Spec §FR-001]
+- [x] CHK008 Is "latest stable" defined clearly enough to exclude prerelease, alpha, beta, and release-candidate versions? [Clarity, Spec §FR-004, Plan §Research Summary]
+- [x] CHK009 Is the accepted public version identifier format documented consistently across spec, plan, and installer contract? [Clarity, Spec §Assumptions, Plan §Research Summary, Contract §installer]
+- [x] CHK010 Is "validate the staged command" defined with a minimum objective validation requirement? [Clarity, Spec §FR-012]
+- [x] CHK011 Are failure stages named consistently enough for user-facing error requirements to be testable? [Clarity, Spec §FR-015]
+- [x] CHK012 Is the default installation target requirement clear enough to distinguish command location, library location, template location, and version source location? [Clarity, Spec §FR-007, Contract §installer]
 
 ## Requirement Consistency
 
-- [ ] CHK013 Are install failure-safety requirements consistent between the spec, installer contract, data model, and quickstart scenarios? [Consistency, Spec §FR-008, Contract §installer, Data Model §Lifecycle Operation]
-- [ ] CHK014 Are update staging and activation requirements consistent between user story acceptance scenarios and functional requirements? [Consistency, Spec §User Story 4, Spec §FR-011, Spec §FR-012]
-- [ ] CHK015 Are supported platform statements consistent across requirements, assumptions, and documentation expectations? [Consistency, Spec §FR-017, Spec §Assumptions]
-- [ ] CHK016 Are pinned install and pinned update requirements expressed with the same release identity terminology? [Consistency, Spec §FR-005, Spec §FR-010, Data Model §Release Version]
-- [ ] CHK017 Are local development install requirements consistent with the remote install requirements without implying different installed command behavior? [Consistency, Spec §FR-006, Contract §installer]
+- [x] CHK013 Are install failure-safety requirements consistent between the spec, installer contract, data model, and quickstart scenarios? [Consistency, Spec §FR-008, Contract §installer, Data Model §Lifecycle Operation]
+- [x] CHK014 Are update staging and activation requirements consistent between user story acceptance scenarios and functional requirements? [Consistency, Spec §User Story 4, Spec §FR-011, Spec §FR-012]
+- [x] CHK015 Are supported platform statements consistent across requirements, assumptions, and documentation expectations? [Consistency, Spec §FR-017, Spec §Assumptions]
+- [x] CHK016 Are pinned install and pinned update requirements expressed with the same release identity terminology? [Consistency, Spec §FR-005, Spec §FR-010, Data Model §Release Version]
+- [x] CHK017 Are local development install requirements consistent with the remote install requirements without implying different installed command behavior? [Consistency, Spec §FR-006, Contract §installer]
 
 ## Acceptance Criteria Quality
 
-- [ ] CHK018 Are success criteria measurable without depending on internal implementation details? [Measurability, Spec §Success Criteria]
-- [ ] CHK019 Is the 5-minute install-and-version target scoped to a supported clean environment with necessary prerequisites? [Measurability, Spec §SC-001, Quickstart §Prerequisites]
-- [ ] CHK020 Are failure-safety success criteria specific enough to determine whether the active command remained usable? [Measurability, Spec §SC-003]
-- [ ] CHK021 Are documentation completeness criteria enumerated rather than described with vague terms such as "clear" or "appropriate"? [Measurability, Spec §SC-005]
-- [ ] CHK022 Are version-reporting criteria specific enough to determine whether before-and-after update output is adequate? [Measurability, Spec §SC-004]
+- [x] CHK018 Are success criteria measurable without depending on internal implementation details? [Measurability, Spec §Success Criteria]
+- [x] CHK019 Is the 5-minute install-and-version target scoped to a supported clean environment with necessary prerequisites? [Measurability, Spec §SC-001, Quickstart §Prerequisites]
+- [x] CHK020 Are failure-safety success criteria specific enough to determine whether the active command remained usable? [Measurability, Spec §SC-003]
+- [x] CHK021 Are documentation completeness criteria enumerated rather than described with vague terms such as "clear" or "appropriate"? [Measurability, Spec §SC-005]
+- [x] CHK022 Are version-reporting criteria specific enough to determine whether before-and-after update output is adequate? [Measurability, Spec §SC-004]
 
 ## Scenario Coverage
 
-- [ ] CHK023 Are primary install, version, pinned install, update, and documentation user journeys each represented by independent acceptance scenarios? [Coverage, Spec §User Scenarios]
-- [ ] CHK024 Are alternate flows for pinned install and pinned update covered separately from latest-stable flows? [Coverage, Spec §User Story 3, Spec §User Story 4]
-- [ ] CHK025 Are exception flows for invalid or unavailable requested releases covered in requirements and scenarios? [Coverage, Spec §User Story 3, Spec §Edge Cases]
-- [ ] CHK026 Are recovery requirements defined for interrupted or failed update operations before activation? [Coverage, Spec §Edge Cases, Spec §FR-013]
-- [ ] CHK027 Are documentation-reader scenarios sufficient to cover unsupported environments and cleanup guidance? [Coverage, Spec §User Story 5, Spec §FR-016, Spec §FR-017]
+- [x] CHK023 Are primary install, version, pinned install, update, and documentation user journeys each represented by independent acceptance scenarios? [Coverage, Spec §User Scenarios]
+- [x] CHK024 Are alternate flows for pinned install and pinned update covered separately from latest-stable flows? [Coverage, Spec §User Story 3, Spec §User Story 4]
+- [x] CHK025 Are exception flows for invalid or unavailable requested releases covered in requirements and scenarios? [Coverage, Spec §User Story 3, Spec §Edge Cases]
+- [x] CHK026 Are recovery requirements defined for interrupted or failed update operations before activation? [Coverage, Spec §Edge Cases, Spec §FR-013]
+- [x] CHK027 Are documentation-reader scenarios sufficient to cover unsupported environments and cleanup guidance? [Coverage, Spec §User Story 5, Spec §FR-016, Spec §FR-017]
 
 ## Edge Case Coverage
 
-- [ ] CHK028 Are requirements defined for installations over an existing active installation? [Edge Case, Spec §Edge Cases]
-- [ ] CHK029 Are requirements defined for missing PATH visibility after otherwise successful installation? [Edge Case, Spec §Edge Cases, Data Model §Install Location]
-- [ ] CHK030 Are network interruption and missing release cases represented as user-facing failure requirements? [Edge Case, Spec §Edge Cases, Spec §FR-015]
-- [ ] CHK031 Are permission-denied install-location cases covered by requirements or assumptions? [Edge Case, Spec §Edge Cases, Data Model §Install Location]
-- [ ] CHK032 Are staged validation failure cases covered distinctly from download and resolution failures? [Edge Case, Spec §Edge Cases, Spec §FR-015]
+- [x] CHK028 Are requirements defined for installations over an existing active installation? [Edge Case, Spec §Edge Cases]
+- [x] CHK029 Are requirements defined for missing PATH visibility after otherwise successful installation? [Edge Case, Spec §Edge Cases, Data Model §Install Location]
+- [x] CHK030 Are network interruption and missing release cases represented as user-facing failure requirements? [Edge Case, Spec §Edge Cases, Spec §FR-015]
+- [x] CHK031 Are permission-denied install-location cases covered by requirements or assumptions? [Edge Case, Spec §Edge Cases, Data Model §Install Location]
+- [x] CHK032 Are staged validation failure cases covered distinctly from download and resolution failures? [Edge Case, Spec §Edge Cases, Spec §FR-015]
 
 ## Non-Functional Requirements
 
-- [ ] CHK033 Are reliability requirements for preserving active installs explicit for every lifecycle operation that can replace files? [Reliability, Spec §FR-008, Spec §FR-013]
-- [ ] CHK034 Are reproducibility requirements explicit for pinned install and visible version reporting? [Reproducibility, Spec §FR-005, Spec §FR-018]
-- [ ] CHK035 Are platform support boundaries explicit enough to avoid implying native Windows support? [Scope, Spec §FR-017]
-- [ ] CHK036 Are performance expectations limited to user-relevant lifecycle completion time rather than internal operation timing? [Performance, Spec §SC-001]
-- [ ] CHK037 Are security/privacy requirements intentionally limited by the lack of secrets or user data in release installation? [Assumption, Gap]
+- [x] CHK033 Are reliability requirements for preserving active installs explicit for every lifecycle operation that can replace files? [Reliability, Spec §FR-008, Spec §FR-013]
+- [x] CHK034 Are reproducibility requirements explicit for pinned install and visible version reporting? [Reproducibility, Spec §FR-005, Spec §FR-018]
+- [x] CHK035 Are platform support boundaries explicit enough to avoid implying native Windows support? [Scope, Spec §FR-017]
+- [x] CHK036 Are performance expectations limited to user-relevant lifecycle completion time rather than internal operation timing? [Performance, Spec §SC-001]
+- [x] CHK037 Are security/privacy requirements intentionally limited by the lack of secrets or user data in release installation? [Assumption, Gap]
 
 ## Dependencies & Assumptions
 
-- [ ] CHK038 Are external GitHub release/tag dependencies documented with expected behavior when unavailable? [Dependency, Spec §Assumptions, Spec §FR-015]
-- [ ] CHK039 Are required shell tools and network assumptions documented for remote install and update flows? [Assumption, Spec §Assumptions, Quickstart §Prerequisites]
-- [ ] CHK040 Are deferred distribution channels explicitly excluded from requirements to prevent scope creep? [Scope, Spec §Assumptions]
-- [ ] CHK041 Are release/versioning expectations documented as user-facing requirements rather than only implementation notes? [Dependency, Spec §FR-018, Spec §FR-016]
+- [x] CHK038 Are external GitHub release/tag dependencies documented with expected behavior when unavailable? [Dependency, Spec §Assumptions, Spec §FR-015]
+- [x] CHK039 Are required shell tools and network assumptions documented for remote install and update flows? [Assumption, Spec §Assumptions, Quickstart §Prerequisites]
+- [x] CHK040 Are deferred distribution channels explicitly excluded from requirements to prevent scope creep? [Scope, Spec §Assumptions]
+- [x] CHK041 Are release/versioning expectations documented as user-facing requirements rather than only implementation notes? [Dependency, Spec §FR-018, Spec §FR-016]
 
 ## Ambiguities & Conflicts
 
-- [ ] CHK042 Is there any remaining ambiguity between GitHub releases and GitHub tags as default distribution sources that could change acceptance tests? [Ambiguity, Spec §Assumptions, Plan §Research Summary]
-- [ ] CHK043 Is the relationship between `AGENT_WS_VERSION`, pinned release identifiers, and reported installed version defined consistently? [Ambiguity, Contract §installer, Spec §User Story 3]
-- [ ] CHK044 Are activation failure requirements clear enough to avoid conflict between preserving the previous install and reporting partial state? [Ambiguity, Contract §installer, Data Model §Lifecycle Operation]
-- [ ] CHK045 Is any cleanup or uninstall requirement missing detail that would block README acceptance criteria? [Gap, Spec §FR-016]
+- [x] CHK042 Is there any remaining ambiguity between GitHub releases and GitHub tags as default distribution sources that could change acceptance tests? [Ambiguity, Spec §Assumptions, Plan §Research Summary]
+- [x] CHK043 Is the relationship between `AGENT_WS_VERSION`, pinned release identifiers, and reported installed version defined consistently? [Ambiguity, Contract §installer, Spec §User Story 3]
+- [x] CHK044 Are activation failure requirements clear enough to avoid conflict between preserving the previous install and reporting partial state? [Ambiguity, Contract §installer, Data Model §Lifecycle Operation]
+- [x] CHK045 Is any cleanup or uninstall requirement missing detail that would block README acceptance criteria? [Gap, Spec §FR-016]
 
 ## Notes
 
