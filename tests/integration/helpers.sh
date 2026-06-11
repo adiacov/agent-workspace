@@ -25,7 +25,7 @@ assert_not_exists() {
 
 assert_contains() {
   local needle="$1" file="$2"
-  grep -F "$needle" "$file" >/dev/null || fail "expected $file to contain: $needle"
+  grep -F -- "$needle" "$file" >/dev/null || fail "expected $file to contain: $needle"
 }
 
 make_test_workspace() {
@@ -177,7 +177,7 @@ make_release_archive() {
   cp -R "$root/lib" "$payload/lib"
   cp -R "$root/templates" "$payload/templates"
   cp "$root/install.sh" "$payload/install.sh"
-  cp "$root/VERSION" "$payload/VERSION"
+  printf '%s\n' "$version" > "$payload/VERSION"
   mkdir -p "$archive_dir"
   tar -C "$TEST_TMPDIR" -czf "$archive_dir/$version.tar.gz" "agent-workspace-$version"
   printf '%s\n' "$archive_dir/$version.tar.gz"

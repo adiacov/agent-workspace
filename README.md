@@ -223,7 +223,7 @@ agent-ws update
 agent-ws update --version v1.2.3
 ```
 
-Failed updates preserve the currently working `agent-ws` command.
+`agent-ws update` resolves the latest stable release/tag. `agent-ws update --version` selects an exact release. Updates are staged and validated with `agent-ws version` before activation. Failed updates preserve the currently working `agent-ws` command and report the failed stage.
 
 ### Uninstall / cleanup
 

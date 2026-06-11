@@ -135,24 +135,24 @@
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T044 [P] [US4] Add staged update success integration test in `tests/integration/test_update_staged.sh`
-- [ ] T045 [P] [US4] Add update failure preservation integration test in `tests/integration/test_update_failure_safety.sh`
-- [ ] T046 [P] [US4] Add pinned update integration test in `tests/integration/test_update_pinned.sh`
-- [ ] T047 [P] [US4] Add latest stable filtering integration test for update resolution in `tests/integration/test_update_latest_stable.sh`
-- [ ] T048 [P] [US4] Add `agent-ws help update` contract test in `tests/integration/test_help_update.sh`
+- [X] T044 [P] [US4] Add staged update success integration test in `tests/integration/test_update_staged.sh`
+- [X] T045 [P] [US4] Add update failure preservation integration test in `tests/integration/test_update_failure_safety.sh`
+- [X] T046 [P] [US4] Add pinned update integration test in `tests/integration/test_update_pinned.sh`
+- [X] T047 [P] [US4] Add latest stable filtering integration test for update resolution in `tests/integration/test_update_latest_stable.sh`
+- [X] T048 [P] [US4] Add `agent-ws help update` contract test in `tests/integration/test_help_update.sh`
 
 ### Implementation for User Story 4
 
-- [ ] T049 [US4] Replace placeholder update behavior with staged update orchestration in `lib/agent-ws/update.sh`
-- [ ] T050 [US4] Implement installed prefix discovery for active command updates in `lib/agent-ws/update.sh`
-- [ ] T051 [US4] Implement latest stable update resolution using releases or stable tags in `lib/agent-ws/update.sh`
-- [ ] T052 [US4] Implement `--version VERSION` pinned update selection in `lib/agent-ws/update.sh`
-- [ ] T053 [US4] Implement update archive download and extraction into staging in `lib/agent-ws/update.sh`
-- [ ] T054 [US4] Validate staged update by running staged `agent-ws version` in `lib/agent-ws/update.sh`
-- [ ] T055 [US4] Activate staged update only after validation and preserve previous install on failure in `lib/agent-ws/update.sh`
-- [ ] T056 [US4] Report previous version, new version, command path, and failed stage details in `lib/agent-ws/update.sh`
-- [ ] T057 [US4] Add or update `agent-ws help update` content in `lib/agent-ws/commands.sh`
-- [ ] T058 [US4] Update safe update documentation in `README.md`
+- [X] T049 [US4] Replace placeholder update behavior with staged update orchestration in `lib/agent-ws/update.sh`
+- [X] T050 [US4] Implement installed prefix discovery for active command updates in `lib/agent-ws/update.sh`
+- [X] T051 [US4] Implement latest stable update resolution using releases or stable tags in `lib/agent-ws/update.sh`
+- [X] T052 [US4] Implement `--version VERSION` pinned update selection in `lib/agent-ws/update.sh`
+- [X] T053 [US4] Implement update archive download and extraction into staging in `lib/agent-ws/update.sh`
+- [X] T054 [US4] Validate staged update by running staged `agent-ws version` in `lib/agent-ws/update.sh`
+- [X] T055 [US4] Activate staged update only after validation and preserve previous install on failure in `lib/agent-ws/update.sh`
+- [X] T056 [US4] Report previous version, new version, command path, and failed stage details in `lib/agent-ws/update.sh`
+- [X] T057 [US4] Add or update `agent-ws help update` content in `lib/agent-ws/commands.sh`
+- [X] T058 [US4] Update safe update documentation in `README.md`
 
 **Checkpoint**: User Story 4 supports safe latest and pinned updates without corrupting active installs on failure.
 

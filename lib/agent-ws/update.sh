@@ -17,6 +17,15 @@ agent_ws_update_is_stable_version() {
   esac
 }
 
+agent_ws_update_release_list_contains() {
+  local requested="$1" candidate
+  [ -n "${AGENT_WS_TEST_RELEASES:-}" ] || return 0
+  for candidate in ${AGENT_WS_TEST_RELEASES}; do
+    [ "$candidate" = "$requested" ] && return 0
+  done
+  return 1
+}
+
 agent_ws_update_latest_stable() {
   local version stable=""
   for version in ${AGENT_WS_TEST_RELEASES:-}; do
@@ -26,6 +35,23 @@ agent_ws_update_latest_stable() {
   done
   [ -n "$stable" ] || agent_ws_die "no stable release is available" "provide --version for an available stable Git/GitHub tag."
   printf '%s\n' "$stable"
+}
+
+agent_ws_update_select_version() {
+  local requested="${1:-}"
+  if [ -n "$requested" ]; then
+    agent_ws_update_is_stable_version "$requested" || {
+      agent_ws_update_error "release resolution" "requested version is not a stable vMAJOR.MINOR.PATCH release: $requested" "choose a stable release such as v0.1.0."
+      return 1
+    }
+    agent_ws_update_release_list_contains "$requested" || {
+      agent_ws_update_error "release resolution" "requested release is unavailable: $requested" "choose an available stable release or run 'agent-ws update --dry-run'."
+      return 1
+    }
+    printf '%s\n' "$requested"
+    return 0
+  fi
+  agent_ws_update_latest_stable
 }
 
 agent_ws_update_stage_create() {
@@ -69,25 +95,118 @@ agent_ws_update_download_archive() {
   }
 }
 
+agent_ws_update_is_payload_root() {
+  local root="$1"
+  [ -f "$root/bin/agent-ws" ] && [ -d "$root/lib/agent-ws" ] && [ -d "$root/templates" ] && [ -f "$root/VERSION" ]
+}
+
+agent_ws_update_payload_root_from_extract() {
+  local extract_dir="$1" candidate
+  if agent_ws_update_is_payload_root "$extract_dir"; then
+    printf '%s\n' "$extract_dir"
+    return 0
+  fi
+  for candidate in "$extract_dir"/*; do
+    [ -d "$candidate" ] || continue
+    if agent_ws_update_is_payload_root "$candidate"; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  agent_ws_update_error "staging" "downloaded archive does not contain an agent-ws payload" "check the selected release archive."
+  return 1
+}
+
+agent_ws_update_copy_payload_to_stage() {
+  local payload_root="$1" staged_prefix="$2"
+  mkdir -p "$staged_prefix/bin" "$staged_prefix/lib" "$staged_prefix/share/agent-ws"
+  cp "$payload_root/bin/agent-ws" "$staged_prefix/bin/agent-ws" || return 1
+  chmod +x "$staged_prefix/bin/agent-ws" || return 1
+  rm -rf "$staged_prefix/lib/agent-ws" "$staged_prefix/share/agent-ws/templates"
+  cp -R "$payload_root/lib/agent-ws" "$staged_prefix/lib/agent-ws" || return 1
+  cp -R "$payload_root/templates" "$staged_prefix/share/agent-ws/templates" || return 1
+  cp "$payload_root/VERSION" "$staged_prefix/share/agent-ws/VERSION" || return 1
+}
+
+agent_ws_update_stage_from_archive() {
+  local version="$1" stage="$2" staged_prefix="$3" archive extract_dir payload_root
+  archive="$stage/release.tar.gz"
+  extract_dir="$stage/extract"
+  mkdir -p "$extract_dir"
+  agent_ws_update_download_archive "$version" "$archive" || return 1
+  tar -xzf "$archive" -C "$extract_dir" || {
+    agent_ws_update_error "staging" "unable to extract release archive" "check that the selected release is a tar.gz archive."
+    return 1
+  }
+  payload_root="$(agent_ws_update_payload_root_from_extract "$extract_dir")" || return 1
+  agent_ws_update_copy_payload_to_stage "$payload_root" "$staged_prefix" || {
+    agent_ws_update_error "staging" "unable to stage release payload" "check the selected release payload."
+    return 1
+  }
+}
+
 agent_ws_update_validate_candidate() {
-  local candidate_prefix="$1" command
+  local candidate_prefix="$1" expected_version="${2:-}" command reported_version
   command="$candidate_prefix/bin/agent-ws"
   [ -x "$command" ] || {
     agent_ws_update_error "validation" "candidate command is not executable: $command" "check the release payload layout."
     return 1
   }
-  "$command" version >/dev/null 2>&1 || {
+  reported_version="$($command version 2>/dev/null)" || {
     agent_ws_update_error "validation" "candidate command cannot report version" "check the staged payload before activation."
     return 1
   }
+  if [ -n "$expected_version" ]; then
+    case "$reported_version" in
+      *"$expected_version"*) ;;
+      *)
+        agent_ws_update_error "validation" "candidate reported '$reported_version', expected $expected_version" "check the selected release payload."
+        return 1
+        ;;
+    esac
+  fi
+}
+
+agent_ws_update_replace_file() {
+  local src="$1" dst="$2" tmp
+  mkdir -p "$(dirname "$dst")"
+  tmp="$dst.tmp.$$"
+  cp "$src" "$tmp" || return 1
+  mv "$tmp" "$dst" || return 1
+}
+
+agent_ws_update_replace_dir() {
+  local src="$1" dst="$2" new="$2.new.$$" old="$2.old.$$"
+  mkdir -p "$(dirname "$dst")"
+  rm -rf "$new" "$old"
+  cp -R "$src" "$new" || return 1
+  if [ -e "$dst" ]; then
+    mv "$dst" "$old" || return 1
+  fi
+  if ! mv "$new" "$dst"; then
+    [ -e "$old" ] && mv "$old" "$dst" 2>/dev/null || true
+    return 1
+  fi
+  rm -rf "$old"
+}
+
+agent_ws_update_activate_staged() {
+  local staged_prefix="$1" prefix="$2"
+  mkdir -p "$prefix/bin" "$prefix/lib" "$prefix/share/agent-ws" || return 1
+  agent_ws_update_replace_file "$staged_prefix/bin/agent-ws" "$prefix/bin/agent-ws" || return 1
+  chmod +x "$prefix/bin/agent-ws" || return 1
+  agent_ws_update_replace_dir "$staged_prefix/lib/agent-ws" "$prefix/lib/agent-ws" || return 1
+  agent_ws_update_replace_dir "$staged_prefix/share/agent-ws/templates" "$prefix/share/agent-ws/templates" || return 1
+  agent_ws_update_replace_file "$staged_prefix/share/agent-ws/VERSION" "$prefix/share/agent-ws/VERSION" || return 1
 }
 
 agent_ws_update_command() {
-  local version="${1:-}" dry_run="${2:-0}" latest
-  if [ -z "$version" ]; then
-    latest="$(agent_ws_update_latest_stable)"
-    agent_ws_say "latest stable: $latest"
-    version="$latest"
+  local requested="${1:-}" dry_run="${2:-0}" version stage staged_prefix prefix previous_version
+  version="$(agent_ws_update_select_version "$requested")" || { agent_ws_say "preserved current command"; return 1; }
+  if [ -n "$requested" ]; then
+    agent_ws_say "selected version: $version"
+  else
+    agent_ws_say "latest stable: $version"
   fi
 
   if [ "$dry_run" -eq 1 ]; then
@@ -96,17 +215,33 @@ agent_ws_update_command() {
     return 0
   fi
 
-  if [ -n "${AGENT_WS_TEST_RELEASES:-}" ]; then
-    for candidate in ${AGENT_WS_TEST_RELEASES}; do
-      if [ "$candidate" = "$version" ] && agent_ws_update_is_stable_version "$candidate"; then
-        agent_ws_say "update available: $version"
-        agent_ws_say "staged update validation not configured in test mode; preserved current command"
-        return 0
-      fi
-    done
-  fi
+  prefix="$(agent_ws_update_active_prefix)" || {
+    agent_ws_update_error "activation" "unable to determine active install prefix" "run update from an installed agent-ws command."
+    agent_ws_say "preserved current command"
+    return 1
+  }
+  previous_version="$(agent_ws_installed_version 2>/dev/null || printf '%s' unknown)"
+  stage="$(agent_ws_update_stage_create)"
+  staged_prefix="$stage/prefix"
 
-  agent_ws_update_error "release resolution" "requested release is unavailable: $version" "choose an available stable release or run 'agent-ws update --dry-run'."
-  agent_ws_say "preserved current command"
-  return 1
+  if ! agent_ws_update_stage_from_archive "$version" "$stage" "$staged_prefix"; then
+    agent_ws_update_stage_cleanup "$stage"
+    agent_ws_say "preserved current command"
+    return 1
+  fi
+  if ! agent_ws_update_validate_candidate "$staged_prefix" "$version"; then
+    agent_ws_update_stage_cleanup "$stage"
+    agent_ws_say "preserved current command"
+    return 1
+  fi
+  if ! agent_ws_update_activate_staged "$staged_prefix" "$prefix"; then
+    agent_ws_update_stage_cleanup "$stage"
+    agent_ws_update_error "activation" "unable to activate staged update" "check write permissions for $prefix."
+    agent_ws_say "preserved current command"
+    return 1
+  fi
+  agent_ws_update_stage_cleanup "$stage"
+
+  agent_ws_say "updated agent-ws $previous_version -> $version"
+  agent_ws_say "installed at $prefix/bin/agent-ws"
 }
