@@ -14,7 +14,7 @@ Starting phase 002: release, install, and update hardening for the public `agent
 
 ## Next action
 
-- Run `/speckit.plan` (or equivalent planning workflow) for `specs/002-release-install-update/spec.md`.
+- Run `/speckit.tasks` for `specs/002-release-install-update/plan.md`.
 - During implementation, inspect current install/update/version behavior before editing and preserve failed install/update safety.
 
 ## Blockers
