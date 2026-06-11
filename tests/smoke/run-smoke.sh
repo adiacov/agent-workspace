@@ -3,6 +3,13 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 
+printf 'smoke: version file\n'
+[ -s "$ROOT/VERSION" ] || { printf 'error: VERSION is missing or empty\n' >&2; exit 1; }
+grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$' "$ROOT/VERSION" || {
+  printf 'error: VERSION must use vMAJOR.MINOR.PATCH format\n' >&2
+  exit 1
+}
+
 printf 'smoke: shell syntax\n'
 bash -n \
   "$ROOT/bin/agent-ws" \

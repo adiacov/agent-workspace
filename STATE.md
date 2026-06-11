@@ -9,12 +9,13 @@ Starting phase 002: release, install, and update hardening for the public `agent
 ## Active phase/spec/task
 
 - Active specification: `specs/002-release-install-update/spec.md`.
-- Quality checklist: `specs/002-release-install-update/checklists/requirements.md`.
+- Active task list: `specs/002-release-install-update/tasks.md`.
+- Phase 1 setup tasks T001-T004 are complete.
 - Prior CLI implementation context remains available in `specs/001-agent-workspace-cli/plan.md` when implementation details are needed.
 
 ## Next action
 
-- Run `/speckit.tasks` for `specs/002-release-install-update/plan.md`.
+- Continue phase 002 with Phase 2 foundational tasks T005-T016.
 - During implementation, inspect current install/update/version behavior before editing and preserve failed install/update safety.
 
 ## Blockers

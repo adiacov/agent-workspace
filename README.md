@@ -158,7 +158,15 @@ Ownership boundary:
 
 The intended product model is a global/user-level `agent-ws` command that can be run from anywhere. Projects do not receive a project-local command copy.
 
-Default user install:
+### Public install
+
+Public GitHub install support is being hardened. The intended public install shape is:
+
+```bash
+curl -fsSL <install-url> | bash
+```
+
+Until the final install URL is published, install from a checkout:
 
 ```bash
 ./install.sh
@@ -180,6 +188,28 @@ If you choose another install root, pass `--prefix`:
 
 Ensure `PREFIX/bin` is on `PATH` before running `agent-ws`.
 
+### Pinned install
+
+Pinned install support will use the same public installer with an explicit version:
+
+```bash
+AGENT_WS_VERSION=v0.1.0 curl -fsSL <install-url> | bash
+```
+
+Versions use the `vMAJOR.MINOR.PATCH` format and should match public GitHub tags/releases.
+
+### Version
+
+Installed version visibility will be available with:
+
+```bash
+agent-ws version
+```
+
+The version comes from the installed payload, not from the current working directory.
+
+### Update
+
 Release-aware updates use Git/GitHub stable releases or tags:
 
 ```bash
@@ -188,6 +218,20 @@ agent-ws update --version v1.2.3
 ```
 
 Failed updates preserve the currently working `agent-ws` command.
+
+### Uninstall / cleanup
+
+Manual cleanup removes the installed command and support files:
+
+```bash
+rm -f "$HOME/.local/bin/agent-ws"
+rm -rf "$HOME/.local/lib/agent-ws"
+rm -rf "$HOME/.local/share/agent-ws"
+```
+
+### Supported platforms
+
+Linux-based shell environments are the first supported target. Compatible macOS shells may work when the required standard tools are available. Native Windows outside WSL is not supported in this phase.
 
 ## Migration from the older project-local model
 

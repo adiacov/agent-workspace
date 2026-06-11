@@ -125,3 +125,44 @@ build_fixture_matrix() {
   fixture_invalid_metadata_project "$root" >/dev/null
   fixture_stale_metadata_project "$root" >/dev/null
 }
+
+repo_root() {
+  cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P
+}
+
+make_install_prefix() {
+  local root="${1:-}"
+  if [ -z "$root" ]; then
+    root="$(make_test_workspace)"
+  fi
+  mkdir -p "$root/prefix"
+  printf '%s\n' "$root/prefix"
+}
+
+assert_executable() {
+  local path="$1"
+  [ -x "$path" ] || fail "expected executable file: $path"
+}
+
+assert_command_succeeds() {
+  "$@" >/dev/null 2>&1 || fail "expected command to succeed: $*"
+}
+
+assert_command_fails() {
+  if "$@" >/dev/null 2>&1; then
+    fail "expected command to fail: $*"
+  fi
+}
+
+assert_version_file_value() {
+  local expected="$1" file="$2" actual
+  [ -f "$file" ] || fail "expected version file to exist: $file"
+  actual="$(tr -d '[:space:]' < "$file")"
+  [ "$actual" = "$expected" ] || fail "expected $file to contain $expected, got $actual"
+}
+
+current_repo_version() {
+  local root
+  root="$(repo_root)"
+  tr -d '[:space:]' < "$root/VERSION"
+}

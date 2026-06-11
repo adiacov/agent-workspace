@@ -20,10 +20,10 @@
 
 **Purpose**: Establish version source, release configuration seams, and shared test fixtures used by all release lifecycle stories.
 
-- [ ] T001 Create root version source with initial `v0.1.0` value in `VERSION`
-- [ ] T002 Add shared release/install test fixture helpers in `tests/integration/helpers.sh`
-- [ ] T003 [P] Add shell syntax coverage for `VERSION`, `install.sh`, `bin/agent-ws`, and `lib/agent-ws/*.sh` in `tests/smoke/run-smoke.sh`
-- [ ] T004 [P] Add README placeholder sections for install, pinned install, version, update, uninstall, platforms, and release expectations in `README.md`
+- [X] T001 Create root version source with initial `v0.1.0` value in `VERSION`
+- [X] T002 Add shared release/install test fixture helpers in `tests/integration/helpers.sh`
+- [X] T003 [P] Add shell syntax coverage for `VERSION`, `install.sh`, `bin/agent-ws`, and `lib/agent-ws/*.sh` in `tests/smoke/run-smoke.sh`
+- [X] T004 [P] Add README placeholder sections for install, pinned install, version, update, uninstall, platforms, and release expectations in `README.md`
 
 ---
 
