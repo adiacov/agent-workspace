@@ -160,7 +160,7 @@ The intended product model is a global/user-level `agent-ws` command that can be
 
 ### Public install
 
-Public GitHub install support is being hardened. The intended public install shape is:
+Public GitHub install support installs the latest stable GitHub release/tag by default, stages the payload, validates it, and activates it only after validation succeeds:
 
 ```bash
 curl -fsSL <install-url> | bash

@@ -60,20 +60,20 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T017 [P] [US1] Add remote-style latest-stable archive install integration test in `tests/integration/test_install_remote.sh`
-- [ ] T018 [P] [US1] Add failed remote install preservation integration test in `tests/integration/test_install_remote_failure_safety.sh`
-- [ ] T019 [P] [US1] Add local checkout install validation test with staged activation expectations in `tests/integration/test_install_local_staged.sh`
+- [X] T017 [P] [US1] Add remote-style latest-stable archive install integration test in `tests/integration/test_install_remote.sh`
+- [X] T018 [P] [US1] Add failed remote install preservation integration test in `tests/integration/test_install_remote_failure_safety.sh`
+- [X] T019 [P] [US1] Add local checkout install validation test with staged activation expectations in `tests/integration/test_install_local_staged.sh`
 
 ### Implementation for User Story 1
 
-- [ ] T020 [US1] Extend `install.sh` argument and environment parsing for `--prefix` and `AGENT_WS_PREFIX` in `install.sh`
-- [ ] T021 [US1] Implement local checkout install through staged payload activation in `install.sh`
-- [ ] T022 [US1] Implement remote/curl mode detection when `install.sh` is not running from a checkout in `install.sh`
-- [ ] T023 [US1] Implement release archive download and extraction into staging in `install.sh`
-- [ ] T024 [US1] Install `bin/agent-ws`, `lib/agent-ws/`, `templates/`, and `VERSION` from staged payload in `install.sh`
-- [ ] T025 [US1] Add PATH visibility guidance after successful install in `install.sh`
-- [ ] T026 [US1] Preserve existing active install on download, staging, or validation failure in `install.sh`
-- [ ] T027 [US1] Update default one-line install documentation in `README.md`
+- [X] T020 [US1] Extend `install.sh` argument and environment parsing for `--prefix` and `AGENT_WS_PREFIX` in `install.sh`
+- [X] T021 [US1] Implement local checkout install through staged payload activation in `install.sh`
+- [X] T022 [US1] Implement remote/curl mode detection when `install.sh` is not running from a checkout in `install.sh`
+- [X] T023 [US1] Implement release archive download and extraction into staging in `install.sh`
+- [X] T024 [US1] Install `bin/agent-ws`, `lib/agent-ws/`, `templates/`, and `VERSION` from staged payload in `install.sh`
+- [X] T025 [US1] Add PATH visibility guidance after successful install in `install.sh`
+- [X] T026 [US1] Preserve existing active install on download, staging, or validation failure in `install.sh`
+- [X] T027 [US1] Update default one-line install documentation in `README.md`
 
 **Checkpoint**: User Story 1 is independently testable with remote-style and local checkout install flows.
 

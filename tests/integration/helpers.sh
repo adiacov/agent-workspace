@@ -166,3 +166,19 @@ current_repo_version() {
   root="$(repo_root)"
   tr -d '[:space:]' < "$root/VERSION"
 }
+
+make_release_archive() {
+  local version="$1" archive_dir="$2" root payload
+  root="$(repo_root)"
+  payload="$TEST_TMPDIR/agent-workspace-$version"
+  rm -rf "$payload"
+  mkdir -p "$payload"
+  cp -R "$root/bin" "$payload/bin"
+  cp -R "$root/lib" "$payload/lib"
+  cp -R "$root/templates" "$payload/templates"
+  cp "$root/install.sh" "$payload/install.sh"
+  cp "$root/VERSION" "$payload/VERSION"
+  mkdir -p "$archive_dir"
+  tar -C "$TEST_TMPDIR" -czf "$archive_dir/$version.tar.gz" "agent-workspace-$version"
+  printf '%s\n' "$archive_dir/$version.tar.gz"
+}

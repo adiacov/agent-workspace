@@ -168,6 +168,48 @@ install_download_archive() {
   curl -fsSL "$url" -o "$dst" || install_error "download" "unable to download $url" "check network access or choose an available AGENT_WS_VERSION."
 }
 
+install_is_checkout() {
+  local root="$1"
+  [ -f "$root/bin/agent-ws" ] && [ -d "$root/lib/agent-ws" ] && [ -d "$root/templates" ] && [ -f "$root/VERSION" ]
+}
+
+install_payload_root_from_extract() {
+  local extract_dir="$1" candidate
+  if install_is_checkout "$extract_dir"; then
+    printf '%s\n' "$extract_dir"
+    return 0
+  fi
+  for candidate in "$extract_dir"/*; do
+    [ -d "$candidate" ] || continue
+    if install_is_checkout "$candidate"; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  install_error "staging" "downloaded archive does not contain an agent-ws payload" "check the selected release archive."
+}
+
+install_stage_from_archive() {
+  local version="$1" stage="$2" staged_prefix="$3" archive extract_dir payload_root
+  archive="$stage/release.tar.gz"
+  extract_dir="$stage/extract"
+  mkdir -p "$extract_dir"
+  install_download_archive "$version" "$archive"
+  tar -xzf "$archive" -C "$extract_dir" || install_error "staging" "unable to extract release archive" "check that the selected release is a tar.gz archive."
+  payload_root="$(install_payload_root_from_extract "$extract_dir")"
+  install_stage_from_checkout "$payload_root" "$staged_prefix"
+}
+
+install_path_contains() {
+  local dir="$1" entry old_ifs="$IFS"
+  IFS=:
+  for entry in ${PATH:-}; do
+    [ "$entry" = "$dir" ] && { IFS="$old_ifs"; return 0; }
+  done
+  IFS="$old_ifs"
+  return 1
+}
+
 PREFIX="${AGENT_WS_PREFIX:-${HOME:-}/.local}"
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -193,7 +235,13 @@ STAGE="$(install_stage_create)"
 trap 'install_stage_cleanup "$STAGE"' EXIT
 STAGED_PREFIX="$STAGE/prefix"
 
-install_stage_from_checkout "$ROOT" "$STAGED_PREFIX"
+if [ "${AGENT_WS_FORCE_REMOTE:-0}" = "1" ] || ! install_is_checkout "$ROOT"; then
+  VERSION_TO_INSTALL="$(install_latest_stable)"
+  say "latest stable: $VERSION_TO_INSTALL"
+  install_stage_from_archive "$VERSION_TO_INSTALL" "$STAGE" "$STAGED_PREFIX"
+else
+  install_stage_from_checkout "$ROOT" "$STAGED_PREFIX"
+fi
 install_validate_candidate "$STAGED_PREFIX"
 install_activate_staged "$STAGED_PREFIX" "$PREFIX"
 
@@ -201,4 +249,8 @@ say "installed agent-ws to $PREFIX/bin/agent-ws"
 say "installed libraries to $PREFIX/lib/agent-ws"
 say "installed templates to $PREFIX/share/agent-ws/templates"
 say "installed version to $PREFIX/share/agent-ws/VERSION"
-say "ensure $PREFIX/bin is on PATH"
+if install_path_contains "$PREFIX/bin"; then
+  say "$PREFIX/bin is on PATH"
+else
+  say "ensure $PREFIX/bin is on PATH"
+fi
