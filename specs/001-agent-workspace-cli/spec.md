@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "from the existing features and from BRIEF.md and SPEC.md, create a CLI application for agent-workspace"
+**Input**: User description: "from the existing features and project design docs, create a CLI application for agent-workspace"
 
 ## Clarifications
 
@@ -34,7 +34,7 @@
 
 ### User Story 1 - Initialize a Project Workspace (Priority: P1)
 
-A developer starts in a project directory and uses the globally installed `agent-ws` command to create the standard collaboration structure for AI-assisted work, including project memory files, selected agent instruction files copied from global templates, privacy-aware defaults, and workspace metadata in `.agent-workspace/`.
+A developer starts in a project directory and uses the globally installed `agent-ws` command to create the standard collaboration structure for AI-assisted work, including project context files, selected agent instruction files copied from global templates, privacy-aware defaults, and workspace metadata in `.agent-workspace/`.
 
 **Why this priority**: Initialization is the core value already provided by Agent Workspace and is required before later lifecycle commands are useful.
 
@@ -42,7 +42,7 @@ A developer starts in a project directory and uses the globally installed `agent
 
 **Acceptance Scenarios**:
 
-1. **Given** a clean project directory with no Agent Workspace files, **When** the developer initializes with the default profile and one supported agent, **Then** the project receives default memory files, privacy defaults, the selected agent instruction file copied from global templates, and workspace metadata.
+1. **Given** a clean project directory with no Agent Workspace files, **When** the developer initializes with the default profile and one supported agent, **Then** the project receives default context files, privacy defaults, the selected agent instruction file copied from global templates, and workspace metadata.
 2. **Given** an existing project file that has the same destination as a generated file, **When** initialization runs, **Then** the existing file is preserved and the result clearly reports that it was skipped.
 3. **Given** a developer chooses the code profile, **When** initialization runs, **Then** the project receives engineering guidance in addition to the default workspace files.
 4. **Given** a developer wants to start a new project by name, **When** initialization is run with a new project directory name, **Then** the directory is created and initialized with the same Agent Workspace structure.
@@ -86,7 +86,7 @@ A developer checks whether the current project follows the expected Agent Worksp
 
 A developer scans one or more directories to find projects that appear to use Agent Workspace, including newer projects with metadata and older projects with legacy signals.
 
-**Why this priority**: The brief identifies multi-repository usage as the key reason for evolving from a project-by-project bootstrap script into a broader CLI.
+**Why this priority**: Project notes identify multi-repository usage as the key reason for evolving from a project-by-project bootstrap script into a broader CLI.
 
 **Independent Test**: Can be tested by creating a directory tree with projects containing strong, weak, and no Agent Workspace signals and verifying classification output.
 
@@ -169,7 +169,7 @@ A new user can read the README and quickly understand what Agent Workspace is, h
 - **FR-005**: The CLI MUST support adding supported agent instruction entrypoints after initialization using canonical templates from the global installation or selected release source; if required templates are missing, invalid, or inaccessible, the command MUST stop before writing partial output and report how to restore or select a valid template source.
 - **FR-006**: The CLI MUST support a custom agent instruction entrypoint using a developer-provided project-root-relative destination that is neither absolute nor able to escape the project root through parent-directory traversal.
 - **FR-007**: The CLI MUST place generated active agent files at locations expected by each supported agent.
-- **FR-008**: The CLI MUST never silently overwrite existing active files or memory files.
+- **FR-008**: The CLI MUST never silently overwrite existing active files or context files.
 - **FR-009**: The CLI MUST clearly report created, skipped, missing, and failed actions for user-facing commands.
 - **FR-010**: The CLI MUST provide a quick current-project status view for known core files, known agent files, profile-specific files, workspace metadata, and global template source availability.
 - **FR-011**: The CLI MUST create explicit workspace metadata under `.agent-workspace/` for newly initialized projects, including selected profile, selected agents, generated file mapping, and template or release revision when available.
@@ -177,7 +177,7 @@ A new user can read the README and quickly understand what Agent Workspace is, h
 - **FR-011b**: New initialization MUST NOT create the generic `.agent/` directory by default.
 - **FR-012**: The CLI MUST audit current or specified projects with deeper checks than status, including expected structure, missing files, legacy layout, metadata validity, stale metadata, global template source availability, and likely drift between active files and available templates.
 - **FR-013**: The CLI MUST discover likely Agent Workspace projects under developer-provided root paths using explicit metadata and legacy signal scoring.
-- **FR-014**: Discovery MUST distinguish strong matches, uncertain matches, and non-matches and report the signals used for classification. Explicit `.agent-workspace/` metadata or multiple legacy Agent Workspace signals, such as `.agent/` plus `bin/agent-workspace` or known active instruction files, count as strong matches; isolated weak generic files such as only `AGENTS.md`, `STATE.md`, or `BRAINSTORM.md` count as uncertain unless corroborated by stronger signals.
+- **FR-014**: Discovery MUST distinguish strong matches, uncertain matches, and non-matches and report the signals used for classification. Explicit `.agent-workspace/` metadata or multiple legacy Agent Workspace signals, such as `.agent/` plus `bin/agent-workspace` or known active instruction files, count as strong matches; isolated weak generic files such as only `AGENTS.md`, `PROJECT.md`, `STATE.md`, or legacy `BRAINSTORM.md` count as uncertain unless corroborated by stronger signals.
 - **FR-015**: Discovery MUST skip common heavy or irrelevant directories such as dependency folders, virtual environments, generated output folders, and version-control internals, and is expected to remain responsive for tens to low hundreds of local projects under explicitly provided roots.
 - **FR-016**: The CLI MUST support read-only comparison of active generated files against available templates and report differences without changing files.
 - **FR-017**: The CLI MUST support a conservative sync mode that refreshes global template/release references, metadata, or comparison baselines without modifying active instruction files or memory unless explicit apply intent is provided for a safe non-conflicting change.
@@ -198,7 +198,7 @@ A new user can read the README and quickly understand what Agent Workspace is, h
 
 - **Workspace Project**: A target project that may contain Agent Workspace metadata, generated active files, and project-owned memory.
 - **Global Template Source**: The canonical reusable templates installed or retrieved with the global Agent Workspace command and used for later agent additions, audits, comparisons, and conservative sync.
-- **Active Generated File**: A file consumed directly by a user or AI agent, such as agent instructions, workflow guidance, engineering guidance, privacy defaults, or project memory.
+- **Active Generated File**: A file consumed directly by a user or AI agent, such as agent instructions, workflow guidance, engineering guidance, privacy defaults, or project context.
 - **Agent Adapter**: A supported mapping from an agent choice to a template and destination path.
 - **Workspace Profile**: A named setup variant that determines which default and profile-specific files are expected.
 - **Workspace Metadata**: A project-local record stored under `.agent-workspace/` containing Agent Workspace ownership information, selected options, generated file mappings, and known revision information.

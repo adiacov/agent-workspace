@@ -1,6 +1,6 @@
 # agent-workspace
 
-Agent Workspace standardizes project setup for AI-assisted development. It provides a global `agent-ws` command, reusable templates, project memory files, and agent-specific instruction entrypoints.
+Agent Workspace standardizes project setup for AI-assisted development. It provides a global `agent-ws` command, reusable templates, context files, and agent-specific instruction entrypoints.
 
 ## Primary quickstart
 
@@ -103,8 +103,8 @@ agent-ws help migrate
 Depending on profile and selected agents, `agent-ws init` creates active project-owned files such as:
 
 - `WORKFLOWS.md`
+- `PROJECT.md`
 - `STATE.md`
-- `BRAINSTORM.md`
 - `.gitignore`
 - `ENGINEERING.md` for the `code` profile
 - `AGENTS.md` for Pi/Codex-style agents
@@ -116,6 +116,17 @@ Depending on profile and selected agents, `agent-ws init` creates active project
 Existing active files are skipped, never silently overwritten.
 
 New initialization does not create `.agent/`, `.agent/templates/`, or `bin/agent-workspace`.
+
+## Context model
+
+Agent Workspace uses one canonical current-context entrypoint per repository:
+
+- `STATE.md`: current status, active phase/spec/task, next action, blockers, and explicit pointers to relevant deeper docs. Agents should read this first and follow only relevant pointers.
+- `PROJECT.md`: stable project identity, purpose, users, boundaries, non-goals, and principles. Read it when that stable scope is needed, not by default for every task.
+- `specs/<feature>/...`: feature-specific implementation context. Read these only when `STATE.md` points to them or the user request is clearly about that feature.
+- `DECISIONS.md` or `MEMORY.md`: optional durable history or memory. These are not required for every task.
+
+Agents should not blindly read unrelated historical specs, decisions, or old context files by default.
 
 ## Metadata and ownership
 
@@ -186,12 +197,12 @@ Older projects may contain:
 - `.agent/templates/`
 - `bin/agent-workspace`
 - active instruction files such as `AGENTS.md`, `CLAUDE.md`, or Cursor rules
-- memory files such as `STATE.md` and `BRAINSTORM.md`
+- context or memory files such as `PROJECT.md`, `STATE.md`, and legacy `BRAINSTORM.md`
 
 The migration rule is conservative:
 
 - active instruction files are project-owned and must be preserved;
-- memory files are project-owned and must be preserved;
+- context and memory files are project-owned and must be preserved;
 - `.agent-workspace/workspace.json` may be created as committed non-private metadata;
 - `bin/agent-workspace` is a legacy local command copy and may be removed only with explicit apply intent;
 - old project-local template caches under `.agent/templates/` are outside the supported global model and are not inspected, migrated, or used for decisions. You may delete them manually after reviewing your project.

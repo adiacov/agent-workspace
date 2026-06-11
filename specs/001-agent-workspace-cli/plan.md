@@ -6,7 +6,7 @@
 
 ## Summary
 
-Create a globally installed `agent-ws` CLI that initializes and manages Agent Workspace projects from canonical templates bundled with the global installation or selected release source. New projects store committed metadata under `.agent-workspace/`, do not receive project-local template caches, do not receive `bin/agent-workspace`, and keep active instruction/memory files project-owned. The implementation will evolve the existing Bash CLI/bootstrap behavior into a global-command model, add discovery/audit/diff/sync/update/migration capabilities, and rewrite README documentation around one clear quickstart.
+Create a globally installed `agent-ws` CLI that initializes and manages Agent Workspace projects from canonical templates bundled with the global installation or selected release source. New projects store committed metadata under `.agent-workspace/`, do not receive project-local template caches, do not receive `bin/agent-workspace`, and keep active instruction/context files project-owned. The implementation will evolve the existing Bash CLI/bootstrap behavior into a global-command model, add discovery/audit/diff/sync/update/migration capabilities, and rewrite README documentation around one clear quickstart.
 
 ## Technical Context
 

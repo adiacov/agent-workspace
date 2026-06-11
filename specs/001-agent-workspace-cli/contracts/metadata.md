@@ -51,7 +51,7 @@ Metadata MUST NOT include:
 
 - absolute machine-specific paths;
 - user names or personal project registry information;
-- private memory content from `STATE.md`, `BRAINSTORM.md`, or similar files;
+- private memory content from `STATE.md`, `MEMORY.md`, legacy `BRAINSTORM.md`, or similar files;
 - secrets, credentials, tokens, or environment-specific configuration.
 
 ## Compatibility rules

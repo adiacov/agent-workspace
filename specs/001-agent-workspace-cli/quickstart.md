@@ -36,7 +36,7 @@ agent-ws init --profile code --agents pi --no-prompt
 
 Expected outcome:
 
-- `WORKFLOWS.md`, `STATE.md`, `BRAINSTORM.md`, `.gitignore`, `ENGINEERING.md`, and `AGENTS.md` are created if missing.
+- `WORKFLOWS.md`, `PROJECT.md`, `STATE.md`, `.gitignore`, `ENGINEERING.md`, and `AGENTS.md` are created if missing.
 - `.agent-workspace/workspace.json` is created.
 - `.agent/` is not created.
 - `bin/agent-workspace` is not created.
