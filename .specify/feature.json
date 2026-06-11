@@ -1,1 +1,3 @@
-{"feature_directory":"specs/001-agent-workspace-cli"}
+{
+  "feature_directory": "specs/002-release-install-update"
+}

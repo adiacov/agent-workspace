@@ -4,18 +4,18 @@ Single canonical current-context entrypoint for this repository.
 
 ## Current status
 
-Redesigning the context-file model to use `PROJECT.md` for stable identity plus `STATE.md` for current context.
+Starting phase 002: release, install, and update hardening for the public `agent-ws` CLI lifecycle.
 
 ## Active phase/spec/task
 
-- User-requested context model redesign.
-- Relevant implementation plan: `specs/001-agent-workspace-cli/plan.md` only for existing CLI/template structure and check commands.
+- Active specification: `specs/002-release-install-update/spec.md`.
+- Quality checklist: `specs/002-release-install-update/checklists/requirements.md`.
+- Prior CLI implementation context remains available in `specs/001-agent-workspace-cli/plan.md` when implementation details are needed.
 
 ## Next action
 
-- Finish updating templates, docs, tests, and local instructions.
-- Run relevant smoke/integration checks.
-- Commit changes in small related commits.
+- Run `/speckit.plan` (or equivalent planning workflow) for `specs/002-release-install-update/spec.md`.
+- During implementation, inspect current install/update/version behavior before editing and preserve failed install/update safety.
 
 ## Blockers
 
