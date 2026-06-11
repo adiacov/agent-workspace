@@ -15,9 +15,9 @@ Current instruction architecture:
 * AGENTS.md / CLAUDE.md / Cursor rules / INSTRUCTIONS.md → agent adapters
 * WORKFLOWS.md → collaboration and workflow authority
 * ENGINEERING.md → engineering standards and implementation guidance
-* STATE.md → project state
-* BRAINSTORM.md → durable ideas and discoveries
-* BRIEF.md → project scope
+* PROJECT.md → stable project identity and boundaries
+* STATE.md → canonical current project context
+* MEMORY.md, if present → durable private memory
 
 Work completed:
 
@@ -67,7 +67,7 @@ Result:
 * Adapters now:
 
   * load WORKFLOWS.md;
-  * load memory files referenced by WORKFLOWS.md;
+  * load context and memory files according to WORKFLOWS.md;
   * load ENGINEERING.md for implementation work;
   * update memory on completion.
 

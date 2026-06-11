@@ -25,6 +25,6 @@ secrets/
 sessions/pending/*.md
 sessions/archive/*.md
 
-# Uncomment if project memory should stay private
-STATE.md
-BRAINSTORM.md
+# Optional private durable memory or local decision notes
+MEMORY.md
+DECISIONS.local.md

@@ -5,19 +5,22 @@ This file is the primary workflow authority. Agent-specific adapter files should
 ## Start of session
 
 1. Read the agent adapter/instruction file for the current tool if present.
-2. Read project memory files if present, such as `STATE.md` and `BRAINSTORM.md`.
-3. Reconcile memory with reality before continuing work:
+2. Read durable memory if present, such as `MEMORY.md`.
+3. Read `STATE.md` if present. Treat it as the single canonical current-context entrypoint.
+4. Follow only the relevant pointers from `STATE.md`, plus files clearly required by the user's request.
+5. Read `PROJECT.md` only when project purpose, users, boundaries, non-goals, or principles are needed.
+6. Reconcile memory with reality before continuing work:
 
    * check `sessions/pending/` for raw checkpoint files;
    * inspect `git status` and recent commits;
-   * inspect project files mentioned by memory, such as briefs, plans, and READMEs;
+   * inspect project files mentioned by `STATE.md`, such as active specs, plans, and READMEs;
    * inspect relevant local/external task state when current work mentions tasks;
-   * compare these facts with project memory.
-4. Treat memory as a hint, not a source of truth. Repository state, task systems, and current project files take precedence.
-5. If durable memory is stale or contradicted by repo/task reality, update memory or project docs before continuing normal work.
-6. If the task is unclear after reconciliation, ask what we are working on.
-7. Read project scope if present, such as `BRIEF.md`.
-8. For coding or implementation work, read and follow `ENGINEERING.md` if present.
+   * compare these facts with project context/memory.
+7. Treat memory as a hint, not a source of truth. Repository state, task systems, and current project files take precedence.
+8. Do not blindly read unrelated historical specs, decisions, or implementation notes by default.
+9. If durable memory is stale or contradicted by repo/task reality, update memory or project docs before continuing normal work.
+10. If the task is unclear after reconciliation, ask what we are working on.
+11. For coding or implementation work, read and follow `ENGINEERING.md` if present.
 
 ## Collaboration style
 
@@ -36,7 +39,7 @@ If pending checkpoints exist:
 
 1. review them before continuing normal work;
 2. extract only durable goals, decisions, current state, next actions, blockers, and important realizations;
-3. update project memory/docs as appropriate;
+3. update project context/memory/docs as appropriate;
 4. move processed checkpoint files to `sessions/archive/`.
 
 Do not blindly copy raw conversation into durable memory.
