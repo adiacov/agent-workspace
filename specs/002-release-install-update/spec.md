@@ -1,6 +1,6 @@
 # Feature Specification: Release, Install, and Update Hardening
 
-**Feature Branch**: `main`
+**Feature Branch**: `002-release-install-update`
 
 **Created**: 2026-06-11
 
