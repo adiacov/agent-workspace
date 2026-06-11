@@ -4,19 +4,22 @@ Single canonical current-context entrypoint for this repository.
 
 ## Current status
 
-Phase 002 release, install, and update hardening is implemented and validated on branch `002-release-install-update`.
+Phase 002 release, install, and update hardening is complete and released as `v0.1.0`.
+
+Local repository reconciliation: `main` is at `b958fe2 docs: add changelog`; tag `v0.1.0` points at `584a29a chore: complete release lifecycle polish`.
 
 ## Active phase/spec/task
 
-- Active specification: `specs/002-release-install-update/spec.md`.
-- Active task list: `specs/002-release-install-update/tasks.md`.
-- All implementation phases T001-T075 are complete.
+- No active implementation phase is currently selected.
+- Completed specification: `specs/002-release-install-update/spec.md`.
+- Completed task list: `specs/002-release-install-update/tasks.md`.
+- All phase 002 tasks T001-T075 are complete.
 - Prior CLI implementation context remains available in `specs/001-agent-workspace-cli/plan.md` when historical CLI architecture context is needed.
 
 ## Next action
 
-- Review final diff and merge branch `002-release-install-update` when ready.
-- Before a true public remote install, create/publish a stable GitHub tag matching `VERSION`.
+- Decide the next phase, if any, after v0.1.0 release hardening.
+- Candidate future phase: automated release workflow, if manual tag/release creation becomes friction.
 
 ## Blockers
 
