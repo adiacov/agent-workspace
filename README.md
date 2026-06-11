@@ -163,10 +163,10 @@ The intended product model is a global/user-level `agent-ws` command that can be
 Public GitHub install support installs the latest stable GitHub release/tag by default, stages the payload, validates it, and activates it only after validation succeeds:
 
 ```bash
-curl -fsSL <install-url> | bash
+curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/install.sh | bash
 ```
 
-`<install-url>` is the published raw `install.sh` URL for this repository. The first public release must have a stable tag matching `VERSION` before true remote GitHub validation.
+The public installer URL is `https://raw.githubusercontent.com/adiacov/agent-workspace/main/install.sh`. It points at `install.sh` in the default branch; the installer resolves and installs the latest stable GitHub release/tag. The first public release must have a stable tag matching `VERSION` before true remote GitHub validation.
 
 Until the final install URL is published, install from a checkout:
 
@@ -195,7 +195,7 @@ Ensure `PREFIX/bin` is on `PATH` before running `agent-ws`.
 Pinned install uses the same public installer with an explicit version:
 
 ```bash
-AGENT_WS_VERSION=v0.1.0 curl -fsSL <install-url> | bash
+AGENT_WS_VERSION=v0.1.0 curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/install.sh | bash
 ```
 
 The installer resolves exactly the requested version, validates that the staged command reports that version, and preserves any existing install if the requested release is unavailable or invalid. Versions use the `vMAJOR.MINOR.PATCH` format and must match public GitHub tags/releases for remote install and update.

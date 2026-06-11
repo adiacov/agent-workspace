@@ -185,16 +185,16 @@
 
 **Purpose**: Final validation, consistency, and cleanup across all stories.
 
-- [ ] T066 [P] Run shell syntax checks for `bin/agent-ws`, `install.sh`, and `lib/agent-ws/*.sh`
-- [ ] T067 [P] Run all release lifecycle integration tests in `tests/integration/`
-- [ ] T068 [P] Run smoke tests in `tests/smoke/run-smoke.sh`
-- [ ] T069 Validate quickstart scenarios in `specs/002-release-install-update/quickstart.md`
-- [ ] T070 Review release lifecycle requirements checklist findings in `specs/002-release-install-update/checklists/release-lifecycle.md`
-- [ ] T071 Update `STATE.md` to summarize completed phase 002 status and next action
-- [ ] T072 Review changed shell comments and remove temporary debug output in `install.sh`, `lib/agent-ws/commands.sh`, and `lib/agent-ws/update.sh`
-- [ ] T073 Verify README commands and implementation behavior match `specs/002-release-install-update/contracts/cli.md` and `specs/002-release-install-update/contracts/installer.md`
-- [ ] T074 Verify or document the required initial public tag/release matching `VERSION` before remote GitHub validation in `README.md`
-- [ ] T075 Confirm working tree is clean after committing phase 002 changes using `git status`
+- [X] T066 [P] Run shell syntax checks for `bin/agent-ws`, `install.sh`, and `lib/agent-ws/*.sh`
+- [X] T067 [P] Run all release lifecycle integration tests in `tests/integration/`
+- [X] T068 [P] Run smoke tests in `tests/smoke/run-smoke.sh`
+- [X] T069 Validate quickstart scenarios in `specs/002-release-install-update/quickstart.md`
+- [X] T070 Review release lifecycle requirements checklist findings in `specs/002-release-install-update/checklists/release-lifecycle.md`
+- [X] T071 Update `STATE.md` to summarize completed phase 002 status and next action
+- [X] T072 Review changed shell comments and remove temporary debug output in `install.sh`, `lib/agent-ws/commands.sh`, and `lib/agent-ws/update.sh`
+- [X] T073 Verify README commands and implementation behavior match `specs/002-release-install-update/contracts/cli.md` and `specs/002-release-install-update/contracts/installer.md`
+- [X] T074 Verify or document the required initial public tag/release matching `VERSION` before remote GitHub validation in `README.md`
+- [X] T075 Confirm working tree is clean after committing phase 002 changes using `git status`
 
 ---
 

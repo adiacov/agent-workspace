@@ -37,7 +37,7 @@ Environment:
 Examples:
   ./install.sh
   ./install.sh --prefix "$HOME/.local"
-  AGENT_WS_VERSION=v0.1.0 curl -fsSL <install-url> | bash
+  AGENT_WS_VERSION=v0.1.0 curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/install.sh | bash
 
 After install, ensure PREFIX/bin is on PATH.
 USAGE

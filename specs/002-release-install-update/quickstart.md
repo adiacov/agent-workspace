@@ -8,7 +8,7 @@ Use temporary prefixes so validation does not modify a developer's normal instal
 - Standard tools: `git`, `curl`, `mktemp`, `cp`, `mv`, `chmod`, `tar`, and common text utilities.
 - Network access for true remote GitHub scenarios.
 - A stable public tag matching `VERSION`, such as `v0.1.0`, before true remote GitHub validation.
-- Published installer URL: `<install-url>` is the raw `install.sh` URL documented in `README.md` once releases are published.
+- Published installer URL: `https://raw.githubusercontent.com/adiacov/agent-workspace/main/install.sh`.
 
 ## 1. Local checkout install reports version
 
@@ -43,7 +43,7 @@ Expected outcome:
 
 ```bash
 prefix="$(mktemp -d)"
-AGENT_WS_PREFIX="$prefix" curl -fsSL <install-url> | bash
+AGENT_WS_PREFIX="$prefix" curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/install.sh | bash
 "$prefix/bin/agent-ws" version
 ```
 
@@ -57,7 +57,7 @@ Expected outcome:
 
 ```bash
 prefix="$(mktemp -d)"
-AGENT_WS_PREFIX="$prefix" AGENT_WS_VERSION=v0.1.0 curl -fsSL <install-url> | bash
+AGENT_WS_PREFIX="$prefix" AGENT_WS_VERSION=v0.1.0 curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/install.sh | bash
 "$prefix/bin/agent-ws" version
 ```
 
@@ -72,7 +72,7 @@ Expected outcome:
 prefix="$(mktemp -d)"
 ./install.sh --prefix "$prefix"
 before="$($prefix/bin/agent-ws version)"
-AGENT_WS_PREFIX="$prefix" AGENT_WS_VERSION=v9.9.9-does-not-exist curl -fsSL <install-url> | bash || true
+AGENT_WS_PREFIX="$prefix" AGENT_WS_VERSION=v9.9.9-does-not-exist curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/install.sh | bash || true
 after="$($prefix/bin/agent-ws version)"
 test "$before" = "$after"
 ```
@@ -87,7 +87,7 @@ Expected outcome:
 
 ```bash
 prefix="$(mktemp -d)"
-AGENT_WS_PREFIX="$prefix" AGENT_WS_VERSION=v0.1.0 curl -fsSL <install-url> | bash
+AGENT_WS_PREFIX="$prefix" AGENT_WS_VERSION=v0.1.0 curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/install.sh | bash
 before="$($prefix/bin/agent-ws version)"
 "$prefix/bin/agent-ws" update
 after="$($prefix/bin/agent-ws version)"

@@ -4,7 +4,7 @@
 
 **Created**: 2026-06-11
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: User description: "Make `agent-ws` installable, versioned, and safely updateable from GitHub for Linux-based shell environments, without requiring users to manually clone the repository."
 

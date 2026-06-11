@@ -26,7 +26,7 @@ printf 'smoke: install.sh help\n'
 
 printf 'smoke: README lifecycle coverage\n'
 for needle in \
-  'curl -fsSL <install-url> | bash' \
+  'curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/install.sh | bash' \
   'AGENT_WS_VERSION=v0.1.0' \
   'agent-ws version' \
   'agent-ws update' \

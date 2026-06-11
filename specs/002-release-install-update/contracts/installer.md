@@ -18,7 +18,7 @@ The installer supports both local checkout installation and remote/curl installa
 ## Remote install
 
 ```bash
-curl -fsSL <install-url> | bash
+curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/install.sh | bash
 ```
 
 **Expected outcomes**:
@@ -33,7 +33,7 @@ curl -fsSL <install-url> | bash
 ## Pinned remote install
 
 ```bash
-AGENT_WS_VERSION=v0.1.0 curl -fsSL <install-url> | bash
+AGENT_WS_VERSION=v0.1.0 curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/install.sh | bash
 ```
 
 **Environment variables**:
