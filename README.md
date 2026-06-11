@@ -166,6 +166,8 @@ Public GitHub install support installs the latest stable GitHub release/tag by d
 curl -fsSL <install-url> | bash
 ```
 
+`<install-url>` is the published raw `install.sh` URL for this repository. The first public release must have a stable tag matching `VERSION` before true remote GitHub validation.
+
 Until the final install URL is published, install from a checkout:
 
 ```bash
@@ -196,7 +198,7 @@ Pinned install uses the same public installer with an explicit version:
 AGENT_WS_VERSION=v0.1.0 curl -fsSL <install-url> | bash
 ```
 
-The installer resolves exactly the requested version, validates that the staged command reports that version, and preserves any existing install if the requested release is unavailable or invalid. Versions use the `vMAJOR.MINOR.PATCH` format and should match public GitHub tags/releases.
+The installer resolves exactly the requested version, validates that the staged command reports that version, and preserves any existing install if the requested release is unavailable or invalid. Versions use the `vMAJOR.MINOR.PATCH` format and must match public GitHub tags/releases for remote install and update.
 
 ### Version
 
@@ -227,7 +229,7 @@ agent-ws update --version v1.2.3
 
 ### Uninstall / cleanup
 
-Manual cleanup removes the installed command and support files:
+Manual cleanup removes only the installed command and support files. It does not remove project files created by `agent-ws init`:
 
 ```bash
 rm -f "$HOME/.local/bin/agent-ws"
@@ -237,7 +239,7 @@ rm -rf "$HOME/.local/share/agent-ws"
 
 ### Supported platforms
 
-Linux-based shell environments are the first supported target. Compatible macOS shells may work when the required standard tools are available. Native Windows outside WSL is not supported in this phase.
+Linux-based shell environments are the first supported target. Compatible macOS shells may work when the required standard tools are available. WSL may work but is not a first-class tested target yet. Native Windows outside WSL is not supported in this phase.
 
 ## Migration from the older project-local model
 

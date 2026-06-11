@@ -24,6 +24,21 @@ printf 'smoke: agent-ws help\n'
 printf 'smoke: install.sh help\n'
 "$ROOT/install.sh" --help >/dev/null
 
+printf 'smoke: README lifecycle coverage\n'
+for needle in \
+  'curl -fsSL <install-url> | bash' \
+  'AGENT_WS_VERSION=v0.1.0' \
+  'agent-ws version' \
+  'agent-ws update' \
+  'Uninstall / cleanup' \
+  'Supported platforms' \
+  'vMAJOR.MINOR.PATCH'; do
+  grep -F -- "$needle" "$ROOT/README.md" >/dev/null || {
+    printf 'error: README missing lifecycle documentation: %s\n' "$needle" >&2
+    exit 1
+  }
+done
+
 for smoke_test in "$ROOT"/tests/smoke/test_*.sh; do
   [ -x "$smoke_test" ] || continue
   printf 'smoke: %s\n' "$(basename "$smoke_test")"

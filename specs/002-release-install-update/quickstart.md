@@ -1,13 +1,14 @@
 # Quickstart Validation: Release, Install, and Update Hardening
 
-This guide describes runnable validation scenarios for phase 002. Use temporary prefixes so validation does not modify a developer's normal installation.
+Use temporary prefixes so validation does not modify a developer's normal installation.
 
 ## Prerequisites
 
 - Linux-based shell environment with Bash.
-- Standard tools: `git`, `curl`, `mktemp`, `cp`, `mv`, `chmod`, and common text utilities.
-- Network access for remote GitHub scenarios.
-- At least one stable public tag such as `v0.1.0` when validating true remote install/update.
+- Standard tools: `git`, `curl`, `mktemp`, `cp`, `mv`, `chmod`, `tar`, and common text utilities.
+- Network access for true remote GitHub scenarios.
+- A stable public tag matching `VERSION`, such as `v0.1.0`, before true remote GitHub validation.
+- Published installer URL: `<install-url>` is the raw `install.sh` URL documented in `README.md` once releases are published.
 
 ## 1. Local checkout install reports version
 
@@ -21,9 +22,24 @@ Expected outcome:
 
 - Install succeeds.
 - Version output is clear and matches `VERSION`.
-- Installed command can still run `help` and `init` smoke checks.
+- Installed command can run `help`.
 
-## 2. Remote latest stable install
+## 2. Installed CLI can initialize a project
+
+```bash
+project="$(mktemp -d)"
+(
+  cd "$project"
+  "$prefix/bin/agent-ws" init --profile general --agents pi --no-prompt
+)
+```
+
+Expected outcome:
+
+- Project initialization succeeds from the installed command.
+- The project contains `WORKFLOWS.md`, `PROJECT.md`, `STATE.md`, `AGENTS.md`, and `.agent-workspace/workspace.json`.
+
+## 3. Remote latest stable install
 
 ```bash
 prefix="$(mktemp -d)"
@@ -37,7 +53,7 @@ Expected outcome:
 - Installed version is the latest stable public release.
 - Output includes PATH guidance if needed.
 
-## 3. Pinned install
+## 4. Pinned install
 
 ```bash
 prefix="$(mktemp -d)"
@@ -50,7 +66,7 @@ Expected outcome:
 - Install succeeds for an available pinned release.
 - Version output reports `v0.1.0`.
 
-## 4. Invalid pinned install preserves previous command
+## 5. Invalid pinned install preserves previous command
 
 ```bash
 prefix="$(mktemp -d)"
@@ -67,7 +83,7 @@ Expected outcome:
 - Existing command still runs.
 - Version output before and after is unchanged.
 
-## 5. Update to latest stable
+## 6. Update to latest stable
 
 ```bash
 prefix="$(mktemp -d)"
@@ -84,7 +100,7 @@ Expected outcome:
 - Successful update reports previous and new versions.
 - Active command remains runnable after update.
 
-## 6. Failed update preserves active command
+## 7. Failed update preserves active command
 
 Use a controlled test fixture or environment override that forces download or validation failure.
 
@@ -94,7 +110,7 @@ Expected outcome:
 - The previous `agent-ws version` still succeeds.
 - Failure message identifies the failed stage and recovery guidance.
 
-## 7. Documentation review
+## 8. Documentation review
 
 Review `README.md` and confirm it includes:
 

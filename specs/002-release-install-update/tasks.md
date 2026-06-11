@@ -166,16 +166,16 @@
 
 ### Tests for User Story 5 ⚠️
 
-- [ ] T059 [P] [US5] Add README lifecycle command coverage check in `tests/smoke/run-smoke.sh`
-- [ ] T060 [P] [US5] Add quickstart lifecycle validation script in `tests/smoke/test_release_lifecycle_quickstart.sh`
-- [ ] T061 [P] [US5] Add installed CLI init-after-install validation in `tests/smoke/test_release_lifecycle_quickstart.sh`
+- [X] T059 [P] [US5] Add README lifecycle command coverage check in `tests/smoke/run-smoke.sh`
+- [X] T060 [P] [US5] Add quickstart lifecycle validation script in `tests/smoke/test_release_lifecycle_quickstart.sh`
+- [X] T061 [P] [US5] Add installed CLI init-after-install validation in `tests/smoke/test_release_lifecycle_quickstart.sh`
 
 ### Implementation for User Story 5
 
-- [ ] T062 [US5] Document supported platforms and native Windows non-goal in `README.md`
-- [ ] T063 [US5] Document release/versioning expectations and `vMAJOR.MINOR.PATCH` convention in `README.md`
-- [ ] T064 [US5] Document uninstall/manual cleanup steps for installed command and support files in `README.md`
-- [ ] T065 [US5] Update `specs/002-release-install-update/quickstart.md` with final install URL and validated commands
+- [X] T062 [US5] Document supported platforms and native Windows non-goal in `README.md`
+- [X] T063 [US5] Document release/versioning expectations and `vMAJOR.MINOR.PATCH` convention in `README.md`
+- [X] T064 [US5] Document uninstall/manual cleanup steps for installed command and support files in `README.md`
+- [X] T065 [US5] Update `specs/002-release-install-update/quickstart.md` with final install URL and validated commands
 
 **Checkpoint**: User Story 5 is complete when README and quickstart cover the full public lifecycle.
 
