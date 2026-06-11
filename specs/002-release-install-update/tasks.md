@@ -33,18 +33,18 @@
 
 **⚠️ CRITICAL**: No user story work should begin until this phase is complete.
 
-- [ ] T005 Implement version source discovery helper for checkout and installed payload layouts in `lib/agent-ws/commands.sh`
-- [ ] T006 Implement shared version file validation helper in `lib/agent-ws/commands.sh`
-- [ ] T007 Implement staged install directory creation and cleanup helpers in `install.sh`
-- [ ] T008 Implement staged payload validation helper that runs candidate `agent-ws version` in `install.sh`
-- [ ] T009 Implement safe activation helper that replaces active install only after validation in `install.sh`
-- [ ] T010 Implement GitHub release/tag configuration constants and environment overrides in `install.sh`
-- [ ] T011 Implement stable version filtering helper that excludes alpha, beta, rc, and prerelease suffixes in `install.sh`
-- [ ] T012 Implement default remote install latest-stable release/tag resolution in `install.sh`
-- [ ] T013 Implement shared update staging and validation helpers in `lib/agent-ws/update.sh`
-- [ ] T014 Implement shared latest stable release/tag resolution helper in `lib/agent-ws/update.sh`
-- [ ] T015 Implement reusable failure-stage error messages for release resolution, download, staging, validation, and activation in `install.sh`
-- [ ] T016 Mirror reusable failure-stage error messages for update paths in `lib/agent-ws/update.sh`
+- [X] T005 Implement version source discovery helper for checkout and installed payload layouts in `lib/agent-ws/commands.sh`
+- [X] T006 Implement shared version file validation helper in `lib/agent-ws/commands.sh`
+- [X] T007 Implement staged install directory creation and cleanup helpers in `install.sh`
+- [X] T008 Implement staged payload validation helper that runs candidate `agent-ws version` in `install.sh`
+- [X] T009 Implement safe activation helper that replaces active install only after validation in `install.sh`
+- [X] T010 Implement GitHub release/tag configuration constants and environment overrides in `install.sh`
+- [X] T011 Implement stable version filtering helper that excludes alpha, beta, rc, and prerelease suffixes in `install.sh`
+- [X] T012 Implement default remote install latest-stable release/tag resolution in `install.sh`
+- [X] T013 Implement shared update staging and validation helpers in `lib/agent-ws/update.sh`
+- [X] T014 Implement shared latest stable release/tag resolution helper in `lib/agent-ws/update.sh`
+- [X] T015 Implement reusable failure-stage error messages for release resolution, download, staging, validation, and activation in `install.sh`
+- [X] T016 Mirror reusable failure-stage error messages for update paths in `lib/agent-ws/update.sh`
 
 **Checkpoint**: Foundation ready - version, staging, validation, and release resolution primitives exist for story work.
 

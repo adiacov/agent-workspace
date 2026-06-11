@@ -2,7 +2,15 @@
 set -euo pipefail
 
 say() { printf '%s\n' "$*"; }
+warn() { printf 'warning: %s\n' "$*" >&2; }
 die() { printf 'error: %s\n' "$*" >&2; exit 1; }
+
+install_error() {
+  local stage="$1" message="$2" next="${3:-retry after fixing the reported problem.}"
+  printf 'error: install failed during %s: %s\n' "$stage" "$message" >&2
+  printf 'next: %s\n' "$next" >&2
+  exit 1
+}
 
 usage() {
   cat <<'USAGE'
@@ -17,10 +25,19 @@ Installed layout:
   PREFIX/bin/agent-ws
   PREFIX/lib/agent-ws/
   PREFIX/share/agent-ws/templates/
+  PREFIX/share/agent-ws/VERSION
+
+Environment:
+  AGENT_WS_PREFIX          Install prefix for curl/remote usage.
+  AGENT_WS_VERSION         Specific release/tag to install.
+  AGENT_WS_REPO            GitHub repository, owner/name.
+  AGENT_WS_INSTALL_BASE_URL  Override archive base URL for tests/mirrors.
+  AGENT_WS_TEST_RELEASES   Space-separated release list for tests.
 
 Examples:
   ./install.sh
   ./install.sh --prefix "$HOME/.local"
+  AGENT_WS_VERSION=v0.1.0 curl -fsSL <install-url> | bash
 
 After install, ensure PREFIX/bin is on PATH.
 USAGE
@@ -37,7 +54,121 @@ copy_dir() {
   cp -R "$src" "$dst"
 }
 
-PREFIX="${HOME:-}/.local"
+install_is_stable_version() {
+  local version="$1" lower
+  lower="$(printf '%s' "$version" | tr '[:upper:]' '[:lower:]')"
+  case "$lower" in
+    *alpha*|*beta*|*rc*|*pre*) return 1 ;;
+    v[0-9]*.[0-9]*.[0-9]*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+install_latest_stable() {
+  local version stable=""
+  if [ -n "${AGENT_WS_VERSION:-}" ]; then
+    printf '%s\n' "$AGENT_WS_VERSION"
+    return 0
+  fi
+  for version in ${AGENT_WS_TEST_RELEASES:-}; do
+    if install_is_stable_version "$version"; then
+      stable="$version"
+    fi
+  done
+  if [ -n "$stable" ]; then
+    printf '%s\n' "$stable"
+    return 0
+  fi
+  install_error "release resolution" "no stable release is available" "set AGENT_WS_VERSION to an available vMAJOR.MINOR.PATCH tag."
+}
+
+install_stage_create() {
+  mktemp -d "${TMPDIR:-/tmp}/agent-ws-install.XXXXXX"
+}
+
+install_stage_cleanup() {
+  local stage="${1:-}"
+  [ -n "$stage" ] && [ -d "$stage" ] && rm -rf "$stage"
+}
+
+install_validate_candidate() {
+  local candidate_prefix="$1" command
+  command="$candidate_prefix/bin/agent-ws"
+  [ -x "$command" ] || install_error "validation" "candidate command is not executable: $command" "check the release payload layout."
+  if ! "$command" version >/dev/null 2>&1; then
+    # Phase 2 introduces the validation hook before the version command is wired
+    # into the active CLI. Fall back to help for existing local installs so the
+    # helper can be adopted without breaking current development flows.
+    "$command" help >/dev/null 2>&1 || install_error "validation" "candidate command cannot run" "check the staged payload before activation."
+  fi
+}
+
+install_replace_file() {
+  local src="$1" dst="$2" tmp
+  mkdir -p "$(dirname "$dst")"
+  tmp="$dst.tmp.$$"
+  cp "$src" "$tmp" || install_error "activation" "unable to stage file $(basename "$dst")" "check write permissions for $(dirname "$dst")."
+  mv "$tmp" "$dst" || install_error "activation" "unable to activate file $(basename "$dst")" "check write permissions for $(dirname "$dst")."
+}
+
+install_replace_dir() {
+  local src="$1" dst="$2" new="$2.new.$$" old="$2.old.$$"
+  mkdir -p "$(dirname "$dst")"
+  rm -rf "$new" "$old"
+  cp -R "$src" "$new" || install_error "activation" "unable to stage directory $(basename "$dst")" "check write permissions for $(dirname "$dst")."
+  if [ -e "$dst" ]; then
+    mv "$dst" "$old" || install_error "activation" "unable to preserve existing directory $(basename "$dst")" "check write permissions for $(dirname "$dst")."
+  fi
+  if ! mv "$new" "$dst"; then
+    [ -e "$old" ] && mv "$old" "$dst" 2>/dev/null || true
+    install_error "activation" "unable to activate directory $(basename "$dst")" "existing installation was restored if possible."
+  fi
+  rm -rf "$old"
+}
+
+install_activate_staged() {
+  local staged_prefix="$1" prefix="$2"
+  mkdir -p "$prefix/bin" "$prefix/lib" "$prefix/share/agent-ws"
+  install_replace_file "$staged_prefix/bin/agent-ws" "$prefix/bin/agent-ws"
+  chmod +x "$prefix/bin/agent-ws" || install_error "activation" "unable to make command executable" "check permissions for $prefix/bin/agent-ws."
+  install_replace_dir "$staged_prefix/lib/agent-ws" "$prefix/lib/agent-ws"
+  install_replace_dir "$staged_prefix/share/agent-ws/templates" "$prefix/share/agent-ws/templates"
+  if [ -f "$staged_prefix/share/agent-ws/VERSION" ]; then
+    install_replace_file "$staged_prefix/share/agent-ws/VERSION" "$prefix/share/agent-ws/VERSION"
+  fi
+}
+
+install_stage_from_checkout() {
+  local root="$1" staged_prefix="$2"
+  [ -f "$root/bin/agent-ws" ] || install_error "staging" "missing bin/agent-ws in repository checkout" "run install.sh from a complete checkout."
+  [ -d "$root/lib/agent-ws" ] || install_error "staging" "missing lib/agent-ws in repository checkout" "run install.sh from a complete checkout."
+  [ -d "$root/templates" ] || install_error "staging" "missing templates in repository checkout" "run install.sh from a complete checkout."
+  [ -f "$root/VERSION" ] || install_error "staging" "missing VERSION in repository checkout" "restore the root VERSION file."
+
+  mkdir -p "$staged_prefix/bin" "$staged_prefix/lib" "$staged_prefix/share/agent-ws"
+  cp "$root/bin/agent-ws" "$staged_prefix/bin/agent-ws"
+  chmod +x "$staged_prefix/bin/agent-ws"
+  copy_dir "$root/lib/agent-ws" "$staged_prefix/lib/agent-ws"
+  copy_dir "$root/templates" "$staged_prefix/share/agent-ws/templates"
+  cp "$root/VERSION" "$staged_prefix/share/agent-ws/VERSION"
+}
+
+install_archive_url() {
+  local version="$1"
+  if [ -n "${AGENT_WS_INSTALL_BASE_URL:-}" ]; then
+    printf '%s/%s.tar.gz\n' "${AGENT_WS_INSTALL_BASE_URL%/}" "$version"
+  else
+    printf 'https://github.com/%s/archive/refs/tags/%s.tar.gz\n' "${AGENT_WS_REPO:-adiacov/agent-workspace}" "$version"
+  fi
+}
+
+install_download_archive() {
+  local version="$1" dst="$2" url
+  url="$(install_archive_url "$version")"
+  curl -fsSL "$url" -o "$dst" || install_error "download" "unable to download $url" "check network access or choose an available AGENT_WS_VERSION."
+}
+
+PREFIX="${AGENT_WS_PREFIX:-${HOME:-}/.local}"
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --prefix)
@@ -58,17 +189,16 @@ done
 [ -n "$PREFIX" ] || die "unable to determine install prefix; pass --prefix PREFIX"
 
 ROOT="$(repo_root)"
-[ -f "$ROOT/bin/agent-ws" ] || die "missing bin/agent-ws in repository checkout"
-[ -d "$ROOT/lib/agent-ws" ] || die "missing lib/agent-ws in repository checkout"
-[ -d "$ROOT/templates" ] || die "missing templates in repository checkout"
+STAGE="$(install_stage_create)"
+trap 'install_stage_cleanup "$STAGE"' EXIT
+STAGED_PREFIX="$STAGE/prefix"
 
-mkdir -p "$PREFIX/bin" "$PREFIX/lib" "$PREFIX/share/agent-ws"
-cp "$ROOT/bin/agent-ws" "$PREFIX/bin/agent-ws"
-chmod +x "$PREFIX/bin/agent-ws"
-copy_dir "$ROOT/lib/agent-ws" "$PREFIX/lib/agent-ws"
-copy_dir "$ROOT/templates" "$PREFIX/share/agent-ws/templates"
+install_stage_from_checkout "$ROOT" "$STAGED_PREFIX"
+install_validate_candidate "$STAGED_PREFIX"
+install_activate_staged "$STAGED_PREFIX" "$PREFIX"
 
 say "installed agent-ws to $PREFIX/bin/agent-ws"
 say "installed libraries to $PREFIX/lib/agent-ws"
 say "installed templates to $PREFIX/share/agent-ws/templates"
+say "installed version to $PREFIX/share/agent-ws/VERSION"
 say "ensure $PREFIX/bin is on PATH"

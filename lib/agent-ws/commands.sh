@@ -12,6 +12,57 @@ agent_ws_die() {
   exit 1
 }
 
+agent_ws_validate_version_value() {
+  local version="$1"
+  [ -n "$version" ] || return 1
+  case "$version" in
+    v[0-9]*.[0-9]*.[0-9]*) ;;
+    *) return 1 ;;
+  esac
+  case "$version" in
+    *[!abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._+-]*) return 1 ;;
+  esac
+  return 0
+}
+
+agent_ws_read_version_file() {
+  local file="$1" version
+  [ -f "$file" ] || return 1
+  version="$(tr -d '[:space:]' < "$file")"
+  agent_ws_validate_version_value "$version" || return 1
+  printf '%s\n' "$version"
+}
+
+agent_ws_version_file() {
+  local candidate
+
+  if [ -n "${AGENT_WS_VERSION_FILE:-}" ]; then
+    [ -f "$AGENT_WS_VERSION_FILE" ] || return 1
+    printf '%s\n' "$AGENT_WS_VERSION_FILE"
+    return 0
+  fi
+
+  for candidate in \
+    "$AGENT_WS_LIB_DIR/../../VERSION" \
+    "$AGENT_WS_LIB_DIR/../VERSION" \
+    "$AGENT_WS_LIB_DIR/VERSION" \
+    "$AGENT_WS_LIB_DIR/../../share/agent-ws/VERSION" \
+    "$AGENT_WS_LIB_DIR/../../share/agent-ws/version"; do
+    if [ -f "$candidate" ]; then
+      cd "$(dirname "$candidate")" && printf '%s/%s\n' "$(pwd -P)" "$(basename "$candidate")"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+agent_ws_installed_version() {
+  local file
+  file="$(agent_ws_version_file)" || return 1
+  agent_ws_read_version_file "$file"
+}
+
 agent_ws_usage() {
   cat <<'USAGE'
 Usage: agent-ws <command> [options] [path]
