@@ -87,17 +87,17 @@
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T028 [P] [US2] Add installed version command integration test in `tests/integration/test_version.sh`
-- [ ] T029 [P] [US2] Add missing or invalid installed version source failure test in `tests/integration/test_version_invalid_payload.sh`
-- [ ] T030 [P] [US2] Add `agent-ws help version` contract test in `tests/integration/test_help_version.sh`
+- [X] T028 [P] [US2] Add installed version command integration test in `tests/integration/test_version.sh`
+- [X] T029 [P] [US2] Add missing or invalid installed version source failure test in `tests/integration/test_version_invalid_payload.sh`
+- [X] T030 [P] [US2] Add `agent-ws help version` contract test in `tests/integration/test_help_version.sh`
 
 ### Implementation for User Story 2
 
-- [ ] T031 [US2] Add `version` command dispatch in `lib/agent-ws/commands.sh`
-- [ ] T032 [US2] Implement `agent_ws_command_version` using the shared version source helper in `lib/agent-ws/commands.sh`
-- [ ] T033 [US2] Ensure `agent-ws version` reads the installed payload `VERSION` location in `lib/agent-ws/commands.sh`
-- [ ] T034 [US2] Add `agent-ws help version` content in `lib/agent-ws/commands.sh`
-- [ ] T035 [US2] Update version command documentation in `README.md`
+- [X] T031 [US2] Add `version` command dispatch in `lib/agent-ws/commands.sh`
+- [X] T032 [US2] Implement `agent_ws_command_version` using the shared version source helper in `lib/agent-ws/commands.sh`
+- [X] T033 [US2] Ensure `agent-ws version` reads the installed payload `VERSION` location in `lib/agent-ws/commands.sh`
+- [X] T034 [US2] Add `agent-ws help version` content in `lib/agent-ws/commands.sh`
+- [X] T035 [US2] Update version command documentation in `README.md`
 
 **Checkpoint**: User Story 2 is independently testable after any successful local or remote-style install.
 

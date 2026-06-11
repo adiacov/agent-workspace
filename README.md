@@ -200,10 +200,16 @@ Versions use the `vMAJOR.MINOR.PATCH` format and should match public GitHub tags
 
 ### Version
 
-Installed version visibility will be available with:
+Show the installed command version with:
 
 ```bash
 agent-ws version
+```
+
+Example output:
+
+```text
+agent-ws v0.1.0
 ```
 
 The version comes from the installed payload, not from the current working directory.

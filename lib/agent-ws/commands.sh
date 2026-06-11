@@ -81,6 +81,7 @@ Commands:
   discover    Discover Agent Workspace projects
   diff        Compare active files with templates
   sync        Conservative maintenance
+  version     Show installed command version
   update      Update the global command
   migrate     Preview/apply legacy migration
   help        Show this help text
@@ -177,6 +178,13 @@ Options:
   --apply                 Apply only safe non-active-file updates.
 
 Use migrate, not sync, for older projects with .agent/ or bin/agent-workspace.
+USAGE
+      ;;
+    version) cat <<'USAGE'
+Usage: agent-ws version
+
+Shows the installed agent-ws version from the installed payload VERSION file.
+Does not inspect the current project or require a git checkout.
 USAGE
       ;;
     update) cat <<'USAGE'
@@ -367,6 +375,12 @@ agent_ws_main() {
       else
         agent_ws_cmd_sync
       fi
+      ;;
+    version)
+      if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ]; then
+        agent_ws_die "version does not accept positional arguments" "run 'agent-ws version'."
+      fi
+      agent_ws_cmd_version
       ;;
     update)
       if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" = "--help" ]; then
@@ -567,6 +581,12 @@ agent_ws_cmd_sync() {
     agent_ws_die "sync accepts at most one project path" "run 'agent-ws help sync' for usage."
   fi
   agent_ws_sync_project "$target" "$mode"
+}
+
+agent_ws_cmd_version() {
+  local version
+  version="$(agent_ws_installed_version)" || agent_ws_die "unable to determine installed version" "reinstall agent-ws or restore the installed VERSION file."
+  agent_ws_say "agent-ws $version"
 }
 
 agent_ws_cmd_update() {
