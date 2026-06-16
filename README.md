@@ -4,6 +4,17 @@ Agent Workspace standardizes project setup for AI-assisted development. It provi
 
 See [CHANGELOG.md](CHANGELOG.md) for release history.
 
+## Contents
+
+- [Primary quickstart](#primary-quickstart)
+- [Commands](#commands)
+- [What gets created in a project](#what-gets-created-in-a-project)
+- [Context model](#context-model)
+- [Install and update model](#install-and-update-model)
+- [Migration from the older project-local model](#migration-from-the-older-project-local-model)
+- [Advanced options](#advanced-options)
+- [Templates](#templates)
+
 ## Primary quickstart
 
 From this repository checkout, install the command for your user:
