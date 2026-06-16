@@ -48,6 +48,17 @@ After initialization, project metadata is stored at:
 
 ## Commands
 
+Choose commands by what they operate on:
+
+| Need | Command | Operates on |
+| --- | --- | --- |
+| Create Agent Workspace files in a project | `init` | one project |
+| Add another agent entrypoint to a project | `add-agent` | one project |
+| Inspect project health or template differences | `status`, `audit`, `diff` | one or more projects |
+| Maintain an already-modern Agent Workspace project | `sync` | one project metadata/baselines |
+| Convert an old `.agent/` project to the global model | `migrate` | one legacy project |
+| Update the installed `agent-ws` command and global templates | `update` | user-level installation |
+
 ```bash
 agent-ws init [project-name|path] --profile general --agents pi --no-prompt
 ```
@@ -89,20 +100,20 @@ agent-ws sync [path] --dry-run
 agent-ws sync [path] --apply
 ```
 
-Runs conservative maintenance for projects already using the global model. It validates metadata/template references and comparison baselines. It is not for legacy `.agent/` migration and does not overwrite active instruction files or memory.
+Maintains one project that already uses the global Agent Workspace model. It validates project metadata/template references and comparison baselines. It does not update the installed `agent-ws` command, does not migrate legacy `.agent/` projects, and does not overwrite active instruction files or memory.
 
 ```bash
 agent-ws update [--version VERSION]
 ```
 
-Updates the global command from a stable Git/GitHub release or tag when release support is available. Without `--version`, the latest stable release is the newest tag or release that is not pre-release and does not include alpha, beta, or release-candidate suffixes.
+Updates the user-level installed `agent-ws` command and global templates from a stable Git/GitHub release or tag. It does not modify project files. Without `--version`, the latest stable release is the newest tag or release that is not pre-release and does not include alpha, beta, or release-candidate suffixes.
 
 ```bash
 agent-ws migrate --dry-run /path/to/legacy-project
 agent-ws migrate --apply /path/to/legacy-project
 ```
 
-Previews or applies safe migration from the older project-local model with `.agent/` and `bin/agent-workspace`.
+Previews or applies migration of one legacy project from the older project-local model with `.agent/` and `bin/agent-workspace` to the global `agent-ws` model. It is not for already-modern projects.
 
 Use command-specific help for concise usage:
 
@@ -171,7 +182,7 @@ Ownership boundary:
 
 ## Synchronization for existing global projects
 
-Use `sync` only for projects already initialized with the global Agent Workspace model and `.agent-workspace/workspace.json`. It is not for older `.agent/` project-local migrations.
+Use `sync` only for projects already initialized with the global Agent Workspace model and `.agent-workspace/workspace.json`. It maintains project metadata/baselines for that project. It does not update the installed `agent-ws` command and is not for older `.agent/` project-local migrations.
 
 Preview synchronization first:
 
@@ -258,7 +269,7 @@ agent-ws update
 agent-ws update --version v1.2.3
 ```
 
-`agent-ws update` resolves the latest stable release/tag. `agent-ws update --version` selects an exact release. Updates are staged and validated with `agent-ws version` before activation. Failed updates preserve the currently working `agent-ws` command and report the failed stage.
+`agent-ws update` resolves the latest stable release/tag. `agent-ws update --version` selects an exact release. Updates are staged and validated with `agent-ws version` before activation. Failed updates preserve the currently working `agent-ws` command and report the failed stage. This updates only the installed tool and global templates; use `sync` separately for project-level maintenance.
 
 ### Uninstall / cleanup
 
@@ -304,7 +315,7 @@ Apply only after reviewing the preview:
 agent-ws migrate --apply /path/to/legacy-project
 ```
 
-The migration helper preserves active instruction files and memory by default.
+The migration helper preserves active instruction files and memory by default. After a project has been migrated to the global model, use `sync` for future project-level maintenance instead of running `migrate` again.
 
 ## Advanced options
 
