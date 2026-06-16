@@ -10,6 +10,7 @@ See [CHANGELOG.md](CHANGELOG.md) for release history.
 - [Commands](#commands)
 - [What gets created in a project](#what-gets-created-in-a-project)
 - [Context model](#context-model)
+- [Synchronization for existing global projects](#synchronization-for-existing-global-projects)
 - [Install and update model](#install-and-update-model)
 - [Migration from the older project-local model](#migration-from-the-older-project-local-model)
 - [Advanced options](#advanced-options)
@@ -167,6 +168,24 @@ Ownership boundary:
 - Agent Workspace owns reusable mechanisms and global templates.
 - The target project owns final active instruction files and memory.
 - Active files may contain local project-specific edits and are preserved by default.
+
+## Synchronization for existing global projects
+
+Use `sync` only for projects already initialized with the global Agent Workspace model and `.agent-workspace/workspace.json`. It is not for older `.agent/` project-local migrations.
+
+Preview synchronization first:
+
+```bash
+agent-ws sync /path/to/project --dry-run
+```
+
+Apply only after reviewing the preview:
+
+```bash
+agent-ws sync /path/to/project --apply
+```
+
+`sync --apply` is conservative and must not overwrite active instruction files or memory, but it is still an applying maintenance command. Prefer `--dry-run` first whenever you are unsure what the project state is or what will be validated.
 
 ## Install and update model
 
