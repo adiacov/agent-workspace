@@ -123,12 +123,13 @@ New initialization does not create `.agent/`, `.agent/templates/`, or `bin/agent
 
 Agent Workspace uses one canonical current-context entrypoint per repository:
 
-- `STATE.md`: current status, active phase/spec/task, next action, blockers, and explicit pointers to relevant deeper docs. Agents should read this first and follow only relevant pointers.
+- `STATE.md`: current status, active work, next action, blockers, and explicit pointers to relevant deeper docs. Agents should read this first and follow only relevant pointers.
 - `PROJECT.md`: stable project identity, purpose, users, boundaries, non-goals, and principles. Read it when that stable scope is needed, not by default for every task.
-- `specs/<feature>/...`: feature-specific implementation context. Read these only when `STATE.md` points to them or the user request is clearly about that feature.
+- Task artifacts from planning tools: task-specific context. Read these only when `STATE.md` points to them or the user request is clearly about that task.
 - `DECISIONS.md` or `MEMORY.md`: optional durable history or memory. These are not required for every task.
+- `sessions/pending/`: raw recovery checkpoints. Agents should check for these at startup, extract only durable state, then archive processed files.
 
-Agents should not blindly read unrelated historical specs, decisions, or old context files by default.
+Agents should classify the request before loading broad project context and use the smallest useful context set. They should not blindly read unrelated historical task artifacts, decisions, or old context files by default.
 
 ## Metadata and ownership
 

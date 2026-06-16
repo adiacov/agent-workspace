@@ -5,7 +5,7 @@ This repository uses file-based instructions and memory.
 Before performing meaningful work:
 
 1. Read `WORKFLOWS.md` and follow it as the primary workflow authority.
-2. Read context and memory files according to `WORKFLOWS.md`.
+2. Classify the request and load only the context required by `WORKFLOWS.md`.
 3. For coding or implementation work, read and follow `ENGINEERING.md` if present.
 
 When work is completed:

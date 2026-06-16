@@ -6,7 +6,7 @@ Single canonical current-context entrypoint for this repository.
 
 Not defined yet.
 
-## Active phase/spec/task
+## Active work
 
 Not defined yet.
 
@@ -21,5 +21,6 @@ Not defined yet.
 ## Relevant deeper docs
 
 Read these only when they are relevant to the current task or explicitly requested.
+Keep this list limited to active work. Remove completed-work pointers when work is closed.
 
-- Add active specs, plans, decisions, or docs here.
+- Add active task docs, decisions, or other relevant docs here.
