@@ -10,6 +10,7 @@ See [CHANGELOG.md](CHANGELOG.md) for release history.
 - [Commands](#commands)
 - [What gets created in a project](#what-gets-created-in-a-project)
 - [Context model](#context-model)
+- [Metadata and ownership](#metadata-and-ownership)
 - [Synchronization for existing global projects](#synchronization-for-existing-global-projects)
 - [Install and update model](#install-and-update-model)
 - [Migration from the older project-local model](#migration-from-the-older-project-local-model)
@@ -18,13 +19,15 @@ See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 ## Primary quickstart
 
-From this repository checkout, install the command for your user:
+Install the command for your user. From a repository checkout, run:
 
 ```bash
 ./install.sh
 export PATH="$HOME/.local/bin:$PATH"
 agent-ws help
 ```
+
+For public GitHub install, see [Install and update model](#install-and-update-model).
 
 Initialize the current project:
 
@@ -55,9 +58,9 @@ Choose commands by what they operate on:
 | Create Agent Workspace files in a project | `init` | one project |
 | Add another agent entrypoint to a project | `add-agent` | one project |
 | Inspect project health or template differences | `status`, `audit`, `diff` | one or more projects |
-| Maintain an already-modern Agent Workspace project | `sync` | one project metadata/baselines |
+| Maintain an already-modern Agent Workspace project | `sync` | one project metadata |
 | Convert an old `.agent/` project to the global model | `migrate` | one legacy project |
-| Update the installed `agent-ws` command and global templates | `update` | user-level installation |
+| Update the installed `agent-ws` command and global templates | `update` | user-level installation, not project files |
 
 ```bash
 agent-ws init [project-name|path] --profile general --agents pi --no-prompt
@@ -100,7 +103,7 @@ agent-ws sync [path] --dry-run
 agent-ws sync [path] --apply
 ```
 
-Maintains one project that already uses the global Agent Workspace model. It validates project metadata/template references and comparison baselines. It does not update the installed `agent-ws` command, does not migrate legacy `.agent/` projects, and does not overwrite active instruction files or memory.
+Maintains one project that already uses the global Agent Workspace model. It validates project metadata and template references. It does not update the installed `agent-ws` command, does not migrate legacy `.agent/` projects, and does not overwrite active instruction files or memory.
 
 ```bash
 agent-ws update [--version VERSION]
@@ -182,7 +185,9 @@ Ownership boundary:
 
 ## Synchronization for existing global projects
 
-Use `sync` only for projects already initialized with the global Agent Workspace model and `.agent-workspace/workspace.json`. It maintains project metadata/baselines for that project. It does not update the installed `agent-ws` command and is not for older `.agent/` project-local migrations.
+Use `sync` for project-level maintenance after a project already has `.agent-workspace/workspace.json`. It validates metadata and template references for that one project.
+
+Do not use `sync` to update the installed tool; use `agent-ws update` for that. Do not use `sync` for older `.agent/` projects; use `migrate` for those.
 
 Preview synchronization first:
 
@@ -202,17 +207,22 @@ agent-ws sync /path/to/project --apply
 
 The intended product model is a global/user-level `agent-ws` command that can be run from anywhere. Projects do not receive a project-local command copy.
 
+Updating the installed tool and maintaining project files are separate steps:
+
+1. use `agent-ws update` to update the installed command and global templates;
+2. use `agent-ws sync --dry-run /path/to/project` when you want to inspect maintenance for an existing project.
+
 ### Public install
 
-Public GitHub install support installs the latest stable GitHub release/tag by default, stages the payload, validates it, and activates it only after validation succeeds:
+Public GitHub install installs the latest stable GitHub release/tag by default. The installer stages the payload, validates it, and activates it only after validation succeeds:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/install.sh | bash
 ```
 
-The public installer URL is `https://raw.githubusercontent.com/adiacov/agent-workspace/main/install.sh`. It points at `install.sh` in the default branch; the installer resolves and installs the latest stable GitHub release/tag. The first public release must have a stable tag matching `VERSION` before true remote GitHub validation.
+The public installer URL is `https://raw.githubusercontent.com/adiacov/agent-workspace/main/install.sh`. It points at `install.sh` in the default branch; the installer resolves and installs the latest stable GitHub release/tag.
 
-Until the final install URL is published, install from a checkout:
+For local development or testing from a checkout, run:
 
 ```bash
 ./install.sh
