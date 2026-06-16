@@ -11,6 +11,7 @@ Template context-efficiency release.
 - Reduced default memory, repository, and historical task-artifact loading to only when relevant.
 - Updated adapter templates to load only context required by `WORKFLOWS.md`.
 - Clarified `STATE.md` as active-work context with cleanup guidance for completed-work pointers.
+- Added a tag-based GitHub Actions release workflow that validates `VERSION`, changelog notes, smoke tests, and integration tests before creating a GitHub release.
 
 ## v0.1.0 - 2026-06-11
 
