@@ -16,11 +16,11 @@ make_release_archive "$new_version" "$archive_dir" >/dev/null
 before="$($prefix/bin/agent-ws version)"
 
 AGENT_WS_TEST_RELEASES="$new_version" AGENT_WS_UPDATE_BASE_URL="file://$archive_dir" \
-  "$prefix/bin/agent-ws" update >update.out
+  "$prefix/bin/agent-ws" update >"$TEST_TMPDIR/update.out"
 
 after="$($prefix/bin/agent-ws version)"
 [ "$after" = "agent-ws $new_version" ] || fail "expected updated version $new_version, got $after"
-assert_contains "updated agent-ws" update.out
-assert_contains "$before" update.out
-assert_contains "$new_version" update.out
+assert_contains "updated agent-ws" "$TEST_TMPDIR/update.out"
+assert_contains "$before" "$TEST_TMPDIR/update.out"
+assert_contains "$new_version" "$TEST_TMPDIR/update.out"
 assert_executable "$prefix/bin/agent-ws"

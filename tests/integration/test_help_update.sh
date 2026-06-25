@@ -10,8 +10,8 @@ trap cleanup_test_workspace EXIT
 
 prefix="$(make_install_prefix "$TEST_TMPDIR")"
 "$ROOT/install.sh" --prefix "$prefix" >/dev/null
-"$prefix/bin/agent-ws" help update >help.out
+"$prefix/bin/agent-ws" help update >"$TEST_TMPDIR/help.out"
 
-assert_contains 'Usage: agent-ws update' help.out
-assert_contains '--version version' help.out
-assert_contains 'preserves the current command' help.out
+assert_contains 'Usage: agent-ws update' "$TEST_TMPDIR/help.out"
+assert_contains '--version version' "$TEST_TMPDIR/help.out"
+assert_contains 'preserves the current command' "$TEST_TMPDIR/help.out"

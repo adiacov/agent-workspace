@@ -14,12 +14,12 @@ before="$($prefix/bin/agent-ws version)"
 
 set +e
 AGENT_WS_TEST_RELEASES="v0.2.0" AGENT_WS_UPDATE_BASE_URL="file://$TEST_TMPDIR/missing" \
-  "$prefix/bin/agent-ws" update >update.out 2>&1
+  "$prefix/bin/agent-ws" update >"$TEST_TMPDIR/update.out" 2>&1
 status=$?
 set -e
 
 [ "$status" -ne 0 ] || fail 'update should fail when archive is missing'
 after="$($prefix/bin/agent-ws version)"
 [ "$before" = "$after" ] || fail 'failed update changed active version'
-assert_contains 'update failed during download' update.out
-assert_contains 'preserved current command' update.out
+assert_contains 'update failed during download' "$TEST_TMPDIR/update.out"
+assert_contains 'preserved current command' "$TEST_TMPDIR/update.out"

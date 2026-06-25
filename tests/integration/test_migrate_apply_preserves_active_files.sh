@@ -13,13 +13,13 @@ printf 'brainstorm memory\n' > "$LEGACY/BRAINSTORM.md"
 touch "$LEGACY/bin/agent-workspace"
 before_agents="$(sha256sum "$LEGACY/AGENTS.md" | awk '{print $1}')"
 before_state="$(sha256sum "$LEGACY/STATE.md" | awk '{print $1}')"
-"$TMPBIN/bin/agent-ws" migrate --apply "$LEGACY" >migrate.out
+"$TMPBIN/bin/agent-ws" migrate --apply "$LEGACY" >"$TMPBIN/migrate.out"
 after_agents="$(sha256sum "$LEGACY/AGENTS.md" | awk '{print $1}')"
 after_state="$(sha256sum "$LEGACY/STATE.md" | awk '{print $1}')"
 test "$before_agents" = "$after_agents" || fail 'AGENTS.md changed during migration'
 test "$before_state" = "$after_state" || fail 'STATE.md changed during migration'
-assert_contains 'migration: apply' migrate.out
-assert_contains 'preserved active files and context' migrate.out
+assert_contains 'migration: apply' "$TMPBIN/migrate.out"
+assert_contains 'preserved active files and context' "$TMPBIN/migrate.out"
 assert_file_exists "$LEGACY/.agent-workspace/workspace.json"
 python3 - "$LEGACY/.agent-workspace/workspace.json" <<'PY'
 import json, sys

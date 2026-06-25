@@ -17,7 +17,7 @@ AGENT_WS_FORCE_REMOTE=1 \
 AGENT_WS_PREFIX="$prefix" \
 AGENT_WS_VERSION="$version" \
 AGENT_WS_INSTALL_BASE_URL="file://$archive_dir" \
-  "$ROOT/install.sh" >install.out
+  "$ROOT/install.sh" >"$TEST_TMPDIR/install.out"
 
-assert_contains "selected version: $version" install.out
+assert_contains "selected version: $version" "$TEST_TMPDIR/install.out"
 assert_version_file_value "$version" "$prefix/share/agent-ws/VERSION"

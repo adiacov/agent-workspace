@@ -15,8 +15,8 @@ make_release_archive "$pinned" "$archive_dir" >/dev/null
 "$ROOT/install.sh" --prefix "$prefix" >/dev/null
 
 AGENT_WS_TEST_RELEASES="v0.2.0 $pinned" AGENT_WS_UPDATE_BASE_URL="file://$archive_dir" \
-  "$prefix/bin/agent-ws" update --version "$pinned" >update.out
+  "$prefix/bin/agent-ws" update --version "$pinned" >"$TEST_TMPDIR/update.out"
 
-assert_contains "selected version: $pinned" update.out
-"$prefix/bin/agent-ws" version >version.out
-assert_contains "agent-ws $pinned" version.out
+assert_contains "selected version: $pinned" "$TEST_TMPDIR/update.out"
+"$prefix/bin/agent-ws" version >"$TEST_TMPDIR/version.out"
+assert_contains "agent-ws $pinned" "$TEST_TMPDIR/version.out"

@@ -11,5 +11,5 @@ trap cleanup_test_workspace EXIT
 prefix="$(make_install_prefix "$TEST_TMPDIR")"
 "$ROOT/install.sh" --prefix "$prefix" >/dev/null
 
-"$prefix/bin/agent-ws" version >version.out
-assert_contains "agent-ws $(current_repo_version)" version.out
+"$prefix/bin/agent-ws" version >"$TEST_TMPDIR/version.out"
+assert_contains "agent-ws $(current_repo_version)" "$TEST_TMPDIR/version.out"
