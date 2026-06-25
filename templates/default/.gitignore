@@ -6,6 +6,9 @@
 # Agent Workspace legacy local cache
 .agent/
 
+# Transient handoff outbox (delivered downstream, not project history)
+HANDOFF.md
+
 # Local/private identity, memory, or secrets
 MEMORY.md
 DECISIONS.local.md

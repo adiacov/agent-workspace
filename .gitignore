@@ -9,6 +9,9 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Transient handoff outbox (delivered downstream, not project history)
+HANDOFF.md
+
 # Local/private identity or secrets
 LOCAL.md
 PRIVATE.md
