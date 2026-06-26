@@ -79,8 +79,8 @@ Commands:
   status      Show current project status
   audit       Audit one or more projects
   discover    Discover Agent Workspace projects
-  diff        Compare active files with templates
-  sync        Conservative maintenance
+  diff        Show incoming template changes (baseline to template)
+  sync        Merge template changes into a project
   version     Show installed command version
   update      Update the global command
   migrate     Preview/apply legacy migration
@@ -159,8 +159,10 @@ USAGE
     diff) cat <<'USAGE'
 Usage: agent-ws diff [path]
 
-Performs read-only comparison of active generated files with global templates.
-Reports stale metadata, unavailable templates, and unknown mappings without modifying files.
+Shows the incoming template delta for framework files: what the current templates
+would bring in relative to the project's baseline (the template version last synced).
+Read-only. Colorized on a TTY; plain under NO_COLOR or when piped. Content files
+(STATE.md, PROJECT.md) are not shown.
 
 Arguments:
   path                    Optional project path. Defaults to current directory.
@@ -169,13 +171,16 @@ USAGE
     sync) cat <<'USAGE'
 Usage: agent-ws sync [path] [--dry-run|--apply]
 
-Runs conservative maintenance for already-global Agent Workspace projects.
-It validates metadata/template references and comparison baselines. It is not legacy migration.
-It never overwrites active instruction files or memory.
+Merges published template changes into a project's framework files using a per-project
+baseline three-way merge. Template-only additions apply cleanly while local edits are
+preserved. Overlapping edits are refused: the live file is left untouched, a *.merge
+side-file with conflict markers is written, and the run exits non-zero (resolve it
+separately). Content files (STATE.md, PROJECT.md) are never synced. A project with no
+baseline is seeded on first sync. Backups are taken before writes and removed on success.
 
 Options:
-  --dry-run               Preview maintenance checks. Default.
-  --apply                 Apply only safe non-active-file updates.
+  --dry-run               Preview per-file outcomes without modifying anything. Default.
+  --apply                 Perform the merge (and seed baselines as needed).
 
 Use migrate, not sync, for older projects with .agent/ or bin/agent-workspace.
 USAGE

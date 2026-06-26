@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.1.3 - 2026-06-26
+
+Merge-based sync release.
+
+### Added
+
+- `agent-ws sync` now merges published template changes into a project's framework files using a per-project baseline three-way merge: template-only additions apply cleanly while local edits are preserved. Overlapping edits are refused — the live file is left untouched, a `*.merge` side-file with conflict markers is written, and the run exits non-zero. Content files (`STATE.md`, `PROJECT.md`) are never synced.
+- Per-project baseline snapshots under `.agent-workspace/baseline/` (the template version a project last synced from), written by `init` and refreshed after each successful sync. Baselines are gitignored local working artifacts; a project with no baseline is seeded on first sync (which also ensures the project `.gitignore` excludes the baseline and transient `*.bak`/`*.merge` files).
+- Backups are taken before each write and removed on success; a failed write restores the original.
+
+### Changed
+
+- `agent-ws diff` now shows the incoming template delta (baseline → current template) for framework files only, colorized on a TTY and plain under `NO_COLOR`, instead of an unscoped active-vs-template comparison.
+- Updated `README.md` ownership/synchronization sections and command help to describe the merge model.
+
 ## v0.1.2 - 2026-06-25
 
 Handoff producer contract release.

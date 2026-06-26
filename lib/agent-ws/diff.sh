@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Active-file/template comparison helpers for agent-ws.
+# Incoming-delta preview for sync: shows what the current templates would bring
+# into a project's framework files, i.e. baseline (template-then) -> template-now.
+# This is the meaningful input to `sync`, not an unscoped active-vs-template diff.
 
 agent_ws_metadata_generated_paths() {
   local metadata_file="$1"
@@ -16,16 +18,32 @@ for path, item in sorted((data.get('generatedFiles') or {}).items()):
 PY
 }
 
+# Emit a colorized unified diff unless NO_COLOR is set or output is not a TTY.
+agent_ws_diff_render() {
+  local from="$1" to="$2"
+  if [ -n "${NO_COLOR:-}" ] || [ ! -t 1 ]; then
+    diff -u "$from" "$to" || true
+    return 0
+  fi
+  diff -u "$from" "$to" | while IFS= read -r dline; do
+    case "$dline" in
+      '+++ '*|'--- '*) printf '\033[1m%s\033[0m\n' "$dline" ;;
+      '@@'*)           printf '\033[36m%s\033[0m\n' "$dline" ;;
+      '+'*)            printf '\033[32m%s\033[0m\n' "$dline" ;;
+      '-'*)            printf '\033[31m%s\033[0m\n' "$dline" ;;
+      *)               printf '%s\n' "$dline" ;;
+    esac
+  done
+  return 0
+}
+
 agent_ws_diff_project() {
-  local project_root="$1" metadata_file metadata_status template_dir line path template active template_file
+  local project_root="$1" metadata_file metadata_status template_dir line path kind template template_file baseline
   project_root="$(agent_ws_existing_project_root "$project_root")"
   metadata_file="$(agent_ws_metadata_path "$project_root")"
   metadata_status="$(agent_ws_metadata_status "$project_root")"
-  agent_ws_say "Diff: $project_root"
+  agent_ws_say "Diff (incoming template delta): $project_root"
   agent_ws_say "metadata: $metadata_status"
-  if [ "$metadata_status" = "stale" ]; then
-    agent_ws_say "note: active files remain project-owned"
-  fi
   [ -f "$metadata_file" ] || { agent_ws_say "no metadata mappings available"; return 0; }
   template_dir="$(agent_ws_template_source_dir 2>/dev/null || true)"
   [ -n "$template_dir" ] || { agent_ws_say "template source: missing"; return 0; }
@@ -33,18 +51,28 @@ agent_ws_diff_project() {
   while IFS= read -r line; do
     [ -n "$line" ] || continue
     path="${line%%|*}"
-    template="${line#*|}"
-    active="$project_root/$path"
+    local rest="${line#*|}"
+    kind="${rest%%|*}"
+    template="${rest#*|}"
     template_file="$template_dir/$template"
-    if [ ! -f "$active" ]; then
-      agent_ws_say "missing active: $path"
-    elif [ ! -f "$template_file" ]; then
+    baseline="$(agent_ws_baseline_path "$project_root" "$path")"
+
+    if ! agent_ws_file_is_framework "$kind"; then
+      continue
+    fi
+    if [ ! -f "$template_file" ]; then
       agent_ws_say "missing template: $template"
-    elif cmp -s "$template_file" "$active"; then
+      continue
+    fi
+    if [ ! -f "$baseline" ]; then
+      agent_ws_say "no baseline: $path (run 'agent-ws sync --apply' to seed)"
+      continue
+    fi
+    if cmp -s "$baseline" "$template_file"; then
       agent_ws_say "same: $path"
     else
-      agent_ws_say "diff: $path"
-      diff -u "$template_file" "$active" || true
+      agent_ws_say "incoming: $path"
+      agent_ws_diff_render "$baseline" "$template_file"
     fi
-  done <<< "$(agent_ws_metadata_generated_paths "$metadata_file" 2>/dev/null || true)"
+  done <<< "$(agent_ws_metadata_generated_records "$metadata_file" 2>/dev/null || true)"
 }

@@ -65,6 +65,16 @@ agent_ws_safe_copy_skip() {
   agent_ws_say "created $dst"
 }
 
+# Classify a generated file by its recorded kind. Framework files
+# (default/profile/adapter) are reconciled by sync; content files (context,
+# e.g. STATE.md/PROJECT.md) are seeded once and never synced.
+agent_ws_file_is_framework() {
+  case "$1" in
+    default|profile|adapter) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 agent_ws_default_template_files() {
   printf '%s\n' \
     'default/.gitignore:.gitignore:default' \
@@ -127,6 +137,10 @@ agent_ws_copy_template_spec() {
     cp "$src" "$dst"
     agent_ws_say "created $dst_rel"
     created=1
+  fi
+  # Snapshot a sync baseline for framework files so the project is sync-ready.
+  if agent_ws_file_is_framework "$kind"; then
+    agent_ws_baseline_write "$project_root" "$dst_rel" "$src" || true
   fi
   if [ -n "${AGENT_WS_GENERATED_RECORDS_FILE:-}" ]; then
     if [ "${AGENT_WS_RECORD_CREATED_ONLY:-0}" -eq 0 ] || [ "$created" -eq 1 ]; then

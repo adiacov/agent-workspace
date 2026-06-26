@@ -14,5 +14,8 @@ trap 'rm -rf "$TMPBIN" "$PROJECT"' EXIT
   after="$(sha256sum AGENTS.md | awk '{print $1}')"
   test "$before" = "$after" || fail 'sync --apply changed active file'
   assert_contains 'sync: apply' sync.out
-  assert_contains 'no safe active-file changes applied' sync.out
+  # No incoming template change since init: nothing to merge, active file (with
+  # its local edit) is left untouched.
+  assert_contains 'AGENTS.md: unchanged' sync.out
+  assert_contains 'sync complete' sync.out
 )
