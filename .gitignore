@@ -31,3 +31,6 @@ sessions/archive/*.md
 # Optional private durable memory or local decision notes
 MEMORY.md
 DECISIONS.local.md
+
+# Internal working notes / design reports (for us, not shipped or committed)
+reports/

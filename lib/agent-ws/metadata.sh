@@ -10,6 +10,25 @@ agent_ws_metadata_now() {
   date -u '+%Y-%m-%dT%H:%M:%SZ'
 }
 
+# Emit one "path|kind|template" line per generated file that has a template
+# mapping, sorted by path. Used by sync/diff to classify and reconcile files.
+agent_ws_metadata_generated_records() {
+  local metadata_file="$1"
+  python3 - "$metadata_file" <<'PY'
+import json, sys
+try:
+    data = json.load(open(sys.argv[1], encoding='utf-8'))
+except Exception:
+    sys.exit(1)
+for path, item in sorted((data.get('generatedFiles') or {}).items()):
+    template = item.get('template')
+    if not template:
+        continue
+    kind = item.get('kind') or ''
+    print(f'{path}|{kind}|{template}')
+PY
+}
+
 agent_ws_metadata_generated_json_from_records() {
   local records_file="$1"
   python3 - "$records_file" <<'PY'

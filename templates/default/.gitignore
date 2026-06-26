@@ -6,6 +6,11 @@
 # Agent Workspace legacy local cache
 .agent/
 
+# Agent Workspace sync working files (baseline snapshots + transient artifacts)
+.agent-workspace/baseline/
+*.bak
+*.merge
+
 # Transient handoff outbox (delivered downstream, not project history)
 HANDOFF.md
 

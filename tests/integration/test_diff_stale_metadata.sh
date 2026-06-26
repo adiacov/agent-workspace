@@ -18,5 +18,4 @@ open(p,'w').write(json.dumps(d))
 PY
   "$TMPBIN/bin/agent-ws" diff . >diff.out
   assert_contains 'metadata: stale' diff.out
-  assert_contains 'active files remain project-owned' diff.out
 )

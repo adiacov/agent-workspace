@@ -16,6 +16,7 @@ bash -n \
   "$ROOT/install.sh" \
   "$ROOT"/lib/agent-ws/*.sh \
   "$ROOT"/tests/integration/*.sh \
+  "$ROOT"/tests/unit/*.sh \
   "$ROOT"/tests/smoke/*.sh
 
 printf 'smoke: agent-ws help\n'
@@ -43,6 +44,12 @@ for smoke_test in "$ROOT"/tests/smoke/test_*.sh; do
   [ -x "$smoke_test" ] || continue
   printf 'smoke: %s\n' "$(basename "$smoke_test")"
   "$smoke_test"
+done
+
+for unit_test in "$ROOT"/tests/unit/test_*.sh; do
+  [ -f "$unit_test" ] || continue
+  printf 'unit: %s\n' "$(basename "$unit_test")"
+  bash "$unit_test"
 done
 
 printf 'smoke: ok\n'

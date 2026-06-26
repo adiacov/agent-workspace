@@ -57,8 +57,8 @@ Choose commands by what they operate on:
 | --- | --- | --- |
 | Create Agent Workspace files in a project | `init` | one project |
 | Add another agent entrypoint to a project | `add-agent` | one project |
-| Inspect project health or template differences | `status`, `audit`, `diff` | one or more projects |
-| Maintain an already-modern Agent Workspace project | `sync` | one project metadata |
+| Inspect project health or incoming template changes | `status`, `audit`, `diff` | one or more projects |
+| Merge published template changes into a project | `sync` | one project's framework files |
 | Convert an old `.agent/` project to the global model | `migrate` | one legacy project |
 | Update the installed `agent-ws` command and global templates | `update` | user-level installation, not project files |
 
@@ -96,14 +96,14 @@ Scans explicit roots for likely Agent Workspace projects and reports strong or u
 agent-ws diff [path]
 ```
 
-Shows read-only differences between active generated files and available global templates.
+Shows the incoming template delta for framework files — what the current templates would bring in relative to each project's baseline (the template version it last synced from). Read-only; colorized on a TTY, plain under `NO_COLOR` or when piped. Content files (`STATE.md`, `PROJECT.md`) are not shown.
 
 ```bash
 agent-ws sync [path] --dry-run
 agent-ws sync [path] --apply
 ```
 
-Maintains one project that already uses the global Agent Workspace model. It validates project metadata and template references. It does not update the installed `agent-ws` command, does not migrate legacy `.agent/` projects, and does not overwrite active instruction files or memory.
+Merges published template changes into a project's framework files (`WORKFLOWS.md`, `ENGINEERING.md`, agent adapter files) using a per-project baseline three-way merge. Template-only additions apply cleanly while local edits are preserved. Overlapping edits are refused — the live file is left untouched, a `*.merge` side-file with conflict markers is written, and the run exits non-zero (resolve that file separately). Content files (`STATE.md`, `PROJECT.md`) are never synced. A project with no baseline is seeded on first sync. It does not update the installed `agent-ws` command and does not migrate legacy `.agent/` projects.
 
 ```bash
 agent-ws update [--version VERSION]
@@ -184,27 +184,45 @@ Ownership boundary:
 
 - Agent Workspace owns reusable mechanisms and global templates.
 - The target project owns final active instruction files and memory.
-- Active files may contain local project-specific edits and are preserved by default.
+- Active files may contain local project-specific edits and are preserved.
+
+`sync` relaxes this just enough to be useful: it merges template changes into framework files
+while preserving local edits (clean additions apply; overlapping edits are refused, never
+overwritten). To support this each project keeps a **baseline** — a snapshot of the template
+version it last synced from — under `.agent-workspace/baseline/`. The baseline is a local,
+gitignored working artifact (a fresh clone re-seeds it on first sync). Content files
+(`STATE.md`, `PROJECT.md`) remain seed-once and are never synced.
 
 ## Synchronization for existing global projects
 
-Use `sync` for project-level maintenance after a project already has `.agent-workspace/workspace.json`. It validates metadata and template references for that one project.
+After updating the global templates (`agent-ws update`), use `sync` from within a project to
+pull those template changes into the project's framework files. Typical flow:
 
-Do not use `sync` to update the installed tool; use `agent-ws update` for that. Do not use `sync` for older `.agent/` projects; use `migrate` for those.
+1. inspect the incoming delta: `agent-ws diff /path/to/project`;
+2. preview per-file outcomes: `agent-ws sync /path/to/project --dry-run`;
+3. apply: `agent-ws sync /path/to/project --apply`.
 
-Preview synchronization first:
+Do not use `sync` to update the installed tool; use `agent-ws update` for that. Do not use
+`sync` for older `.agent/` projects; use `migrate` for those.
+
+Preview first:
 
 ```bash
 agent-ws sync /path/to/project --dry-run
 ```
 
-Apply only after reviewing the preview:
+Apply after reviewing the preview:
 
 ```bash
 agent-ws sync /path/to/project --apply
 ```
 
-`sync --apply` is conservative and must not overwrite active instruction files or memory, but it is still an applying maintenance command. Prefer `--dry-run` first whenever you are unsure what the project state is or what will be validated.
+Per-file outcomes are reported as: `unchanged`, `updated`, `seeded` (baseline established),
+`conflicted` (refused — a `*.merge` side-file is written and the run exits non-zero),
+`skipped-content` (`STATE.md`/`PROJECT.md`), or `missing-active` / `missing-template`. On a
+clean run a backup is taken before each write and removed on success; if a write fails the
+original is restored. The first sync on a project created before this model establishes the
+baseline and applies nothing destructive that run.
 
 ## Install and update model
 

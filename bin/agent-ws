@@ -21,6 +21,8 @@ fi
 for agent_ws_module in \
   templates.sh \
   metadata.sh \
+  baseline.sh \
+  merge.sh \
   discovery.sh \
   audit.sh \
   diff.sh \
