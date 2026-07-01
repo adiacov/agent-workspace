@@ -26,17 +26,20 @@ See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 Pick the *shape* you need when you run `init` — the profile.
 
-**Building one thing?** Use `code`: one repo with its own memory and workflow.
+**One project** — a single repo with its own durable memory and workflow:
+
+- `general` — for any generic project: notes, research, planning, writing, a business or idea you're shaping.
+- `code` — for software projects.
 
 ```
-my-tool/                 one repo, one focus
-├── STATE.md             what's true now
-├── WORKFLOWS.md         how we work
-├── PROJECT.md           what this is
-└── ENGINEERING.md       (code profile) how we build
+my-project/
+├── STATE.md          what's true now
+├── WORKFLOWS.md      how we work
+├── PROJECT.md        what this is
+└── ENGINEERING.md    how we build   (code profile only)
 ```
 
-**Steering many things toward a goal** — a business, a job search, a handful of side-projects? Use `cockpit`: one place that remembers and coordinates the rest, pointing at each project without swallowing it.
+**Many projects at once** — use `cockpit`: one place that remembers and coordinates several separate project repos, pointing at each without swallowing it.
 
 ```
                  my-cockpit/            ← you steer from here
@@ -51,7 +54,7 @@ my-tool/                 one repo, one focus
  (own STATE.md)     (own STATE.md)     (own STATE.md)   each stands alone
 ```
 
-(`general` is `code` without the engineering guidance.) See [Advanced options](#advanced-options) for the full profile walkthrough.
+See [Advanced options](#advanced-options) for the full profile walkthrough.
 
 ## Primary quickstart
 
@@ -394,9 +397,9 @@ The migration helper preserves active instruction files and memory by default. A
 
 Supported profiles:
 
-- `general`: default memory and workflow files for a single project.
-- `code`: `general` plus engineering guidance in `ENGINEERING.md`. Choose this when you are building one thing in one repo.
-- `cockpit`: `general` plus a control-room layer for steering *many* separate project repos over time. Choose this when you are coordinating several projects toward a goal — business, career, study, side-projects — rather than building a single one.
+- `general`: core memory and workflow files for a single project. Choose this for any non-code project — notes, research, planning, writing, a business or idea you're shaping.
+- `code`: `general` plus engineering guidance in `ENGINEERING.md`. Choose this for software projects.
+- `cockpit`: `general` plus a control-room layer for steering *many* separate project repos over time. Choose this when you are coordinating several projects toward a goal — business, career, study, side-projects — rather than working inside a single one.
 
 The `cockpit` profile adds:
 
