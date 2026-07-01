@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.1.5 - 2026-07-01
+
+Documentation release.
+
+### Changed
+
+- `README.md`: lead with the problem and value (amnesiac agents, per-tool instruction files, drifting context) instead of a mechanism-first opening, and move "What you can build" below the Contents list.
+- `README.md`: clarify profile positioning — `general` for any generic (non-code) project (notes, research, planning, writing, a business or idea), `code` for software projects, `cockpit` for coordinating many projects; drop the backwards "general is code without the engineering guidance" framing.
+- `README.md`: keep the optional `checkpoint` tool mentioned only in "Complementary tools"; remove the `sessions/pending/` recovery-checkpoint bullet from the Context model.
+
 ## v0.1.4 - 2026-07-01
 
 Cockpit profile release.
