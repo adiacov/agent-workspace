@@ -2,195 +2,116 @@
 
 ## Status
 
-Draft for rewrite.
+Current. Describes the shipped global-CLI model. Supersedes the earlier project-local
+(`.agent/templates/`, `bin/agent-workspace`, `bootstrap.sh`) draft.
 
 ## Goal
 
-Agent Workspace bootstraps agent-specific instruction files and project context files into a target project using maintainable templates.
+Agent Workspace bootstraps agent-specific instruction files and project context files into a
+target project from maintainable templates, using a single globally-installed `agent-ws` command.
 
-The generated files should live where each supported agent actually expects to find them. There should be no hidden shared active instruction layer that agents are expected to discover indirectly.
+The generated files live where each supported agent actually expects to find them. There is no
+hidden shared active instruction layer that agents must discover indirectly.
 
 ## Core principles
 
 - Templates are the source of truth for generated content.
-- Shell scripts should orchestrate copying and prompting, not embed Markdown file contents.
-- Generated agent instruction files must be placed at the correct agent-specific auto-load locations.
-- No silent overwrites: existing generated files are skipped unless a future explicit overwrite command is added.
-- Keep setup portable and simple for users running a curl bootstrap command.
-- Keep local templates after initialization so `add-agent` can work later and users can edit templates locally.
+- Shell modules orchestrate copying, prompting, and reconciliation; they do not embed Markdown
+  file bodies.
+- Generated agent instruction files are placed at the correct agent-native auto-load locations.
+- No silent overwrites: existing generated files are skipped.
+- The tool is meaning-free: it copies scaffolding but never reads or maintains a project's own
+  content (its `STATE.md`, `PROJECT.md`, etc.).
+- One global command, installed once per user; projects do not carry a local CLI copy or a local
+  template cache.
 
-## Target project structure after initialization
+## Install and command model
 
-Example target project after running bootstrap/init:
+`agent-ws` is installed once per user (default under `~/.local`) via `install.sh` or the public
+`install.sh | bash` one-liner. Templates ship with the installed payload, not inside each project.
+Projects are initialized in place; they do not receive `.agent/`, `.agent/templates/`, or a
+`bin/agent-workspace` copy. The older project-local model is supported only through `agent-ws
+migrate`, which converts a legacy project to the global model while preserving project-owned files.
 
-```text
-.agent/
-  templates/
-    default/
-    adapters/
+## Profiles
 
-bin/
-  agent-workspace
+A profile selects the *shape* of scaffolding `init` creates:
 
-AGENTS.md        # if pi/codex selected
-CLAUDE.md        # if claude selected
-.cursor/rules/   # if cursor selected
-PROJECT.md
-STATE.md
-.gitignore
-```
+- `general`: the single-project core — `PROJECT.md`, `STATE.md`, `WORKFLOWS.md`, `.gitignore`.
+- `code`: `general` plus `ENGINEERING.md` (engineering guidance). For building one project.
+- `cockpit`: `general` plus a control-room layer for steering many separate project repos —
+  `PROJECTS.md` (project index), `PROFILE.md` (strategy/context), `WORKFLOWS-COCKPIT.md`
+  (control-room workflows), and a cross-cutting `STATE.md` variant. For coordinating projects
+  toward a goal rather than building a single one. Standalone (no profile stacking).
 
-Important: initialized target projects should not receive a root-level `templates/` directory. Repository templates are copied to `.agent/templates/` during initialization for local reuse by the CLI. Generated active instruction files themselves are not placed under `.agent/` unless a specific agent requires that location.
+The profile is recorded in `.agent-workspace/workspace.json`.
 
-## Active generated files
+## Generated (active) files
 
-Generated files are active files consumed by humans or agents. They should be placed at visible or agent-native locations:
+Active files are consumed by humans or agents, placed at visible or agent-native locations:
 
 - `AGENTS.md` for Pi and Codex-style agents
 - `CLAUDE.md` for Claude Code
 - `.cursor/rules/agent-workspace.mdc` for Cursor
-- `PROJECT.md` for stable project identity
-- `STATE.md` for the canonical current-context entrypoint
-- `.gitignore` for privacy-aware defaults; it should ignore `.agent/` and optional private files such as `MEMORY.md` by default
+- a custom instruction file at a user-chosen project-relative path (custom agent)
+- `PROJECT.md` (stable project identity), `STATE.md` (canonical current-context entrypoint)
+- `WORKFLOWS.md` (primary workflow authority), and `ENGINEERING.md` / cockpit files per profile
+- `.gitignore` with privacy-aware defaults
 
-There should not be generated active shared instruction files like `.agent/COLLABORATION.md`, `.agent/MEMORY.md`, or `.agent/WORKFLOWS.md` unless a future supported agent explicitly requires them.
+Existing active files are skipped, never silently overwritten.
 
-## Template storage model
+## Ownership model
 
-Repository templates live in:
+Each generated file is recorded with a `kind` that governs synchronization:
 
-```text
-templates/default/
-templates/adapters/
-```
+- `default` / `profile` / `adapter` are **framework** files: `agent-ws sync` reconciles published
+  template changes into them via a per-project gitignored baseline three-way merge, preserving
+  local edits.
+- `context` files (`PROJECT.md`, `STATE.md`, and the cockpit `PROJECTS.md` / `PROFILE.md`) are
+  **content**: seeded once and never synced or read by the tool.
 
-During bootstrap/init, templates are copied into the target project at:
+The base `WORKFLOWS.md` template is identical across all profiles; cockpit control-room workflows
+live in the companion `WORKFLOWS-COCKPIT.md` (a framework file), keeping the base untouched.
 
-```text
-.agent/templates/
-```
+## Supported agents
 
-This keeps the target project self-contained for later commands such as:
+| Agent  | Generated path                         |
+| ------ | -------------------------------------- |
+| pi     | `AGENTS.md`                            |
+| codex  | `AGENTS.md`                            |
+| claude | `CLAUDE.md`                            |
+| cursor | `.cursor/rules/agent-workspace.mdc`    |
+| custom | user-provided project-relative path    |
 
-```bash
-./bin/agent-workspace add-agent
-```
+## Commands
 
-Users may edit `.agent/templates/`, remove generated files, and rerun commands to regenerate customized outputs.
+- `init [path] --profile <general|code|cockpit> --agents <list> [--custom-path p] [--no-prompt]`
+  — create core files, profile files, selected agent files, and `workspace.json`. Prompts when
+  options are omitted and prompting is available.
+- `add-agent --agents <list> [--custom-path p]` — add an agent entrypoint to an existing project.
+- `status` / `audit` — report project health and expected-file presence per recorded profile.
+- `diff` / `sync` — preview / apply incoming template changes to framework files.
+- `migrate --dry-run|--apply` — convert a legacy project-local project to the global model.
+- `version` / `update` — report / update the installed command and global templates.
 
-## Supported agents table
-
-This table must be researched and verified before expanding support.
-
-| Agent | Generated path | Notes | Verification status |
-| --- | --- | --- | --- |
-| pi | `AGENTS.md` | Needs official verification. | TODO |
-| codex | `AGENTS.md` | Needs official verification. | TODO |
-| claude | `CLAUDE.md` | Needs official verification. | TODO |
-| cursor | `.cursor/rules/agent-workspace.mdc` | Needs official verification. | TODO |
-| custom | user-provided path | project root path. | N/A |
-
-## Command behavior
-
-### Bootstrap command
-
-The public bootstrap command is:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/adiacov/agent-workspace/main/bootstrap.sh | bash
-```
-
-NOTE: research similar commands for windows and macos (the two other popular OS)
-
-Expected behavior:
-
-1. Run init behavior in the current working directory.
-2. Ensure git exists for the target project using `git init` only if the current directory is not already inside a git work tree.
-3. Install/copy templates into `.agent/templates/`.
-4. Generate default files from `.agent/templates/default/`.
-5. Install local CLI at `bin/agent-workspace`.
-6. Ask which agent adapter(s) to generate.
-7. Generate selected agent files at the correct locations from `.agent/templates/adapters/`.
-
-### `./bin/agent-workspace init`
-
-Same behavior as bootstrap init, but using the local CLI. Documentation must state clearly when this command should be run - especially no need to run it after initial bootstrap with curl.
-
-### `./bin/agent-workspace add-agent`
-
-Expected behavior:
-
-1. Ensure `.agent/templates/` exists; if missing, stop and warn the user. Propose the user a recovery strategy see below `Expected behavior for custom agents`.
-2. Ask which agent adapter(s) to generate.
-3. Generate selected files from `.agent/templates/adapters/`.
-4. Skip existing files without overwriting.
-
-Expected behavior for custom agents:
-
-1. Ensure `.agent/templates/` exists; if missing, stop and warn the user.
-2. Ask for a project-root-relative output path, such as `INSTRUCTIONS.md` or `.my-agent/instructions.md`.
-3. Generate that file from `.agent/templates/adapters/custom/INSTRUCTIONS.md`.
-4. Skip the file if it already exists, without overwriting.
-
-Custom support is intentionally simple in the first version: it is a "copy this generic custom template to a user-chosen path" flow, not a reusable named adapter system.
-
-### `./bin/agent-workspace status`
-
-Show presence/missing status for:
-
-- `.agent/templates/`
-- `bin/agent-workspace`
-- `.gitignore`
-- `PROJECT.md`
-- `STATE.md`
-- `AGENTS.md`
-- `CLAUDE.md`
-- `.cursor/rules/agent-workspace.mdc`
-
-## Template layout proposal
+## Template layout
 
 ```text
 templates/
-  default/
-    .gitignore
-    PROJECT.md
-    STATE.md
+  default/       .gitignore, PROJECT.md, STATE.md, WORKFLOWS.md
+  profiles/
+    software/    ENGINEERING.md            # code profile
+    cockpit/     PROJECTS.md, PROFILE.md, STATE.md, WORKFLOWS-COCKPIT.md
   adapters/
-    pi/
-      AGENTS.md
-    codex/
-      AGENTS.md
-    claude/
-      CLAUDE.md
-    cursor/
-      .cursor/rules/agent-workspace.mdc
-    custom/
-      INSTRUCTIONS.md
+    pi/ codex/ claude/ cursor/ custom/
 ```
 
-## Rewrite plan
+Initialized projects do not receive a root-level `templates/` directory or a local template cache.
 
-1. Create and agree on this spec.
-2. Remove old script implementations.
-3. Clear README so it can be rewritten from the new model.
-4. Verify/reorganize templates to match the spec.
-5. Rewrite `bootstrap.sh` from scratch.
-6. Copy/sync `bootstrap.sh` into `bin/agent-workspace` or generate local CLI from the same script body.
-7. Test bootstrap in a clean temporary project.
-8. Test `add-agent` in the initialized temporary project.
-9. Test idempotency/no-overwrite behavior.
-10. Rewrite README from the final behavior.
+## Non-goals
 
-## Open questions
-
-- Should optional durable memory files such as `MEMORY.md` be generated by default or only by prompt?
-Do not generate them by default; `STATE.md` is the canonical current-context entrypoint.
-
-- Should `.gitignore` ignore `.agent/` and optional private files such as `MEMORY.md` by default?
-Yes.
-
-- Should `templates/` in the source repository include only files copied to `.agent/templates/`, or should the target project also get a visible root `templates/` copy?
-Only `.agent/templates/` is copied to target projects. Initialized target projects should not have root-level `templates/`.
-
-- Should there be an explicit `regenerate` or `overwrite` command in the future?
-Not for the first version. No-overwrite behavior keeps the tool safe. Users can delete generated files and rerun `init` or `add-agent` if they want regeneration; add overwrite support later only if real friction appears.
+- No project-local CLI copy or per-project template cache.
+- No tool-held registry of projects or project meaning; `PROJECTS.md` is a user-owned file.
+- No overwrite command; delete a generated file and rerun `init`/`add-agent` to regenerate.
+- No external session capture/recovery wiring inside any profile (see the optional, independent
+  `checkpoint` companion tool documented in the README).

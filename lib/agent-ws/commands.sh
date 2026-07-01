@@ -72,6 +72,7 @@ Primary flow:
 
 Non-interactive flow:
   agent-ws init --profile code --agents pi --no-prompt
+  agent-ws init --profile cockpit --agents pi --no-prompt
 
 Commands:
   init        Initialize a project workspace
@@ -95,14 +96,17 @@ agent_ws_command_usage() {
   case "$command" in
     help) agent_ws_usage ;;
     init) cat <<'USAGE'
-Usage: agent-ws init [project-name|path] [--profile general|code] [--agents list] [--custom-path path] [--no-prompt]
+Usage: agent-ws init [project-name|path] [--profile general|code|cockpit] [--agents list] [--custom-path path] [--no-prompt]
 
 Initializes the current directory or creates and initializes a named project directory.
 Creates default files, selected agent files, and .agent-workspace/workspace.json.
 Existing active files are skipped, not overwritten.
 
 Options:
-  --profile general|code   Project type. general creates core workflow/context files; code also creates ENGINEERING.md.
+  --profile general|code|cockpit
+                          Project type. general creates core workflow/context files; code also
+                          creates ENGINEERING.md; cockpit adds a control-room layer over many
+                          projects (PROJECTS.md, PROFILE.md, WORKFLOWS-COCKPIT.md, cockpit STATE.md).
   --agents list           Agent adapters to create. Supports pi, codex, claude, cursor, custom. Commas or spaces are accepted.
   --custom-path path      Project-relative output path for the custom agent adapter.
   --no-prompt             Non-interactive mode. Requires --profile and --agents.
@@ -234,7 +238,7 @@ agent_ws_parse_args() {
   while [ "$#" -gt 0 ]; do
     case "$1" in
       --profile)
-        [ "$#" -ge 2 ] || agent_ws_die "--profile requires a value" "choose --profile general or --profile code."
+        [ "$#" -ge 2 ] || agent_ws_die "--profile requires a value" "choose --profile general, code, or cockpit."
         AGENT_WS_PROFILE="$2"; shift 2 ;;
       --agents)
         [ "$#" -ge 2 ] || agent_ws_die "--agents requires a value" "provide a comma-separated or space-separated agent list."
@@ -288,10 +292,10 @@ agent_ws_prompt_read() {
 
 agent_ws_prompt_profile() {
   local value
-  value="$(agent_ws_prompt_read 'Project profile [general/code] (general): ')"
+  value="$(agent_ws_prompt_read 'Project profile [general/code/cockpit] (general): ')"
   case "${value:-general}" in
-    general|code) printf '%s\n' "${value:-general}" ;;
-    *) agent_ws_die "unsupported profile: $value" "choose general or code." ;;
+    general|code|cockpit) printf '%s\n' "${value:-general}" ;;
+    *) agent_ws_die "unsupported profile: $value" "choose general, code, or cockpit." ;;
   esac
 }
 
@@ -449,12 +453,12 @@ agent_ws_cmd_init() {
 
   if [ -z "$profile" ]; then
     if [ "$AGENT_WS_NO_PROMPT" -eq 1 ]; then
-      agent_ws_die "--profile is required with --no-prompt" "provide --profile general or --profile code."
+      agent_ws_die "--profile is required with --no-prompt" "provide --profile general, code, or cockpit."
     fi
-    agent_ws_can_prompt || agent_ws_die "--profile is required when prompting is unavailable" "provide --profile general or --profile code."
+    agent_ws_can_prompt || agent_ws_die "--profile is required when prompting is unavailable" "provide --profile general, code, or cockpit."
     profile="$(agent_ws_prompt_profile)"
   fi
-  [ "$profile" = "general" ] || [ "$profile" = "code" ] || agent_ws_die "unsupported profile: $profile" "choose --profile general or --profile code."
+  [ "$profile" = "general" ] || [ "$profile" = "code" ] || [ "$profile" = "cockpit" ] || agent_ws_die "unsupported profile: $profile" "choose --profile general, code, or cockpit."
   if [ -z "$agents" ]; then
     if [ "$AGENT_WS_NO_PROMPT" -eq 1 ]; then
       agent_ws_die "--agents is required with --no-prompt" "provide --agents pi, codex, claude, cursor, or custom."
@@ -483,7 +487,7 @@ agent_ws_cmd_init() {
   agent_ws_say "initializing $project_root"
   records_file="$(mktemp)"
   AGENT_WS_GENERATED_RECORDS_FILE="$records_file"
-  agent_ws_generate_default_files "$project_root"
+  agent_ws_generate_default_files "$project_root" "$profile"
   agent_ws_generate_profile_files "$project_root" "$profile"
   agent_ws_generate_agent_files "$project_root" "$agents" "$AGENT_WS_CUSTOM_PATH"
   unset AGENT_WS_GENERATED_RECORDS_FILE

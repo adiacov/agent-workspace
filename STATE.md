@@ -4,13 +4,31 @@ Single canonical current-context entrypoint for this repository.
 
 ## Current status
 
-`v0.1.3` is the last released tag — RELEASED: merge-based `sync` merged to `main` (merge commit
-`8858dcc`, feat `8b962d2`) and tagged `v0.1.3` (VERSION = `v0.1.3`, CI auto-release). Working
-tree clean. No active work in flight.
+`v0.1.3` is the last released tag (merge-based sync). Feature `004-cockpit-profile` is
+IMPLEMENTED on branch `004-cockpit-profile` (VERSION bumped to `v0.1.4`, not yet committed/
+merged/tagged). Full suite green: smoke + 4 unit + 48 integration pass, zero repo pollution.
+Uncommitted — pending commit + merge to `main` + tag `v0.1.4`.
 
 ## Active work
 
-None in flight. The `003-sync-template-merge` redesign shipped in `v0.1.3`.
+`cockpit` profile — a third `agent-ws init` profile alongside `general`/`code`, scaffolding a
+control-room over many project repos. IMPLEMENTED on branch `004-cockpit-profile`; spec-kit
+artifacts under `specs/004-cockpit-profile/`.
+
+What shipped: new `cockpit` profile generates `PROJECTS.md`, `PROFILE.md`, `WORKFLOWS-COCKPIT.md`
+(control-room workflows) plus a cross-cutting `STATE.md` variant, on top of the `general` core.
+Mechanism gaps closed in `lib/agent-ws/templates.sh`: `agent_ws_default_template_files` is now
+profile-aware (cockpit swaps the `STATE.md` *source*, destination/kind unchanged — the override);
+`agent_ws_profile_template_files` gained a `cockpit)` branch (the augmentation). `WORKFLOWS.md`
+base template is untouched (companion-file approach). `context` kinds for PROJECTS/PROFILE/STATE
+(never synced); `WORKFLOWS-COCKPIT.md` is a `profile`/framework file (synced like ENGINEERING.md).
+Wired through commands.sh (prompt/validation/help/example), migrate.sh, and audit (no edit needed).
+Templates live in `templates/profiles/cockpit/`. Docs: README top-of-file use-case visuals +
+cockpit walkthrough + optional `checkpoint` note; `SPEC.md` rewritten to the current global-CLI
+model. Open questions resolved: strategy file = `PROFILE.md`; augmentation = companion file;
+cockpit = standalone (no stacking).
+
+Next: commit branch, merge to `main`, tag `v0.1.4` (CI auto-releases).
 
 ## History — merge-based sync (shipped in v0.1.3)
 
@@ -58,7 +76,8 @@ one function.
 
 ## Next action (for the next session)
 
-- No pending action. `v0.1.3` is released and the tree is clean. Await the next request.
+- Commit branch `004-cockpit-profile`, merge to `main`, tag `v0.1.4` (CI auto-releases).
+- The section below is `v0.1.3` history, retained for context only.
 - Optional: adopt `v0.1.3` merge-based sync in remaining sibling projects via `agent-ws sync --apply`.
 
 ## Relevant deeper docs

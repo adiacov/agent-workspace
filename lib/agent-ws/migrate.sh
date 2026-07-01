@@ -8,7 +8,7 @@ agent_ws_migrate_has_file() {
 
 agent_ws_migrate_preserved_files() {
   local project_root="$1" rel
-  for rel in AGENTS.md CLAUDE.md .cursor/rules/agent-workspace.mdc PROJECT.md STATE.md MEMORY.md BRAINSTORM.md WORKFLOWS.md ENGINEERING.md; do
+  for rel in AGENTS.md CLAUDE.md .cursor/rules/agent-workspace.mdc PROJECT.md STATE.md MEMORY.md BRAINSTORM.md WORKFLOWS.md ENGINEERING.md PROJECTS.md PROFILE.md WORKFLOWS-COCKPIT.md; do
     if agent_ws_migrate_has_file "$project_root" "$rel"; then
       printf '%s\n' "$rel"
     fi
@@ -27,6 +27,9 @@ agent_ws_migrate_generated_records() {
       STATE.md) kind="context"; template="default/STATE.md" ;;
       WORKFLOWS.md) kind="default"; template="default/WORKFLOWS.md" ;;
       ENGINEERING.md) kind="profile"; template="profiles/software/ENGINEERING.md" ;;
+      PROJECTS.md) kind="context"; template="profiles/cockpit/PROJECTS.md" ;;
+      PROFILE.md) kind="context"; template="profiles/cockpit/PROFILE.md" ;;
+      WORKFLOWS-COCKPIT.md) kind="profile"; template="profiles/cockpit/WORKFLOWS-COCKPIT.md" ;;
     esac
     [ -n "$template" ] && printf '%s|%s|%s|%s\n' "$rel" "$kind" "$template" "$agent" >> "$records_file"
   done < <(agent_ws_migrate_preserved_files "$project_root")

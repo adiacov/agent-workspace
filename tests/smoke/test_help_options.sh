@@ -11,7 +11,7 @@ check_help() {
   }
 }
 
-check_help init '--profile general|code'
+check_help init '--profile general|code|cockpit'
 check_help init '--agents list'
 check_help init '--no-prompt'
 check_help add-agent '--custom-path path'

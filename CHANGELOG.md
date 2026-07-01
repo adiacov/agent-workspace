@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.1.4 - 2026-07-01
+
+Cockpit profile release.
+
+### Added
+
+- New `cockpit` profile for `agent-ws init`, alongside `general` and `code`. Where `code` builds one project, `cockpit` scaffolds a control-room over many separate project repos: `PROJECTS.md` (project index), `PROFILE.md` (strategy/context), `WORKFLOWS-COCKPIT.md` (control-room workflows — cross-project one-way-dependency rule, explore→build→reflect loop, optional handoff-ingest ritual), and a cross-cutting `STATE.md` variant. All files ship as neutral, user-owned placeholder scaffolding; the tool never reads or maintains their content.
+- `cockpit` file kinds: `PROJECTS.md`/`PROFILE.md`/`STATE.md` are `context` (seeded once, never synced); `WORKFLOWS-COCKPIT.md` is a framework file reconciled by `sync` like `ENGINEERING.md`.
+
+### Changed
+
+- Profile selection (flag, interactive prompt, `--no-prompt` validation, help/usage, examples, and error hints) now accepts and documents `cockpit`; invalid-profile errors list all three profiles.
+- `agent-ws migrate` recognizes `PROJECTS.md`, `PROFILE.md`, and `WORKFLOWS-COCKPIT.md` as preserved, template-mapped files.
+- `README.md`: added a top-of-file "What you can build" visual (one-project vs. cockpit shapes) with a one-line choosing rule, a full `cockpit` profile walkthrough under "Advanced options", and an optional, independent `checkpoint` "Complementary tools" note.
+- `SPEC.md`: rewritten to describe the current global-CLI model and three profiles, removing the obsolete project-local (`.agent/templates/`, `bin/agent-workspace`, `bootstrap.sh`) draft.
+
+### Unchanged
+
+- `general` and `code` init output and metadata are identical to the prior release; the base `WORKFLOWS.md` template is untouched.
+
 ## v0.1.3 - 2026-06-26
 
 Merge-based sync release.

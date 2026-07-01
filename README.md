@@ -4,8 +4,40 @@ Agent Workspace standardizes project setup for AI-assisted development. It provi
 
 See [CHANGELOG.md](CHANGELOG.md) for release history.
 
+## What you can build
+
+*Building one thing? Use `code`. Steering many things toward a goal? Use `cockpit` — one place that remembers and coordinates the rest.*
+
+**One project (`general` / `code`)**
+
+```
+my-tool/                 one repo, one focus
+├── STATE.md             what's true now
+├── WORKFLOWS.md         how we work
+├── PROJECT.md           what this is
+└── ENGINEERING.md       (code profile) how we build
+```
+
+**A cockpit coordinating several projects (`cockpit`)**
+
+```
+                 my-cockpit/            ← you steer from here
+                 ├── PROJECTS.md        index of everything below
+                 ├── PROFILE.md         your goals + context
+                 ├── STATE.md           current focus (cross-project)
+                 └── WORKFLOWS.md        + control-room workflows
+                        │
+      ┌─────────────────┼─────────────────┐
+      ▼                 ▼                 ▼
+ ../project-a       ../project-b       ../project-c   ← separate repos,
+ (own STATE.md)     (own STATE.md)     (own STATE.md)   each stands alone
+```
+
+See [Advanced options](#advanced-options) for the full profile walkthrough.
+
 ## Contents
 
+- [What you can build](#what-you-can-build)
 - [Primary quickstart](#primary-quickstart)
 - [Commands](#commands)
 - [What gets created in a project](#what-gets-created-in-a-project)
@@ -135,6 +167,7 @@ Depending on profile and selected agents, `agent-ws init` creates active project
 - `STATE.md`
 - `.gitignore`
 - `ENGINEERING.md` for the `code` profile
+- `PROJECTS.md`, `PROFILE.md`, and `WORKFLOWS-COCKPIT.md` for the `cockpit` profile (with a cross-cutting `STATE.md` variant)
 - `AGENTS.md` for Pi/Codex-style agents
 - `CLAUDE.md` for Claude Code
 - `.cursor/rules/agent-workspace.mdc` for Cursor
@@ -159,6 +192,12 @@ Agent Workspace uses one canonical current-context entrypoint per repository:
 Agents should classify the request before loading broad project context and use the smallest useful context set. They should not blindly read unrelated historical task artifacts, decisions, or old context files by default.
 
 A downstream workspace may later ingest and drain `HANDOFF.md`; the producer contract in `WORKFLOWS.md` stays generic and never names a specific consumer.
+
+## Complementary tools
+
+An Agent Workspace project is, by design, a collaboration between a human and AI agents. A common failure mode of that collaboration is *losing work* when a session ends, is compacted, or the user switches agents.
+
+**checkpoint** — a safety net for agent sessions. Working with a coding agent is amnesiac: when a session ends or is compacted, the context of what you were doing is gone. [`checkpoint`](https://github.com/adiacov/checkpoint) captures your git state and recent conversation at the end of a session so your next session — in any supported agent — can pick up where you left off. It is optional and independent of `agent-workspace`; nothing here installs, configures, or depends on it. Install it separately if you want that protection, and see its README for setup and usage.
 
 ## Metadata and ownership
 
@@ -352,8 +391,22 @@ The migration helper preserves active instruction files and memory by default. A
 
 Supported profiles:
 
-- `general`: default memory and workflow files
-- `code`: includes engineering guidance in `ENGINEERING.md`
+- `general`: default memory and workflow files for a single project.
+- `code`: `general` plus engineering guidance in `ENGINEERING.md`. Choose this when you are building one thing in one repo.
+- `cockpit`: `general` plus a control-room layer for steering *many* separate project repos over time. Choose this when you are coordinating several projects toward a goal — business, career, study, side-projects — rather than building a single one.
+
+The `cockpit` profile adds:
+
+- `PROJECTS.md` — an index of the projects the cockpit coordinates (name, one-line purpose, coarse status, path to each project's own repo). The cockpit points at each project's own `STATE.md`; it does not hold per-project implementation detail.
+- `PROFILE.md` — the strategy/context layer: background, goals, constraints, and preferences for what you are steering. Ships with neutral placeholder content.
+- `WORKFLOWS-COCKPIT.md` — control-room workflows that augment the base `WORKFLOWS.md`: the cross-project one-way-dependency rule (cockpit → projects, never the reverse), the explore→build→reflect loop (explore in the cockpit, build in a separate project repo, return to reflect), and an optional handoff-ingest ritual.
+- a cross-cutting `STATE.md` variant: current focus and coarse per-project status pointing at each repo's own `STATE.md`, rather than a single project's active state.
+
+A cockpit indexes and reasons about sibling projects, but each sibling repo stays understandable on its own and never depends on the cockpit. Create a cockpit with:
+
+```bash
+agent-ws init --profile cockpit --agents pi --no-prompt
+```
 
 Supported agents:
 

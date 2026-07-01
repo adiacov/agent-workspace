@@ -75,11 +75,19 @@ agent_ws_file_is_framework() {
   esac
 }
 
+# Core files every project gets. Profile-aware: some profiles override the
+# *source* of a default file while keeping its destination and kind (e.g.
+# cockpit swaps STATE.md for a cross-cutting index variant). Destinations stay
+# constant so audit can enumerate expected files without knowing the profile.
 agent_ws_default_template_files() {
+  local profile="${1:-}" state_src='default/STATE.md'
+  case "$profile" in
+    cockpit) state_src='profiles/cockpit/STATE.md' ;;
+  esac
   printf '%s\n' \
     'default/.gitignore:.gitignore:default' \
     'default/PROJECT.md:PROJECT.md:context' \
-    'default/STATE.md:STATE.md:context' \
+    "$state_src:STATE.md:context" \
     'default/WORKFLOWS.md:WORKFLOWS.md:default'
 }
 
@@ -88,7 +96,17 @@ agent_ws_profile_template_files() {
   case "$profile" in
     ''|general) return 0 ;;
     code) printf '%s\n' 'profiles/software/ENGINEERING.md:ENGINEERING.md:profile' ;;
-    *) agent_ws_die "unsupported profile: $profile" "choose 'general' or 'code'." ;;
+    cockpit)
+      # Coordination layer over the general core. PROJECTS.md/PROFILE.md are
+      # user-owned content (seeded once, never synced); WORKFLOWS-COCKPIT.md is
+      # a framework file reconciled by sync like ENGINEERING.md. The cockpit
+      # STATE.md override is supplied by agent_ws_default_template_files.
+      printf '%s\n' \
+        'profiles/cockpit/PROJECTS.md:PROJECTS.md:context' \
+        'profiles/cockpit/PROFILE.md:PROFILE.md:context' \
+        'profiles/cockpit/WORKFLOWS-COCKPIT.md:WORKFLOWS-COCKPIT.md:profile'
+      ;;
+    *) agent_ws_die "unsupported profile: $profile" "choose 'general', 'code', or 'cockpit'." ;;
   esac
 }
 
@@ -150,14 +168,14 @@ agent_ws_copy_template_spec() {
 }
 
 agent_ws_generate_default_files() {
-  local project_root="$1" spec rel dst kind
+  local project_root="$1" profile="${2:-}" spec rel dst kind
   while IFS= read -r spec; do
     [ -n "$spec" ] || continue
     IFS=: read -r rel dst kind <<EOF
 $spec
 EOF
     agent_ws_copy_template_spec "$project_root" "$rel" "$dst" "$kind" ""
-  done <<< "$(agent_ws_default_template_files)"
+  done <<< "$(agent_ws_default_template_files "$profile")"
 }
 
 agent_ws_generate_profile_files() {
