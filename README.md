@@ -1,39 +1,12 @@
 # agent-workspace
 
-Agent Workspace standardizes project setup for AI-assisted development. It provides a global `agent-ws` command, reusable templates, context files, and agent-specific instruction entrypoints.
+**Give your AI coding agents a memory and a consistent way of working — one that survives across sessions, across tools, and across projects.**
+
+AI agents start every session amnesiac: they don't know what your project is, what you decided last time, or how you like to work — and each tool (Claude, Cursor, Codex, Pi…) looks for its own instruction file. So you re-explain the same context over and over, and it drifts.
+
+`agent-ws init` fixes that with one command. It scaffolds a few plain-Markdown files — what the project *is* (`PROJECT.md`), what's *true right now* (`STATE.md`), and *how you work* (`WORKFLOWS.md`) — and wires up the entrypoint each agent you use already reads. Every session, any agent picks up the same durable context, so the project stays coherent no matter which tool or how much time has passed. The files are yours; the tool copies scaffolding and never reads or edits your content.
 
 See [CHANGELOG.md](CHANGELOG.md) for release history.
-
-## What you can build
-
-*Building one thing? Use `code`. Steering many things toward a goal? Use `cockpit` — one place that remembers and coordinates the rest.*
-
-**One project (`general` / `code`)**
-
-```
-my-tool/                 one repo, one focus
-├── STATE.md             what's true now
-├── WORKFLOWS.md         how we work
-├── PROJECT.md           what this is
-└── ENGINEERING.md       (code profile) how we build
-```
-
-**A cockpit coordinating several projects (`cockpit`)**
-
-```
-                 my-cockpit/            ← you steer from here
-                 ├── PROJECTS.md        index of everything below
-                 ├── PROFILE.md         your goals + context
-                 ├── STATE.md           current focus (cross-project)
-                 └── WORKFLOWS.md        + control-room workflows
-                        │
-      ┌─────────────────┼─────────────────┐
-      ▼                 ▼                 ▼
- ../project-a       ../project-b       ../project-c   ← separate repos,
- (own STATE.md)     (own STATE.md)     (own STATE.md)   each stands alone
-```
-
-See [Advanced options](#advanced-options) for the full profile walkthrough.
 
 ## Contents
 
@@ -48,6 +21,37 @@ See [Advanced options](#advanced-options) for the full profile walkthrough.
 - [Migration from the older project-local model](#migration-from-the-older-project-local-model)
 - [Advanced options](#advanced-options)
 - [Templates](#templates)
+
+## What you can build
+
+Pick the *shape* you need when you run `init` — the profile.
+
+**Building one thing?** Use `code`: one repo with its own memory and workflow.
+
+```
+my-tool/                 one repo, one focus
+├── STATE.md             what's true now
+├── WORKFLOWS.md         how we work
+├── PROJECT.md           what this is
+└── ENGINEERING.md       (code profile) how we build
+```
+
+**Steering many things toward a goal** — a business, a job search, a handful of side-projects? Use `cockpit`: one place that remembers and coordinates the rest, pointing at each project without swallowing it.
+
+```
+                 my-cockpit/            ← you steer from here
+                 ├── PROJECTS.md        index of everything below
+                 ├── PROFILE.md         your goals + context
+                 ├── STATE.md           current focus (cross-project)
+                 └── WORKFLOWS.md        + control-room workflows
+                        │
+      ┌─────────────────┼─────────────────┐
+      ▼                 ▼                 ▼
+ ../project-a       ../project-b       ../project-c   ← separate repos,
+ (own STATE.md)     (own STATE.md)     (own STATE.md)   each stands alone
+```
+
+(`general` is `code` without the engineering guidance.) See [Advanced options](#advanced-options) for the full profile walkthrough.
 
 ## Primary quickstart
 
