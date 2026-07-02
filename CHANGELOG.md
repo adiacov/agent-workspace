@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.3.0 - 2026-07-02
+
+Fleet-awareness release: the tool now remembers your projects and can fix them with one command.
+
+### Added
+
+- **Project registry**: projects register themselves globally (one absolute path per line in `${XDG_DATA_HOME:-~/.local/share}/agent-ws/projects`) whenever a command touches them and finds valid metadata (`init`, `migrate --apply`, `status`, `audit`, `sync`, `heal`). The registry stores paths only, never project meaning; `discover` never writes it.
+- **`agent-ws projects`**: lists every registered project with a one-word state (`in-sync`, `outdated`, `incomplete`, `legacy`, `unmanaged`, …) and the recommended fix. Entries whose directory no longer exists are pruned on listing.
+- **`agent-ws heal [path]`**: brings a project to a healthy state with one preview-first command, composing the existing steps in order — adopt if legacy/unmanaged (migrate), recreate missing files from templates (existing files are never overwritten), then sync (seed baselines / merge template changes). Defaults to `--dry-run` showing the plan. It never guesses: uninitialized directories, unreadable metadata, and merge conflicts are reported with instructions instead of auto-resolved.
+
+### Fixed
+
+- `agent-ws discover` reports project roots instead of every matching directory: once a directory matches, its subtree is pruned, and the tool's own artifact dirs (`.agent-workspace/`, `.agent/`) are skipped — so template caches, baselines, and build output no longer appear as separate matches.
+
 ## v0.2.0 - 2026-07-02
 
 Output usability release: every command now explains itself and tells you what to run next.
