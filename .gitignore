@@ -34,3 +34,6 @@ DECISIONS.local.md
 
 # Internal working notes / design reports (for us, not shipped or committed)
 reports/
+.agent-workspace/baseline/
+*.bak
+*.merge

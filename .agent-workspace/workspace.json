@@ -1,0 +1,35 @@
+{
+  "agents": [
+    "pi"
+  ],
+  "createdAt": "2026-07-02T05:20:38Z",
+  "generatedFiles": {
+    "AGENTS.md": {
+      "agent": "pi",
+      "kind": "adapter",
+      "template": "adapters/pi/AGENTS.md"
+    },
+    "ENGINEERING.md": {
+      "kind": "profile",
+      "template": "profiles/software/ENGINEERING.md"
+    },
+    "PROJECT.md": {
+      "kind": "context",
+      "template": "default/PROJECT.md"
+    },
+    "STATE.md": {
+      "kind": "context",
+      "template": "default/STATE.md"
+    },
+    "WORKFLOWS.md": {
+      "kind": "default",
+      "template": "default/WORKFLOWS.md"
+    }
+  },
+  "profile": "code",
+  "schemaVersion": 1,
+  "templateRevision": "unknown",
+  "toolName": "agent-ws",
+  "toolVersion": "unknown",
+  "updatedAt": "2026-07-02T05:20:38Z"
+}
