@@ -50,10 +50,11 @@ The profile is recorded in `.agent-workspace/workspace.json`.
 
 Active files are consumed by humans or agents, placed at visible or agent-native locations:
 
-- `AGENTS.md` for Pi and Codex-style agents
-- `CLAUDE.md` for Claude Code
-- `.cursor/rules/agent-workspace.mdc` for Cursor
-- a custom instruction file at a user-chosen project-relative path (custom agent)
+- `AGENTS.md` — the canonical instruction entrypoint shared by every supported agent
+  (pi, codex, and Cursor read it natively)
+- `CLAUDE.md` for Claude Code — a thin shim that imports `AGENTS.md` (`@AGENTS.md`)
+- a custom pointer file at a user-chosen project-relative path (custom agent), deferring
+  to `AGENTS.md`
 - `PROJECT.md` (stable project identity), `STATE.md` (canonical current-context entrypoint)
 - `WORKFLOWS.md` (primary workflow authority), and `ENGINEERING.md` / cockpit files per profile
 - `.gitignore` with privacy-aware defaults
@@ -75,13 +76,21 @@ live in the companion `WORKFLOWS-COCKPIT.md` (a framework file), keeping the bas
 
 ## Supported agents
 
-| Agent  | Generated path                         |
-| ------ | -------------------------------------- |
-| pi     | `AGENTS.md`                            |
-| codex  | `AGENTS.md`                            |
-| claude | `CLAUDE.md`                            |
-| cursor | `.cursor/rules/agent-workspace.mdc`    |
-| custom | user-provided project-relative path    |
+Every agent shares the canonical `AGENTS.md`; agents that cannot read it natively get a
+thin shim that defers to it.
+
+| Agent  | Generated path(s)                                            |
+| ------ | ------------------------------------------------------------ |
+| pi     | `AGENTS.md`                                                  |
+| codex  | `AGENTS.md`                                                  |
+| claude | `AGENTS.md` + `CLAUDE.md` (shim importing `@AGENTS.md`)      |
+| cursor | `AGENTS.md` (read natively; no `.cursor` rules file)         |
+| custom | `AGENTS.md` + pointer file at a user-provided relative path  |
+
+Pre-v0.4.0 projects may still record the retired per-agent templates
+(`adapters/pi/AGENTS.md`, `adapters/codex/AGENTS.md`, the cursor `.mdc`); readers upgrade
+those records on the fly and `sync --apply` persists the rewrite. A pre-existing
+`.cursor/rules/agent-workspace.mdc` is preserved but no longer template-managed.
 
 ## Commands
 
@@ -118,7 +127,8 @@ templates/
     software/    ENGINEERING.md            # code profile
     cockpit/     PROJECTS.md, PROFILE.md, STATE.md, WORKFLOWS-COCKPIT.md
   adapters/
-    pi/ codex/ claude/ cursor/ custom/
+    AGENTS.md    # canonical shared entrypoint
+    claude/ custom/    # shims deferring to AGENTS.md
 ```
 
 Initialized projects do not receive a root-level `templates/` directory or a local template cache.

@@ -17,6 +17,7 @@ trap 'rm -rf "$TMPBIN" "$PROJECT"' EXIT
   "$TMPBIN/bin/agent-ws" add-agent --agents claude --no-prompt >add.out
   assert_file_exists CLAUDE.md
   assert_contains 'created CLAUDE.md' add.out
+  assert_contains '@AGENTS.md' CLAUDE.md
   python3 - .agent-workspace/workspace.json <<'PY'
 import json, sys
 data=json.load(open(sys.argv[1], encoding='utf-8'))

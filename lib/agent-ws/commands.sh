@@ -167,8 +167,10 @@ Options:
                           Project type. general creates core workflow/context files; code also
                           creates ENGINEERING.md; cockpit adds a control-room layer over many
                           projects (PROJECTS.md, PROFILE.md, WORKFLOWS-COCKPIT.md, cockpit STATE.md).
-  --agents list           Agent adapters to create. Supports pi, codex, claude, cursor, custom. Commas or spaces are accepted.
-  --custom-path path      Project-relative output path for the custom agent adapter.
+  --agents list           Agents to support. Supports pi, codex, claude, cursor, custom. Commas or spaces are accepted.
+                          Every agent shares one canonical AGENTS.md; claude also gets a CLAUDE.md
+                          shim that imports it, and custom gets a pointer file at --custom-path.
+  --custom-path path      Project-relative output path for the custom agent pointer file.
   --no-prompt             Non-interactive mode. Requires --profile and --agents.
 
 Interactive behavior:
@@ -182,8 +184,10 @@ Adds one or more agent instruction entrypoints to an initialized project.
 Uses global templates, preserves existing files, and updates metadata for newly created files.
 
 Options:
-  --agents list           Agent adapters to add. Supports pi, codex, claude, cursor, custom. Commas or spaces are accepted.
-  --custom-path path      Project-relative output path for the custom agent adapter.
+  --agents list           Agents to add. Supports pi, codex, claude, cursor, custom. Commas or spaces are accepted.
+                          Every agent shares one canonical AGENTS.md; claude also gets a CLAUDE.md
+                          shim that imports it, and custom gets a pointer file at --custom-path.
+  --custom-path path      Project-relative output path for the custom agent pointer file.
   --no-prompt             Non-interactive mode. Requires an agent through --agents or positional argument.
 
 If no agent is provided and prompting is possible, add-agent asks which agent to add.

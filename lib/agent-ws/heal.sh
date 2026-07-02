@@ -22,7 +22,13 @@ agent_ws_heal_complete_files() {
   AGENT_WS_RECORD_CREATED_ONLY=1
   agent_ws_generate_default_files "$project_root" "$profile"
   agent_ws_generate_profile_files "$project_root" "$profile"
-  [ -n "${agents// /}" ] && agent_ws_generate_agent_files "$project_root" "$agents" ""
+  if [ -n "${agents// /}" ]; then
+    agent_ws_generate_agent_files "$project_root" "$agents" ""
+  else
+    # custom-only project: the custom destination is not recoverable, but the
+    # shared canonical AGENTS.md still is.
+    agent_ws_copy_template_spec "$project_root" 'adapters/AGENTS.md' 'AGENTS.md' 'adapter' ''
+  fi
   unset AGENT_WS_GENERATED_RECORDS_FILE
   unset AGENT_WS_RECORD_CREATED_ONLY
   generated_json="$(agent_ws_metadata_generated_json_from_records "$records_file")"

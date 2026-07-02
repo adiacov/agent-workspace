@@ -53,15 +53,23 @@ EOF
     printf '%s\n' "$dst"
   done <<< "$(agent_ws_profile_template_files "$profile")"
 
+  # Adapters can emit several files per agent and share destinations (the
+  # canonical AGENTS.md); dedupe the expected list. The custom destination is
+  # not recoverable from the agent name, but custom still implies AGENTS.md.
   while IFS= read -r agent; do
     [ -n "$agent" ] || continue
-    [ "$agent" = "custom" ] && continue
-    adapter="$(agent_ws_adapter_template "$agent")"
-    IFS=: read -r rel dst2 kind req <<EOF
+    if [ "$agent" = "custom" ]; then
+      printf 'AGENTS.md\n'
+      continue
+    fi
+    while IFS= read -r adapter; do
+      [ -n "$adapter" ] || continue
+      IFS=: read -r rel dst2 kind req <<EOF
 $adapter
 EOF
-    printf '%s\n' "$dst2"
-  done <<< "$(agent_ws_split_agents "$agents")"
+      printf '%s\n' "$dst2"
+    done <<< "$(agent_ws_adapter_template "$agent")"
+  done <<< "$(agent_ws_split_agents "$agents")" | awk '!seen[$0]++'
 }
 
 agent_ws_template_source_status() {

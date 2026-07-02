@@ -2,9 +2,9 @@
 
 **Give your AI coding agents a memory and a consistent way of working — one that survives across sessions, across tools, and across projects.**
 
-AI agents start every session amnesiac: they don't know what your project is, what you decided last time, or how you like to work — and each tool (Claude, Cursor, Codex, Pi…) looks for its own instruction file. So you re-explain the same context over and over, and it drifts.
+AI agents start every session amnesiac: they don't know what your project is, what you decided last time, or how you like to work. The industry has standardized *where* agents look for instructions — the open [AGENTS.md standard](https://agents.md) is read natively by Codex, Cursor, Gemini CLI, and most other tools — but not what goes in that file, how it stays current, or how it survives across sessions and repos.
 
-`agent-ws init` fixes that with one command. It scaffolds a few plain-Markdown files — what the project *is* (`PROJECT.md`), what's *true right now* (`STATE.md`), and *how you work* (`WORKFLOWS.md`) — and wires up the entrypoint each agent you use already reads. Every session, any agent picks up the same durable context, so the project stays coherent no matter which tool or how much time has passed. The files are yours; the tool copies scaffolding and never reads or edits your content.
+`agent-ws init` fixes that with one command. It scaffolds a few plain-Markdown files — what the project *is* (`PROJECT.md`), what's *true right now* (`STATE.md`), and *how you work* (`WORKFLOWS.md`) — and wires them to one canonical `AGENTS.md` entrypoint that every agent reads (agents that can't read it natively, like Claude Code, get a thin shim that imports it). Every session, any agent picks up the same durable context, so the project stays coherent no matter which tool or how much time has passed. The files are yours; the tool copies scaffolding and never reads or edits your content.
 
 See [CHANGELOG.md](CHANGELOG.md) for release history.
 
@@ -198,10 +198,10 @@ Depending on profile and selected agents, `agent-ws init` creates active project
 - `.gitignore`
 - `ENGINEERING.md` for the `code` profile
 - `PROJECTS.md`, `PROFILE.md`, and `WORKFLOWS-COCKPIT.md` for the `cockpit` profile (with a cross-cutting `STATE.md` variant)
-- `AGENTS.md` for Pi/Codex-style agents
-- `CLAUDE.md` for Claude Code
-- `.cursor/rules/agent-workspace.mdc` for Cursor
-- a custom instruction file at a project-relative path you choose
+- `AGENTS.md` — the canonical instruction entrypoint, shared by every selected agent
+  (pi, codex, and Cursor read it natively)
+- `CLAUDE.md` for Claude Code — a thin shim that imports `AGENTS.md`
+- a custom pointer file at a project-relative path you choose, deferring to `AGENTS.md`
 - `.agent-workspace/workspace.json`
 
 Existing active files are skipped, never silently overwritten.
@@ -444,6 +444,11 @@ Supported agents:
 - `claude`
 - `cursor`
 - `custom`
+
+All of them share the one canonical `AGENTS.md`. Selecting `pi`, `codex`, or `cursor` creates
+only `AGENTS.md` (those tools read it natively). Selecting `claude` also creates a `CLAUDE.md`
+shim that imports it (`@AGENTS.md`), and `custom` also creates a pointer file at your chosen
+path. Keep shared instructions in `AGENTS.md`; agent-specific notes go in that agent's shim.
 
 Non-interactive setup for scripts:
 

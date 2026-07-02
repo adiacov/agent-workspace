@@ -10,22 +10,75 @@ agent_ws_metadata_now() {
   date -u '+%Y-%m-%dT%H:%M:%SZ'
 }
 
+# Adapter records written before the canonical-AGENTS.md model (v0.4.0):
+# the per-agent pi/codex AGENTS.md templates collapsed into adapters/AGENTS.md,
+# and the cursor .mdc adapter was retired (Cursor reads AGENTS.md natively).
+# Readers remap these on the fly so pre-v0.4.0 projects keep syncing;
+# 'agent-ws sync --apply' persists the rewrite via
+# agent_ws_metadata_upgrade_adapter_records.
+AGENT_WS_LEGACY_ADAPTER_PY='
+LEGACY_SHARED = {"adapters/pi/AGENTS.md", "adapters/codex/AGENTS.md"}
+RETIRED = {"adapters/cursor/.cursor/rules/agent-workspace.mdc"}
+def upgrade_generated(gen):
+    changed = 0
+    for p in list(gen):
+        t = (gen[p] or {}).get("template")
+        if t in LEGACY_SHARED:
+            gen[p]["template"] = "adapters/AGENTS.md"
+            gen[p].pop("agent", None)
+            changed += 1
+        elif t in RETIRED:
+            del gen[p]
+            changed += 1
+    return changed
+'
+
 # Emit one "path|kind|template" line per generated file that has a template
-# mapping, sorted by path. Used by sync/diff to classify and reconcile files.
+# mapping, sorted by path, with legacy adapter records upgraded in the view.
+# Used by sync/diff to classify and reconcile files.
 agent_ws_metadata_generated_records() {
   local metadata_file="$1"
-  python3 - "$metadata_file" <<'PY'
+  python3 - "$metadata_file" <<PY
 import json, sys
+$AGENT_WS_LEGACY_ADAPTER_PY
 try:
     data = json.load(open(sys.argv[1], encoding='utf-8'))
 except Exception:
     sys.exit(1)
-for path, item in sorted((data.get('generatedFiles') or {}).items()):
+gen = data.get('generatedFiles') or {}
+upgrade_generated(gen)
+for path, item in sorted(gen.items()):
     template = item.get('template')
     if not template:
         continue
     kind = item.get('kind') or ''
     print(f'{path}|{kind}|{template}')
+PY
+}
+
+# Count (and with write=1, persist) the legacy adapter record upgrade for one
+# project. Prints the number of upgraded records.
+agent_ws_metadata_upgrade_adapter_records() {
+  local metadata_file="$1" write="${2:-0}"
+  python3 - "$metadata_file" "$write" <<PY
+import json, sys
+$AGENT_WS_LEGACY_ADAPTER_PY
+path, write = sys.argv[1], sys.argv[2] == '1'
+try:
+    data = json.load(open(path, encoding='utf-8'))
+except Exception:
+    print(0)
+    sys.exit(0)
+gen = data.get('generatedFiles') or {}
+changed = upgrade_generated(gen)
+if changed and write:
+    data['generatedFiles'] = gen
+    tmp = path + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as fh:
+        fh.write(json.dumps(data, indent=2, sort_keys=True) + '\n')
+    import os
+    os.replace(tmp, path)
+print(changed)
 PY
 }
 

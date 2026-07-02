@@ -99,6 +99,21 @@ agent_ws_sync_project() {
   agent_ws_say "template source: $template_dir"
   [ "$metadata_status" = "present" ] && agent_ws_registry_add "$project_root"
 
+  # Pre-v0.4.0 adapter records are upgraded to the canonical AGENTS.md model.
+  # Dry-run previews with the upgraded view (agent_ws_metadata_generated_records
+  # remaps on read); apply persists the rewrite.
+  local upgraded
+  if [ "$mode" = "apply" ]; then
+    upgraded="$(agent_ws_metadata_upgrade_adapter_records "$metadata_file" 1)"
+    [ "$upgraded" -gt 0 ] && agent_ws_say "adapter records: upgraded $upgraded record(s) to the canonical AGENTS.md model"
+  else
+    upgraded="$(agent_ws_metadata_upgrade_adapter_records "$metadata_file" 0)"
+    [ "$upgraded" -gt 0 ] && agent_ws_say "adapter records: $upgraded record(s) will be upgraded to the canonical AGENTS.md model on apply"
+  fi
+  if [ -e "$project_root/.cursor/rules/agent-workspace.mdc" ]; then
+    agent_ws_advise "Cursor reads AGENTS.md natively now; .cursor/rules/agent-workspace.mdc is no longer managed — delete it when convenient"
+  fi
+
   agent_ws_section "Files"
 
   local apply=0

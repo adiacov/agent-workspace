@@ -20,9 +20,10 @@ agent_ws_migrate_generated_records() {
   while IFS= read -r rel; do
     kind="default"; agent=""; template=""
     case "$rel" in
-      AGENTS.md) kind="adapter"; agent="pi"; template="adapters/pi/AGENTS.md" ;;
+      # AGENTS.md is the canonical shared adapter (no single owning agent);
+      # the retired cursor .mdc is preserved but no longer template-managed.
+      AGENTS.md) kind="adapter"; agent=""; template="adapters/AGENTS.md" ;;
       CLAUDE.md) kind="adapter"; agent="claude"; template="adapters/claude/CLAUDE.md" ;;
-      .cursor/rules/agent-workspace.mdc) kind="adapter"; agent="cursor"; template="adapters/cursor/.cursor/rules/agent-workspace.mdc" ;;
       PROJECT.md) kind="context"; template="default/PROJECT.md" ;;
       STATE.md) kind="context"; template="default/STATE.md" ;;
       WORKFLOWS.md) kind="default"; template="default/WORKFLOWS.md" ;;

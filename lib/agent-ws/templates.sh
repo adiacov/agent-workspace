@@ -110,16 +110,20 @@ agent_ws_profile_template_files() {
   esac
 }
 
+# Every supported agent shares one canonical AGENTS.md (pi, codex, and cursor
+# read it natively; claude imports it from a CLAUDE.md shim; custom points at
+# it from the chosen instruction file). Agents that need a shim emit a second
+# spec line, so callers must handle one spec per line.
 agent_ws_adapter_template() {
   local agent="$1" custom_path="${2:-}"
+  local shared='adapters/AGENTS.md:AGENTS.md:adapter:false'
   case "$agent" in
-    pi) printf '%s\n' 'adapters/pi/AGENTS.md:AGENTS.md:adapter:false' ;;
-    codex) printf '%s\n' 'adapters/codex/AGENTS.md:AGENTS.md:adapter:false' ;;
-    claude) printf '%s\n' 'adapters/claude/CLAUDE.md:CLAUDE.md:adapter:false' ;;
-    cursor) printf '%s\n' 'adapters/cursor/.cursor/rules/agent-workspace.mdc:.cursor/rules/agent-workspace.mdc:adapter:false' ;;
+    pi|codex|cursor) printf '%s\n' "$shared" ;;
+    claude) printf '%s\n' "$shared" 'adapters/claude/CLAUDE.md:CLAUDE.md:adapter:false' ;;
     custom)
       [ -n "$custom_path" ] || agent_ws_die "custom agent requires --custom-path" "provide a project-root-relative custom instruction path."
       agent_ws_validate_project_relative_path "$custom_path" >/dev/null
+      printf '%s\n' "$shared"
       printf '%s:%s:%s:%s\n' 'adapters/custom/INSTRUCTIONS.md' "$custom_path" 'adapter' 'true'
       ;;
     *) agent_ws_die "unsupported agent: $agent" "choose pi, codex, claude, cursor, or custom." ;;
@@ -201,33 +205,54 @@ EOF
   done <<< "$(agent_ws_profile_template_files "$profile")"
 }
 
+# Several agents legitimately share the same destination when it comes from
+# the same template (the canonical AGENTS.md); that is deduplicated, not a
+# conflict. Only the same destination from *different* templates is refused
+# (e.g. a custom path colliding with CLAUDE.md).
 agent_ws_agent_destination_conflict_check() {
-  local agents="$1" custom_path="${2:-}" agent spec rel dst kind requires_custom seen_file
+  local agents="$1" custom_path="${2:-}" agent spec rel dst kind requires_custom seen_file prev_rel
   seen_file="$(mktemp)"
   while IFS= read -r agent; do
     [ -n "$agent" ] || continue
-    spec="$(agent_ws_adapter_template "$agent" "$custom_path")"
-    IFS=: read -r rel dst kind requires_custom <<EOF
+    while IFS= read -r spec; do
+      [ -n "$spec" ] || continue
+      IFS=: read -r rel dst kind requires_custom <<EOF
 $spec
 EOF
-    if awk -F '|' -v dst="$dst" '$1 == dst { found=1 } END { exit found ? 0 : 1 }' "$seen_file"; then
-      rm -f "$seen_file"
-      agent_ws_die "destination conflict for $dst" "select agents one at a time or choose a custom path that does not collide."
-    fi
-    printf '%s|%s|%s\n' "$dst" "$agent" "$rel" >> "$seen_file"
+      prev_rel="$(awk -F '|' -v dst="$dst" '$1 == dst { print $2; exit }' "$seen_file")"
+      if [ -n "$prev_rel" ] && [ "$prev_rel" != "$rel" ]; then
+        rm -f "$seen_file"
+        agent_ws_die "destination conflict for $dst" "choose a custom path that does not collide with another agent file."
+      fi
+      [ -n "$prev_rel" ] || printf '%s|%s\n' "$dst" "$rel" >> "$seen_file"
+    done <<< "$(agent_ws_adapter_template "$agent" "$custom_path")"
   done <<< "$(agent_ws_split_agents "$agents")"
   rm -f "$seen_file"
 }
 
 agent_ws_generate_agent_files() {
-  local project_root="$1" agents="$2" custom_path="${3:-}" agent spec rel dst kind requires_custom
+  local project_root="$1" agents="$2" custom_path="${3:-}" agent spec rel dst kind requires_custom owner specs_file
   agent_ws_agent_destination_conflict_check "$agents" "$custom_path"
+  specs_file="$(mktemp)"
   while IFS= read -r agent; do
     [ -n "$agent" ] || continue
-    spec="$(agent_ws_adapter_template "$agent" "$custom_path")"
-    IFS=: read -r rel dst kind requires_custom <<EOF
+    while IFS= read -r spec; do
+      [ -n "$spec" ] || continue
+      IFS=: read -r rel dst kind requires_custom <<EOF
 $spec
 EOF
-    agent_ws_copy_template_spec "$project_root" "$rel" "$dst" "$kind" "$agent"
+      # The shared AGENTS.md belongs to all agents; record it unattributed and
+      # emit it once even when several selected agents map to it.
+      owner="$agent"
+      [ "$rel" = 'adapters/AGENTS.md' ] && owner=""
+      if ! awk -F '|' -v dst="$dst" '$1 == dst { found=1 } END { exit found ? 0 : 1 }' "$specs_file"; then
+        printf '%s|%s|%s|%s\n' "$dst" "$rel" "$kind" "$owner" >> "$specs_file"
+      fi
+    done <<< "$(agent_ws_adapter_template "$agent" "$custom_path")"
   done <<< "$(agent_ws_split_agents "$agents")"
+  while IFS='|' read -r dst rel kind owner; do
+    [ -n "$dst" ] || continue
+    agent_ws_copy_template_spec "$project_root" "$rel" "$dst" "$kind" "$owner"
+  done < "$specs_file"
+  rm -f "$specs_file"
 }
