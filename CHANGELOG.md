@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.1.6 - 2026-07-02
+
+Bugfix release.
+
+### Fixed
+
+- `agent-ws init <path>` now honors the parent-git-repo guard exactly like `agent-ws init` in the current directory; previously a named path silently initialized a nested project inside an existing repository.
+- `agent-ws init` validates the agent list (and the custom adapter path) before writing any files, so an unsupported `--agents` value can no longer leave a half-initialized project (core files without `workspace.json`).
+- `agent-ws sync` no longer misreads a Markdown setext heading underline (`=======`) in cleanly merged content as a conflict; conflict detection now requires labeled `<<<<<<< `/`>>>>>>> ` markers.
+- `agent-ws sync --apply` restores the `.bak` backups and removes the in-flight merge temp file if a run aborts partway, instead of leaving files partially updated. When a run ends with conflicts, the `.bak` files of successfully updated files are kept as a restore point (they are gitignored), matching the documented "removed on success" behavior.
+- `agent-ws update` without `--version` now resolves the latest stable release from the repository's real tags (via `git ls-remote`) and picks the semver maximum; previously it only consulted a test-only variable and always failed.
+- `agent-ws update` validates the staged candidate's version as a whole word, so expected `v0.1.1` no longer accepts a candidate reporting `v0.1.10`.
+- `--custom-path` rejects `:`, `|`, and whitespace, which would have corrupted internal template-spec and metadata records.
+- Internal: `agent_ws_abs_path` no longer creates directories as a side effect; `agent_ws_can_prompt` detects a detached stdin (no TTY, closed stdin) instead of always reporting that prompting is possible.
+
+### Added
+
+- Integration regression test (`tests/integration/test_bugfix_regressions.sh`) covering the init guard, no-partial-init, setext-underline merge, and semver-max release selection.
+
 ## v0.1.5 - 2026-07-01
 
 Documentation release.
