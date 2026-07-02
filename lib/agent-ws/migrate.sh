@@ -36,6 +36,19 @@ agent_ws_migrate_generated_records() {
   return 0
 }
 
+# Infer the profile from the preserved files instead of assuming general:
+# cockpit files win over ENGINEERING.md since a cockpit may also have one.
+agent_ws_migrate_detect_profile() {
+  local project_root="$1"
+  if [ -e "$project_root/WORKFLOWS-COCKPIT.md" ] || [ -e "$project_root/PROJECTS.md" ]; then
+    printf '%s\n' cockpit
+  elif [ -e "$project_root/ENGINEERING.md" ]; then
+    printf '%s\n' code
+  else
+    printf '%s\n' general
+  fi
+}
+
 agent_ws_migrate_detect_agents() {
   local project_root="$1" agents=""
   [ -e "$project_root/AGENTS.md" ] && agents="${agents} pi"
@@ -45,7 +58,7 @@ agent_ws_migrate_detect_agents() {
 }
 
 agent_ws_migrate_project() {
-  local project_root="$1" mode="$2" rel records_file generated_json agents
+  local project_root="$1" mode="$2" rel records_file generated_json agents profile
   project_root="$(agent_ws_existing_project_root "$project_root")"
 
   agent_ws_say "migration: $mode"
@@ -64,15 +77,16 @@ agent_ws_migrate_project() {
   done < <(agent_ws_migrate_preserved_files "$project_root")
 
   if [ ! -f "$(agent_ws_metadata_path "$project_root")" ]; then
+    profile="$(agent_ws_migrate_detect_profile "$project_root")"
     if [ "$mode" = "dry-run" ]; then
-      agent_ws_say "would create: .agent-workspace/workspace.json"
+      agent_ws_say "would create: .agent-workspace/workspace.json (profile: $profile)"
     else
       records_file="$(mktemp)"
       agent_ws_migrate_generated_records "$project_root" "$records_file"
       generated_json="$(agent_ws_metadata_generated_json_from_records "$records_file")"
       rm -f "$records_file"
       agents="$(agent_ws_migrate_detect_agents "$project_root")"
-      agent_ws_metadata_write "$project_root" "general" "$agents" "$generated_json"
+      agent_ws_metadata_write "$project_root" "$profile" "$agents" "$generated_json"
     fi
   else
     agent_ws_say "metadata: present"
