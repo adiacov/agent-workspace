@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.4.0 - 2026-07-02
+
+Canonical-AGENTS.md release: one instruction entrypoint shared by every supported agent.
+
+### Changed
+
+- **One source of truth**: every supported agent now shares one canonical `AGENTS.md` (the open [AGENTS.md standard](https://agents.md)). `pi`, `codex`, and `cursor` map to it directly (those tools read it natively); `claude` also gets a thin `CLAUDE.md` shim that imports it (`@AGENTS.md`); `custom` also gets a pointer file at the chosen path. Keep shared instructions in `AGENTS.md`; agent-specific notes go in the shim.
+- Selecting agents that share `AGENTS.md` together (e.g. `--agents pi,codex,cursor`) is deduplicated instead of refused; a destination conflict is now only reported when the same path would come from different templates (e.g. a `--custom-path` colliding with `CLAUDE.md`).
+- The per-agent `adapters/pi`/`adapters/codex` templates and the Cursor `.cursor/rules/agent-workspace.mdc` adapter are retired. Pre-v0.4.0 adapter records are upgraded transparently on read, and `sync --apply` persists the rewrite; a pre-existing `.mdc` file is preserved but no longer template-managed (sync suggests deleting it).
+- `heal` restores the shared `AGENTS.md` even for custom-only projects.
+
 ## v0.3.0 - 2026-07-02
 
 Fleet-awareness release: the tool now remembers your projects and can fix them with one command.
