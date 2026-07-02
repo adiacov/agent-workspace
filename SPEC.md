@@ -90,9 +90,24 @@ live in the companion `WORKFLOWS-COCKPIT.md` (a framework file), keeping the bas
   options are omitted and prompting is available.
 - `add-agent --agents <list> [--custom-path p]` — add an agent entrypoint to an existing project.
 - `status` / `audit` — report project health and expected-file presence per recorded profile.
+- `projects` — list globally registered projects with a one-word state each.
+- `heal [path] --dry-run|--apply` — bring a project to a healthy state by composing migrate,
+  missing-file regeneration, and sync; dry-run by default, never guesses (profile choice,
+  invalid metadata, and merge conflicts are reported, not auto-resolved).
+- `discover <root...>` — scan roots for project roots (subtrees of a match are pruned); used to
+  find projects that predate the registry, never writes it.
 - `diff` / `sync` — preview / apply incoming template changes to framework files.
 - `migrate --dry-run|--apply` — convert a legacy project-local project to the global model.
 - `version` / `update` — report / update the installed command and global templates.
+
+## Project registry
+
+The tool keeps a plain-text registry of managed projects at
+`${XDG_DATA_HOME:-~/.local/share}/agent-ws/projects` — one absolute path per line, nothing else.
+Projects self-register whenever a command touches them and confirms valid metadata (`init`,
+`migrate --apply`, `status`, `audit`, `sync`, `heal`). Listing prunes entries whose directory no
+longer exists. The registry records only *where* projects are, never what they mean —
+`PROJECTS.md` remains the user-owned place for project meaning.
 
 ## Template layout
 
@@ -111,7 +126,8 @@ Initialized projects do not receive a root-level `templates/` directory or a loc
 ## Non-goals
 
 - No project-local CLI copy or per-project template cache.
-- No tool-held registry of projects or project meaning; `PROJECTS.md` is a user-owned file.
+- No tool-held record of project *meaning*; the registry stores paths only, and `PROJECTS.md`
+  stays a user-owned file.
 - No overwrite command; delete a generated file and rerun `init`/`add-agent` to regenerate.
 - No external session capture/recovery wiring inside any profile (see the optional, independent
   `checkpoint` companion tool documented in the README).

@@ -88,6 +88,14 @@ After initialization, project metadata is stored at:
 .agent-workspace/workspace.json
 ```
 
+From then on the project is registered globally, so you can always see all your
+projects and their health in one place — and fix any of them with one command:
+
+```bash
+agent-ws projects        # every registered project, one line each with its state
+agent-ws heal <path>     # show how to make a project healthy; add --apply to do it
+```
+
 ## Commands
 
 Choose commands by what they operate on:
