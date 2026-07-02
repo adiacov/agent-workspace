@@ -173,8 +173,13 @@ agent_ws_copy_template_spec() {
     created=1
   fi
   # Snapshot a sync baseline for framework files so the project is sync-ready.
+  # Never overwrite an existing baseline of a skipped file: it records what the
+  # active file was generated from, and replacing it with the current template
+  # would erase a pending template delta (sync would report "unchanged").
   if agent_ws_file_is_framework "$kind"; then
-    agent_ws_baseline_write "$project_root" "$dst_rel" "$src" || true
+    if [ "$created" -eq 1 ] || ! agent_ws_baseline_exists "$project_root" "$dst_rel"; then
+      agent_ws_baseline_write "$project_root" "$dst_rel" "$src" || true
+    fi
   fi
   if [ -n "${AGENT_WS_GENERATED_RECORDS_FILE:-}" ]; then
     if [ "${AGENT_WS_RECORD_CREATED_ONLY:-0}" -eq 0 ] || [ "$created" -eq 1 ]; then
