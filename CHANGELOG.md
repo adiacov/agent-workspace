@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.4.1 - 2026-07-02
+
+### Fixed
+
+- `heal` no longer erases pending template deltas: recreating missing files used to rewrite the baselines of files it skipped (already present) to the current template, so the following sync reported `unchanged` and left the stale active file behind. Baselines are now written only for files actually created, or seeded when none exists yet.
+
 ## v0.4.0 - 2026-07-02
 
 Canonical-AGENTS.md release: one instruction entrypoint shared by every supported agent.
