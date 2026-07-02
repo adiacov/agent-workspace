@@ -9,7 +9,7 @@ trap 'rm -rf "$TMPBIN" "$LEGACY"' EXIT
 mkdir -p "$LEGACY/.agent" "$LEGACY/bin"
 touch "$LEGACY/bin/agent-workspace" "$LEGACY/AGENTS.md" "$LEGACY/STATE.md" "$LEGACY/BRAINSTORM.md"
 "$TMPBIN/bin/agent-ws" migrate --dry-run "$LEGACY" >"$TMPBIN/migrate.out"
-assert_contains 'migration: dry-run' "$TMPBIN/migrate.out"
+assert_contains 'Migration preview:' "$TMPBIN/migrate.out"
 assert_contains 'legacy: .agent/' "$TMPBIN/migrate.out"
 assert_contains 'legacy: bin/agent-workspace' "$TMPBIN/migrate.out"
 assert_contains 'preserve: AGENTS.md' "$TMPBIN/migrate.out"

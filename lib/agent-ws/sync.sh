@@ -71,25 +71,34 @@ agent_ws_sync_project() {
   metadata_file="$(agent_ws_metadata_path "$project_root")"
   metadata_status="$(agent_ws_metadata_status "$project_root")"
 
-  agent_ws_say "sync: $mode"
-  agent_ws_say "project: $project_root"
-  agent_ws_say "metadata: $metadata_status"
-
   if [ "$mode" != "dry-run" ] && [ "$mode" != "apply" ]; then
     agent_ws_die "unknown sync mode: $mode" "run 'agent-ws sync --dry-run' or 'agent-ws sync --apply'."
   fi
 
+  if [ "$mode" = "apply" ]; then
+    agent_ws_say "Sync: $project_root"
+  else
+    agent_ws_say "Sync preview: $project_root (dry-run; nothing will be modified)"
+  fi
+  agent_ws_say "metadata: $(agent_ws_metadata_status_gloss "$metadata_status")"
+
   if [ ! -f "$metadata_file" ]; then
-    agent_ws_say "no metadata mappings available"
+    agent_ws_say "nothing to sync: this project has no workspace metadata"
+    agent_ws_advise "adopt an existing project with: agent-ws migrate --dry-run, or set one up with: agent-ws init"
+    agent_ws_advice_flush
     return 0
   fi
 
   template_dir="$(agent_ws_template_source_dir 2>/dev/null || true)"
   if [ -z "$template_dir" ]; then
-    agent_ws_say "template source: missing"
+    agent_ws_say "template source: missing — the global templates cannot be found"
+    agent_ws_advise "reinstall agent-ws or set AGENT_WS_TEMPLATE_SOURCE_DIR"
+    agent_ws_advice_flush
     return 0
   fi
   agent_ws_say "template source: $template_dir"
+
+  agent_ws_section "Files"
 
   local apply=0
   [ "$mode" = "apply" ] && apply=1
@@ -112,15 +121,15 @@ agent_ws_sync_project() {
     template_file="$template_dir/$template"
 
     if ! agent_ws_file_is_framework "$kind"; then
-      agent_ws_say "$path: skipped-content"
+      agent_ws_say "  $path: skipped-content — your content file; sync never touches it"
       continue
     fi
     if [ ! -f "$template_file" ]; then
-      agent_ws_say "$path: missing-template"
+      agent_ws_say "  $path: missing-template — the installed templates no longer provide this file"
       continue
     fi
     if [ ! -f "$active" ]; then
-      agent_ws_say "$path: missing-active"
+      agent_ws_say "  $path: missing-active — tracked in metadata but missing from the project"
       missing_active=$((missing_active + 1))
       continue
     fi
@@ -135,9 +144,9 @@ agent_ws_sync_project() {
           agent_ws_ensure_gitignore "$project_root"
           seeded_any=1
         fi
-        agent_ws_say "$path: seeded"
+        agent_ws_say "  $path: seeded — baseline snapshot saved; this file is now sync-ready"
       else
-        agent_ws_say "$path: would-seed"
+        agent_ws_say "  $path: would-seed — first sync; a baseline snapshot would be saved"
         pending=$((pending + 1))
       fi
       continue
@@ -145,7 +154,7 @@ agent_ws_sync_project() {
 
     # Baseline present: if the template has no incoming change, nothing to do.
     if cmp -s "$baseline" "$template_file"; then
-      agent_ws_say "$path: unchanged"
+      agent_ws_say "  $path: unchanged — already up to date"
       continue
     fi
 
@@ -164,10 +173,10 @@ agent_ws_sync_project() {
       conflicts=$((conflicts + 1))
       if [ "$apply" -eq 1 ]; then
         mv "$merged" "$active.merge"
-        agent_ws_say "$path: conflicted (wrote $path.merge)"
+        agent_ws_say "  $path: conflicted — your edits and the template changed the same lines (wrote $path.merge)"
       else
         rm -f "$merged"
-        agent_ws_say "$path: would-conflict"
+        agent_ws_say "  $path: would-conflict — your edits and the template changed the same lines"
       fi
       AGENT_WS_SYNC_MERGED_TMP=""
       continue
@@ -180,7 +189,7 @@ agent_ws_sync_project() {
       if [ "$apply" -eq 1 ]; then
         agent_ws_baseline_write "$project_root" "$path" "$template_file"
       fi
-      agent_ws_say "$path: unchanged"
+      agent_ws_say "  $path: unchanged — already up to date"
       continue
     fi
 
@@ -188,10 +197,10 @@ agent_ws_sync_project() {
       agent_ws_atomic_write "$merged" "$active"
       AGENT_WS_SYNC_BACKUPS+=("$active")
       agent_ws_baseline_write "$project_root" "$path" "$template_file"
-      agent_ws_say "$path: updated"
+      agent_ws_say "  $path: updated — template changes merged; your local edits were kept"
     else
       rm -f "$merged"
-      agent_ws_say "$path: would-update"
+      agent_ws_say "  $path: would-update — template changes would merge cleanly with your edits"
       pending=$((pending + 1))
     fi
     AGENT_WS_SYNC_MERGED_TMP=""
@@ -215,13 +224,14 @@ agent_ws_sync_project() {
     agent_ws_advise "$missing_active tracked file(s) are missing from the project; restore them with: agent-ws init (existing files are never overwritten)"
   fi
 
+  agent_ws_section "Summary"
   if [ "$conflicts" -gt 0 ]; then
     if [ "$apply" -eq 1 ]; then
-      agent_ws_say "$conflicts file(s) conflicted; live files unchanged, see *.merge"
+      agent_ws_say "  $conflicts file(s) conflicted; your live files were left unchanged, see the *.merge side-files"
       agent_ws_advise "for each *.merge file: edit it to resolve the conflict markers, replace the live file with the result, delete the *.merge file, then re-run: agent-ws sync --apply"
       agent_ws_advice_flush
     else
-      agent_ws_say "$conflicts file(s) would conflict"
+      agent_ws_say "  $conflicts file(s) would conflict"
       agent_ws_advise "some of your edits overlap the template changes; running 'agent-ws sync --apply' will keep your files untouched and write *.merge files to resolve by hand"
       agent_ws_advice_flush
       return 0
@@ -229,11 +239,14 @@ agent_ws_sync_project() {
     return 1
   fi
 
-  if [ "$apply" -eq 0 ] && [ "$pending" -gt 0 ]; then
+  if [ "$apply" -eq 1 ]; then
+    agent_ws_say "  sync complete — the project matches the installed templates"
+  elif [ "$pending" -gt 0 ]; then
+    agent_ws_say "  preview only — $pending file(s) would change; nothing was modified"
     agent_ws_advise "apply the changes above with: agent-ws sync --apply"
+  else
+    agent_ws_say "  preview only — nothing to change; the project matches the installed templates"
   fi
-
-  agent_ws_say "sync complete"
   agent_ws_advice_flush
   return 0
 }

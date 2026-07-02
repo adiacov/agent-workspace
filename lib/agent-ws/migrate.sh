@@ -61,25 +61,38 @@ agent_ws_migrate_project() {
   local project_root="$1" mode="$2" rel records_file generated_json agents profile
   project_root="$(agent_ws_existing_project_root "$project_root")"
 
-  agent_ws_say "migration: $mode"
-  agent_ws_say "project: $project_root"
+  if [ "$mode" = "apply" ]; then
+    agent_ws_say "Migration: $project_root"
+  else
+    agent_ws_say "Migration preview: $project_root (dry-run; nothing will be modified)"
+  fi
 
+  agent_ws_section "Legacy signals"
+  local legacy_found=0
   if [ -d "$project_root/.agent" ]; then
-    agent_ws_say "legacy: .agent/"
+    agent_ws_say "  legacy: .agent/"
+    legacy_found=1
   fi
   if [ -e "$project_root/bin/agent-workspace" ]; then
-    agent_ws_say "legacy: bin/agent-workspace"
+    agent_ws_say "  legacy: bin/agent-workspace"
+    legacy_found=1
   fi
-  agent_ws_say "old project-local template caches are ignored"
+  if [ "$legacy_found" -eq 0 ]; then
+    agent_ws_say "  none found"
+  fi
+  agent_ws_say "  old project-local template caches are ignored"
 
+  agent_ws_section "Preserved files (your content; never modified)"
   while IFS= read -r rel; do
-    [ -n "$rel" ] && agent_ws_say "preserve: $rel"
+    [ -n "$rel" ] && agent_ws_say "  preserve: $rel"
   done < <(agent_ws_migrate_preserved_files "$project_root")
+
+  agent_ws_section "Actions"
 
   if [ ! -f "$(agent_ws_metadata_path "$project_root")" ]; then
     profile="$(agent_ws_migrate_detect_profile "$project_root")"
     if [ "$mode" = "dry-run" ]; then
-      agent_ws_say "would create: .agent-workspace/workspace.json (profile: $profile)"
+      agent_ws_say "  would create: .agent-workspace/workspace.json (profile: $profile)"
       agent_ws_advise "if this preview looks right, perform the migration with: agent-ws migrate --apply"
     else
       records_file="$(mktemp)"
@@ -90,21 +103,21 @@ agent_ws_migrate_project() {
       agent_ws_metadata_write "$project_root" "$profile" "$agents" "$generated_json"
     fi
   else
-    agent_ws_say "metadata: present"
+    agent_ws_say "  metadata: present — nothing to create; this project is already managed"
   fi
 
   if [ -e "$project_root/bin/agent-workspace" ]; then
     if [ "$mode" = "dry-run" ]; then
-      agent_ws_say "would remove: bin/agent-workspace"
+      agent_ws_say "  would remove: bin/agent-workspace"
       agent_ws_advise "if this preview looks right, perform the migration with: agent-ws migrate --apply"
     else
       rm -f "$project_root/bin/agent-workspace"
-      agent_ws_say "removed: bin/agent-workspace"
+      agent_ws_say "  removed: bin/agent-workspace"
     fi
   fi
 
   if [ "$mode" = "apply" ]; then
-    agent_ws_say "preserved active files and context"
+    agent_ws_say "  preserved active files and context"
     agent_ws_advise "make the project sync-ready (seed baseline snapshots) with: agent-ws sync --apply"
     agent_ws_advise "review the result with: agent-ws status"
   fi

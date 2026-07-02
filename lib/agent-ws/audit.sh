@@ -118,28 +118,41 @@ agent_ws_collect_project_advice() {
 }
 
 agent_ws_status_project() {
-  local project_root="$1" metadata_status template_status file missing_count=0
+  local project_root="$1" metadata_status template_status file missing_count=0 profile agents
   project_root="$(agent_ws_existing_project_root "$project_root")"
   metadata_status="$(agent_ws_metadata_status "$project_root")"
   template_status="$(agent_ws_template_source_status)"
 
   agent_ws_say "Status: $project_root"
-  agent_ws_say "metadata: $metadata_status"
-  agent_ws_say "template source: $template_status"
+  if [ "$metadata_status" = "present" ]; then
+    profile="$(agent_ws_audit_metadata_profile "$project_root")"
+    agents="$(agent_ws_audit_metadata_agents "$project_root")"
+    agent_ws_say "Profile: $profile (agents: ${agents:-none})"
+  fi
+
+  agent_ws_section "Workspace"
+  agent_ws_say "  metadata: $(agent_ws_metadata_status_gloss "$metadata_status")"
+  if [ "$template_status" = "present" ]; then
+    agent_ws_say "  template source: present"
+  else
+    agent_ws_say "  template source: missing — the global templates cannot be found"
+  fi
+
+  agent_ws_section "Files"
   while IFS= read -r file; do
     [ -n "$file" ] || continue
     if [ -e "$project_root/$file" ]; then
-      agent_ws_say "$file: present"
+      agent_ws_say "  $file: present"
     else
-      agent_ws_say "$file: missing"
+      agent_ws_say "  $file: missing"
       missing_count=$((missing_count + 1))
     fi
   done <<< "$(agent_ws_audit_expected_files "$project_root")"
   if [ -d "$project_root/.agent" ]; then
-    agent_ws_say "legacy: .agent/"
+    agent_ws_say "  legacy: .agent/ — leftover from the old project-local layout"
   fi
   if [ -e "$project_root/bin/agent-workspace" ]; then
-    agent_ws_say "legacy: bin/agent-workspace"
+    agent_ws_say "  legacy: bin/agent-workspace — leftover from the old project-local layout"
   fi
 
   agent_ws_collect_project_advice "$project_root" "$metadata_status" "$template_status" "$missing_count"
@@ -153,53 +166,61 @@ agent_ws_audit_project() {
   template_status="$(agent_ws_template_source_status)"
 
   agent_ws_say "Audit: $project_root"
-  agent_ws_say "metadata: $metadata_status"
-  agent_ws_say "template source: $template_status"
 
+  agent_ws_section "Workspace"
+  agent_ws_say "  metadata: $(agent_ws_metadata_status_gloss "$metadata_status")"
+  if [ "$template_status" = "present" ]; then
+    agent_ws_say "  template source: present"
+  else
+    agent_ws_say "  template source: missing — the global templates cannot be found"
+  fi
+
+  agent_ws_section "Files"
   while IFS= read -r file; do
     [ -n "$file" ] || continue
     if [ -e "$project_root/$file" ]; then
-      agent_ws_say "present: $file"
+      agent_ws_say "  present: $file"
     else
-      agent_ws_say "missing: $file"
+      agent_ws_say "  missing: $file"
       missing_count=$((missing_count + 1))
     fi
   done <<< "$(agent_ws_audit_expected_files "$project_root")"
 
+  agent_ws_section "Legacy layout"
   if [ -d "$project_root/.agent" ]; then
-    agent_ws_say "legacy: .agent/"
+    agent_ws_say "  legacy: .agent/"
     legacy_count=$((legacy_count + 1))
   fi
   if [ -e "$project_root/bin/agent-workspace" ]; then
-    agent_ws_say "legacy: bin/agent-workspace"
+    agent_ws_say "  legacy: bin/agent-workspace"
     legacy_count=$((legacy_count + 1))
   fi
+  if [ "$legacy_count" -eq 0 ]; then
+    agent_ws_say "  legacy: none"
+  fi
 
+  agent_ws_section "Assessment"
   if [ "$missing_count" -gt 0 ] || [ "$metadata_status" = "missing" ]; then
-    agent_ws_say "partial state: yes"
-    agent_ws_say "recovery: run agent-ws init with the intended profile and agents; active files and context are preserved"
+    agent_ws_say "  partial state: yes — some of the expected pieces are missing"
+    agent_ws_say "  recovery: run agent-ws init with the intended profile and agents; active files and context are preserved"
   else
-    agent_ws_say "partial state: no"
+    agent_ws_say "  partial state: no"
   fi
 
   case "$metadata_status" in
     invalid)
-      agent_ws_say "recovery: inspect or recreate .agent-workspace/workspace.json; active files remain project-owned"
+      agent_ws_say "  recovery: inspect or recreate .agent-workspace/workspace.json; active files remain project-owned"
       ;;
     stale)
-      agent_ws_say "recovery: refresh templates or update metadata references; active files remain project-owned"
+      agent_ws_say "  recovery: refresh templates or update metadata references; active files remain project-owned"
       ;;
     legacy)
-      agent_ws_say "recovery: run agent-ws migrate --dry-run before removing legacy files"
+      agent_ws_say "  recovery: run agent-ws migrate --dry-run before removing legacy files"
       ;;
   esac
 
   if [ "$template_status" = "missing" ]; then
-    agent_ws_say "recovery: reinstall agent-ws or set AGENT_WS_TEMPLATE_SOURCE_DIR"
-  fi
-
-  if [ "$legacy_count" -eq 0 ]; then
-    agent_ws_say "legacy: none"
+    agent_ws_say "  recovery: reinstall agent-ws or set AGENT_WS_TEMPLATE_SOURCE_DIR"
   fi
 
   agent_ws_collect_project_advice "$project_root" "$metadata_status" "$template_status" "$missing_count"

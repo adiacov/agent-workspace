@@ -43,11 +43,23 @@ agent_ws_diff_project() {
   project_root="$(agent_ws_existing_project_root "$project_root")"
   metadata_file="$(agent_ws_metadata_path "$project_root")"
   metadata_status="$(agent_ws_metadata_status "$project_root")"
-  agent_ws_say "Diff (incoming template delta): $project_root"
-  agent_ws_say "metadata: $metadata_status"
-  [ -f "$metadata_file" ] || { agent_ws_say "no metadata mappings available"; return 0; }
+  agent_ws_say "Incoming template changes: $project_root"
+  agent_ws_say "(what the installed templates would bring in, relative to the last sync)"
+  agent_ws_say "metadata: $(agent_ws_metadata_status_gloss "$metadata_status")"
+  if [ ! -f "$metadata_file" ]; then
+    agent_ws_say "nothing to compare: this project has no workspace metadata"
+    agent_ws_advise "adopt an existing project with: agent-ws migrate --dry-run, or set one up with: agent-ws init"
+    agent_ws_advice_flush
+    return 0
+  fi
   template_dir="$(agent_ws_template_source_dir 2>/dev/null || true)"
-  [ -n "$template_dir" ] || { agent_ws_say "template source: missing"; return 0; }
+  if [ -z "$template_dir" ]; then
+    agent_ws_say "template source: missing — the global templates cannot be found"
+    agent_ws_advise "reinstall agent-ws or set AGENT_WS_TEMPLATE_SOURCE_DIR"
+    agent_ws_advice_flush
+    return 0
+  fi
+  agent_ws_section "Files"
 
   while IFS= read -r line; do
     [ -n "$line" ] || continue
@@ -62,18 +74,18 @@ agent_ws_diff_project() {
       continue
     fi
     if [ ! -f "$template_file" ]; then
-      agent_ws_say "missing template: $template"
+      agent_ws_say "  missing template: $template"
       continue
     fi
     if [ ! -f "$baseline" ]; then
-      agent_ws_say "no baseline: $path (run 'agent-ws sync --apply' to seed)"
+      agent_ws_say "  no baseline: $path (run 'agent-ws sync --apply' to seed)"
       unseeded=$((unseeded + 1))
       continue
     fi
     if cmp -s "$baseline" "$template_file"; then
-      agent_ws_say "same: $path"
+      agent_ws_say "  same: $path — up to date"
     else
-      agent_ws_say "incoming: $path"
+      agent_ws_say "  incoming: $path — the template changed since the last sync:"
       agent_ws_diff_render "$baseline" "$template_file"
       incoming=$((incoming + 1))
     fi

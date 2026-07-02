@@ -3,6 +3,26 @@
 
 agent_ws_say() { printf '%s\n' "$*"; }
 
+# Section header: a blank line plus a title, so command output reads as
+# grouped areas instead of one flat stream.
+agent_ws_section() {
+  agent_ws_say ""
+  agent_ws_say "$1"
+}
+
+# One-line plain-language explanation for each metadata state, appended after
+# the state token (tests and scripts match on the token, people read the rest).
+agent_ws_metadata_status_gloss() {
+  case "$1" in
+    present) printf '%s\n' "present — this project is managed by agent-ws" ;;
+    missing) printf '%s\n' "missing — agent-ws does not manage this directory yet" ;;
+    legacy)  printf '%s\n' "legacy — this project uses the old project-local layout" ;;
+    invalid) printf '%s\n' "invalid — .agent-workspace/workspace.json cannot be read" ;;
+    stale)   printf '%s\n' "stale — the recorded template source is unavailable" ;;
+    *)       printf '%s\n' "$1" ;;
+  esac
+}
+
 # Next-step advice: commands collect plain-language recommendations while they
 # run and flush them as one "Next steps" block at the end of the output.
 AGENT_WS_ADVICE=()
@@ -520,7 +540,7 @@ agent_ws_cmd_init() {
   template_dir="$(agent_ws_template_source_dir)"
   AGENT_WS_TEMPLATE_REVISION="$(agent_ws_template_revision "$template_dir")"
 
-  agent_ws_say "initializing $project_root"
+  agent_ws_say "Initializing: $project_root (profile: $profile, agents: $agents)"
   records_file="$(mktemp)"
   AGENT_WS_GENERATED_RECORDS_FILE="$records_file"
   agent_ws_generate_default_files "$project_root" "$profile"
@@ -530,7 +550,7 @@ agent_ws_cmd_init() {
   generated_json="$(agent_ws_metadata_generated_json_from_records "$records_file")"
   rm -f "$records_file"
   agent_ws_metadata_write "$project_root" "$profile" "$agents" "$generated_json"
-  agent_ws_say "initialized $project_root"
+  agent_ws_say "Initialized: $project_root"
   agent_ws_advise "describe your project in PROJECT.md and its current state in STATE.md (these files are yours; agent-ws never edits them)"
   agent_ws_advise "review the workspace anytime with: agent-ws status"
   agent_ws_advice_flush
@@ -566,7 +586,7 @@ agent_ws_cmd_add_agent() {
   template_dir="$(agent_ws_template_source_dir)"
   AGENT_WS_TEMPLATE_REVISION="$(agent_ws_template_revision "$template_dir")"
 
-  agent_ws_say "adding agent support to $project_root"
+  agent_ws_say "Adding agent support: $project_root ($agents)"
   records_file="$(mktemp)"
   AGENT_WS_GENERATED_RECORDS_FILE="$records_file"
   AGENT_WS_RECORD_CREATED_ONLY=1
@@ -580,7 +600,7 @@ agent_ws_cmd_add_agent() {
   else
     agent_ws_say "metadata unchanged; no new agent files created"
   fi
-  agent_ws_say "added agent support to $project_root"
+  agent_ws_say "Done: added agent support to $project_root"
   agent_ws_advise "review the workspace anytime with: agent-ws status"
   agent_ws_advice_flush
 }
@@ -599,7 +619,10 @@ agent_ws_cmd_audit() {
     agent_ws_audit_project "."
     return 0
   fi
+  local first=1
   for path in "${AGENT_WS_PATHS[@]}"; do
+    [ "$first" -eq 1 ] || agent_ws_say ""
+    first=0
     agent_ws_audit_project "$path"
   done
 }

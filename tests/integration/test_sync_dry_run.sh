@@ -14,7 +14,7 @@ trap 'rm -rf "$TMPBIN" "$PROJECT"' EXIT
   "$TMPBIN/bin/agent-ws" sync --dry-run . >sync.out
   after="$(sha256sum AGENTS.md | awk '{print $1}')"
   test "$before" = "$after" || fail 'sync --dry-run changed active file'
-  assert_contains 'sync: dry-run' sync.out
+  assert_contains 'Sync preview:' sync.out
   # No incoming template change since init: framework files report unchanged,
   # and the local edit is preserved (sync never touches it).
   assert_contains 'AGENTS.md: unchanged' sync.out
