@@ -26,14 +26,30 @@ agent_ws_update_release_list_contains() {
   return 1
 }
 
+# List candidate release tags, one per line. AGENT_WS_TEST_RELEASES overrides
+# the remote lookup for tests; otherwise query the repository's tags.
+agent_ws_update_release_tags() {
+  if [ -n "${AGENT_WS_TEST_RELEASES:-}" ]; then
+    local version
+    for version in ${AGENT_WS_TEST_RELEASES}; do
+      printf '%s\n' "$version"
+    done
+    return 0
+  fi
+  git ls-remote --tags --refs "https://github.com/${AGENT_WS_REPO:-adiacov/agent-workspace}.git" 2>/dev/null \
+    | awk -F 'refs/tags/' 'NF > 1 { print $2 }'
+}
+
 agent_ws_update_latest_stable() {
-  local version stable=""
-  for version in ${AGENT_WS_TEST_RELEASES:-}; do
-    if agent_ws_update_is_stable_version "$version"; then
-      stable="$version"
-    fi
-  done
-  [ -n "$stable" ] || agent_ws_die "no stable release is available" "provide --version for an available stable Git/GitHub tag."
+  local stable
+  stable="$(
+    agent_ws_update_release_tags | while IFS= read -r version; do
+      if [ -n "$version" ] && agent_ws_update_is_stable_version "$version"; then
+        printf '%s\n' "$version"
+      fi
+    done | sort -V | tail -n 1
+  )"
+  [ -n "$stable" ] || agent_ws_die "no stable release is available" "check network access to the release repository or provide --version for an available stable Git/GitHub tag."
   printf '%s\n' "$stable"
 }
 
@@ -157,8 +173,10 @@ agent_ws_update_validate_candidate() {
     return 1
   }
   if [ -n "$expected_version" ]; then
-    case "$reported_version" in
-      *"$expected_version"*) ;;
+    # Whole-word match so expected v0.1.1 does not accept a candidate
+    # reporting v0.1.10.
+    case " $reported_version " in
+      *" $expected_version "*) ;;
       *)
         agent_ws_update_error "validation" "candidate reported '$reported_version', expected $expected_version" "check the selected release payload."
         return 1

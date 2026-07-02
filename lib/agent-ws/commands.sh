@@ -273,7 +273,10 @@ agent_ws_dispatch_unimplemented() {
 }
 
 agent_ws_can_prompt() {
-  return 0
+  # A usable TTY or piped/redirected stdin can answer prompts; a fully
+  # detached process (no controlling terminal, closed stdin) cannot.
+  { [ -r /dev/tty ] && true < /dev/tty; } 2>/dev/null && return 0
+  [ -e /dev/stdin ] 2>/dev/null
 }
 
 agent_ws_prompt_read() {
@@ -413,13 +416,11 @@ agent_ws_main() {
 }
 
 agent_ws_abs_path() {
-  local path="$1"
+  local path="$1" dir base
   if [ -d "$path" ]; then
     cd "$path" && pwd -P
   else
-    mkdir -p "$(dirname "$path")"
-    local dir base
-    dir="$(cd "$(dirname "$path")" && pwd -P)"
+    dir="$(cd "$(dirname "$path")" && pwd -P)" || return 1
     base="$(basename "$path")"
     printf '%s/%s\n' "$dir" "$base"
   fi
@@ -469,17 +470,20 @@ agent_ws_cmd_init() {
 
   agent_ws_prompt_custom_path_if_needed "$agents"
 
+  # Validate the agent list before any files are written so a bad agent name
+  # cannot leave a half-initialized project behind.
+  agent_ws_validate_agents "$agents" "$AGENT_WS_CUSTOM_PATH"
+  agent_ws_agent_destination_conflict_check "$agents" "$AGENT_WS_CUSTOM_PATH"
+
   if [ "${#AGENT_WS_PATHS[@]}" -gt 1 ]; then
     agent_ws_die "init accepts at most one project path" "run 'agent-ws help init' for usage."
   fi
 
   target="${AGENT_WS_PATHS[0]:-.}"
-  if [ "$target" = "." ]; then
-    project_root="$(agent_ws_project_root_for_init ".")"
-  else
+  if [ "$target" != "." ]; then
     mkdir -p "$target"
-    project_root="$(agent_ws_abs_path "$target")"
   fi
+  project_root="$(agent_ws_project_root_for_init "$target")"
 
   template_dir="$(agent_ws_template_source_dir)"
   AGENT_WS_TEMPLATE_REVISION="$(agent_ws_template_revision "$template_dir")"
@@ -517,6 +521,9 @@ agent_ws_cmd_add_agent() {
   fi
 
   agent_ws_prompt_custom_path_if_needed "$agents"
+
+  agent_ws_validate_agents "$agents" "$AGENT_WS_CUSTOM_PATH"
+  agent_ws_agent_destination_conflict_check "$agents" "$AGENT_WS_CUSTOM_PATH"
 
   project_root="$(agent_ws_existing_project_root ".")"
   [ -f "$(agent_ws_metadata_path "$project_root")" ] || agent_ws_die "workspace metadata is missing" "run 'agent-ws init' before adding agents."

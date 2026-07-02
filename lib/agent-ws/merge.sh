@@ -20,10 +20,12 @@ agent_ws_merge_three_way() {
   return 0
 }
 
-# True if the file contains git conflict markers.
+# True if the file contains git conflict markers. Requires both labeled
+# begin/end markers so a lone '=======' (e.g. a Markdown setext heading
+# underline) in cleanly merged content is not misread as a conflict.
 agent_ws_has_conflict_markers() {
   local file="$1"
-  grep -Eq '^(<<<<<<<|=======|>>>>>>>)' "$file"
+  grep -q '^<<<<<<< ' "$file" && grep -q '^>>>>>>> ' "$file"
 }
 
 # Backup helpers. Backups are transient (removed on whole-run success, used to

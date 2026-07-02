@@ -126,6 +126,16 @@ agent_ws_adapter_template() {
   esac
 }
 
+# Validate every agent name (and the custom path, when needed) without writing
+# anything. Dies on the first unsupported agent.
+agent_ws_validate_agents() {
+  local agents="$1" custom_path="${2:-}" agent
+  while IFS= read -r agent; do
+    [ -n "$agent" ] || continue
+    agent_ws_adapter_template "$agent" "$custom_path" >/dev/null
+  done <<< "$(agent_ws_split_agents "$agents")"
+}
+
 agent_ws_split_agents() {
   local raw="$1"
   printf '%s\n' "$raw" | tr ',' ' ' | tr ' ' '\n' | awk 'NF {print}'
@@ -137,6 +147,8 @@ agent_ws_validate_project_relative_path() {
   case "$path" in
     /*) agent_ws_die "path must be relative to the project root: $path" "remove the leading slash." ;;
     *'/../'*|'../'*|*'/..'|'..') agent_ws_die "path must not escape the project root: $path" "remove parent-directory traversal from the path." ;;
+    *:*|*'|'*) agent_ws_die "path must not contain ':' or '|': $path" "choose a path without ':' or '|' characters." ;;
+    *[[:space:]]*) agent_ws_die "path must not contain whitespace: $path" "choose a path without spaces or tabs." ;;
   esac
   printf '%s\n' "$path"
 }

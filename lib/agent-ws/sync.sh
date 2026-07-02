@@ -6,6 +6,17 @@
 #                    missing-active | missing-template | skipped-content
 # A run exits non-zero if any file is conflicted.
 
+# EXIT-trap handler: if an apply run aborts partway, restore every file we
+# replaced from its .bak and drop the in-flight merge temp file.
+agent_ws_sync_abort_cleanup() {
+  local b
+  [ -n "${AGENT_WS_SYNC_MERGED_TMP:-}" ] && rm -f "$AGENT_WS_SYNC_MERGED_TMP"
+  for b in "${AGENT_WS_SYNC_BACKUPS[@]:-}"; do
+    [ -n "$b" ] && agent_ws_backup_restore "$b"
+  done
+  return 0
+}
+
 agent_ws_sync_project() {
   local project_root="$1" mode="$2"
   project_root="$(agent_ws_existing_project_root "$project_root")"
@@ -38,7 +49,11 @@ agent_ws_sync_project() {
   [ "$mode" = "apply" ] && apply=1
 
   local conflicts=0 seeded_any=0
-  local backups=()   # files we backed up this run (for cleanup/restore)
+  AGENT_WS_SYNC_BACKUPS=()   # files we backed up this run (for cleanup/restore)
+  AGENT_WS_SYNC_MERGED_TMP=""
+  if [ "$apply" -eq 1 ]; then
+    trap 'agent_ws_sync_abort_cleanup' EXIT
+  fi
 
   local line path kind template active template_file baseline
   while IFS= read -r line; do
@@ -89,6 +104,7 @@ agent_ws_sync_project() {
     # Three-way merge into a temp file in the active file's directory.
     local merged status=0
     merged="$(mktemp "$(dirname "$active")/.agent-ws-merge.XXXXXX")"
+    AGENT_WS_SYNC_MERGED_TMP="$merged"
     if agent_ws_merge_three_way "$active" "$baseline" "$template_file" "$merged"; then
       status=0
     else
@@ -105,12 +121,14 @@ agent_ws_sync_project() {
         rm -f "$merged"
         agent_ws_say "$path: would-conflict"
       fi
+      AGENT_WS_SYNC_MERGED_TMP=""
       continue
     fi
 
     # Clean merge. If it changes nothing, just advance the baseline.
     if cmp -s "$merged" "$active"; then
       rm -f "$merged"
+      AGENT_WS_SYNC_MERGED_TMP=""
       if [ "$apply" -eq 1 ]; then
         agent_ws_baseline_write "$project_root" "$path" "$template_file"
       fi
@@ -120,19 +138,26 @@ agent_ws_sync_project() {
 
     if [ "$apply" -eq 1 ]; then
       agent_ws_atomic_write "$merged" "$active"
-      backups+=("$active")
+      AGENT_WS_SYNC_BACKUPS+=("$active")
       agent_ws_baseline_write "$project_root" "$path" "$template_file"
       agent_ws_say "$path: updated"
     else
       rm -f "$merged"
       agent_ws_say "$path: would-update"
     fi
+    AGENT_WS_SYNC_MERGED_TMP=""
   done <<< "$(agent_ws_metadata_generated_records "$metadata_file" 2>/dev/null || true)"
 
-  # Whole-run success: drop the per-file backups.
+  # The run completed; disarm the abort-restore handler.
   if [ "$apply" -eq 1 ]; then
+    trap - EXIT
+  fi
+
+  # Whole-run success: drop the per-file backups. On a conflicted apply run the
+  # .bak files of updated files are kept as a restore point (they are gitignored).
+  if [ "$apply" -eq 1 ] && [ "$conflicts" -eq 0 ]; then
     local b
-    for b in "${backups[@]:-}"; do
+    for b in "${AGENT_WS_SYNC_BACKUPS[@]:-}"; do
       [ -n "$b" ] && agent_ws_backup_remove "$b"
     done
   fi
