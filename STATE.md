@@ -94,10 +94,12 @@ Backlog captured in `reports/2026-07-02-fleet-status.md` (local, gitignored):
 - `agent-ws update` on the current version prints "updated vX -> vX" instead of "already up to
   date" (dry-run path already handles it).
 - Bump `actions/checkout@v4` deprecation annotation in CI (from the v0.1.4 session).
-- Sync conflict-resolution loop: after resolving a `*.merge` by hand, re-running sync conflicts
-  again unless the baseline is manually advanced to the current template (overlapping hunks
-  merge cleanly only when byte-identical). The documented advice omits the baseline step;
-  consider a `sync --resolve <file>` helper or advice fix.
+- **Next task (agreed with the owner 2026-07-02): implement `sync --resolve <file>` and release
+  it.** Fixes the conflict-resolution loop: after resolving a `*.merge` by hand, re-running sync
+  conflicts again unless the baseline is manually advanced to the current template (overlapping
+  hunks merge cleanly only when byte-identical). The helper should accept the resolved live file,
+  advance its baseline to the current template, remove the `*.merge` side-file, and update the
+  documented advice (sync/heal currently omit the baseline step).
 
 ## History
 
