@@ -1,5 +1,6 @@
 # AGENTS.md
 
+Canonical instruction entrypoint for every AI agent working in this repository.
 This repository uses file-based instructions and memory.
 
 Before performing meaningful work:
@@ -14,7 +15,8 @@ When work is completed:
 * avoid duplicating information across context/memory files;
 * summarize what changed, how it was verified, and any remaining risks.
 
-Project-specific instructions may be added below.
+Project-specific instructions may be added below; keep them here so every agent
+sees the same guidance.
 
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,

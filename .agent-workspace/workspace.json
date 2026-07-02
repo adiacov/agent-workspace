@@ -5,9 +5,8 @@
   "createdAt": "2026-07-02T05:20:38Z",
   "generatedFiles": {
     "AGENTS.md": {
-      "agent": "pi",
       "kind": "adapter",
-      "template": "adapters/pi/AGENTS.md"
+      "template": "adapters/AGENTS.md"
     },
     "ENGINEERING.md": {
       "kind": "profile",
