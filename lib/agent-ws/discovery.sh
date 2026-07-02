@@ -5,6 +5,10 @@ agent_ws_discovery_is_skip_dir() {
   case "$(basename "$1")" in
     .git|node_modules|.venv|venv|dist|build|target|coverage|.idea|.vscode|__pycache__)
       return 0 ;;
+    # The tool's own artifacts are never projects: metadata/baselines and the
+    # legacy project-local dir (its template cache is full of project-like files).
+    .agent-workspace|.agent)
+      return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -49,14 +53,31 @@ agent_ws_discovery_score_dir() {
   fi
 }
 
+# Depth-first walk that reports project roots, not directories: once a
+# directory matches, it is reported and its subtree is pruned, so a project's
+# internals (template caches, baselines, build output) never show up as
+# separate matches.
+agent_ws_discover_walk() {
+  local dir="$1" line child base
+  agent_ws_discovery_is_skip_dir "$dir" && return 0
+  line="$(agent_ws_discovery_score_dir "$dir")"
+  if [ -n "$line" ]; then
+    printf '%s\n' "$line"
+    return 0
+  fi
+  for child in "$dir"/* "$dir"/.*; do
+    [ -d "$child" ] || continue
+    base="$(basename "$child")"
+    [ "$base" = "." ] || [ "$base" = ".." ] && continue
+    agent_ws_discover_walk "$child"
+  done
+  return 0
+}
+
 agent_ws_discover_root() {
-  local root="$1" dir
+  local root="$1"
   root="$(agent_ws_existing_project_root "$root")"
-  while IFS= read -r dir; do
-    agent_ws_discovery_score_dir "$dir"
-  done < <(find "$root" \
-    \( -type d \( -name .git -o -name node_modules -o -name .venv -o -name venv -o -name dist -o -name build -o -name target -o -name coverage -o -name .idea -o -name .vscode -o -name __pycache__ \) -prune \) \
-    -o -type d -print)
+  agent_ws_discover_walk "$root"
 }
 
 agent_ws_discover() {
