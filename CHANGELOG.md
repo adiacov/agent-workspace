@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.2.0 - 2026-07-02
+
+Output usability release: every command now explains itself and tells you what to run next.
+
+### Added
+
+- Commands that inspect or change project state (`status`, `audit`, `diff`, `sync`, `migrate`, `update`, `discover`, `init`, `add-agent`) end with a **Next steps** block recommending the concrete command for the detected situation — adopt hand-made projects with `migrate --dry-run`, seed or merge with `sync --apply`, review incoming changes with `diff`, install with `update` — or an **All good** line when the project is healthy.
+- `status` and `audit` gain a read-only sync-readiness check: they detect when baselines are unseeded or behind the installed templates and recommend the fix.
+- `update --dry-run` reports "already up to date" when the installed version is the latest, instead of offering to reinstall it.
+- `status` shows the project's profile and agents; `discover` prints an explicit "no projects found" message instead of empty output.
+
+### Changed
+
+- Output is grouped into titled sections (Workspace / Files / Legacy / Actions / Summary / Next steps) with indented detail lines, and every state token is followed by a plain-language explanation (e.g. `metadata: missing — agent-ws does not manage this directory yet`, `WORKFLOWS.md: updated — template changes merged; your local edits were kept`).
+- `sync` and `migrate` say up front when a run is a preview: `Sync preview: <path> (dry-run; nothing will be modified)`.
+- State tokens (`metadata: present`, `WORKFLOWS.md: seeded`, `preserve: X`, …) are kept verbatim inside the richer lines, so scripts that grep for them keep working. Scripts matching the old header lines (`sync: dry-run`, `migration: apply`) must switch to the new headers (`Sync preview:`, `Migration:`).
+
 ## v0.1.7 - 2026-07-02
 
 Bugfix release.
