@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.7 - 2026-07-02
+
+Bugfix release.
+
+### Fixed
+
+- `agent-ws migrate` now infers the project profile from the files it preserves instead of always recording `general`: `PROJECTS.md`/`WORKFLOWS-COCKPIT.md` → `cockpit`, `ENGINEERING.md` → `code`, otherwise `general` (cockpit signals win when both are present). `migrate --dry-run` reports the detected profile in its preview line.
+
+### Added
+
+- Integration test (`tests/integration/test_migrate_detects_profile.sh`) covering all three detection cases and the dry-run preview.
+
 ## v0.1.6 - 2026-07-02
 
 Bugfix release.
