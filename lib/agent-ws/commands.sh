@@ -40,6 +40,12 @@ agent_ws_advise() {
 # positive confirmation rather than silence.
 agent_ws_advice_flush() {
   local all_clear="${1:-}" line
+  # A composing command (heal) silences the advice of the steps it runs; it
+  # gives its own guidance at the end.
+  if [ "${AGENT_WS_ADVICE_QUIET:-0}" -eq 1 ]; then
+    AGENT_WS_ADVICE=()
+    return 0
+  fi
   if [ "${#AGENT_WS_ADVICE[@]}" -eq 0 ]; then
     if [ -n "$all_clear" ]; then
       agent_ws_say ""
@@ -131,6 +137,8 @@ Commands:
   add-agent   Add an agent entrypoint
   status      Show current project status
   audit       Audit one or more projects
+  projects    List registered agent-ws projects with their state
+  heal        Bring a project to a healthy state (preview first)
   discover    Discover Agent Workspace projects
   diff        Show incoming template changes (baseline to template)
   sync        Merge template changes into a project
@@ -199,6 +207,35 @@ Reports missing files, metadata validity, stale metadata, legacy structure, temp
 
 Arguments:
   path...                 Optional project paths. Defaults to current directory.
+USAGE
+      ;;
+    projects) cat <<'USAGE'
+Usage: agent-ws projects
+
+Lists projects registered in the global registry with a one-word state and,
+when needed, the command to fix them. Projects register themselves whenever
+agent-ws touches them and finds valid metadata (init, migrate, status, audit,
+sync, heal). Entries whose directory no longer exists are pruned from the
+registry on listing. Use 'agent-ws discover <root>' to find unregistered or
+legacy projects.
+USAGE
+      ;;
+    heal) cat <<'USAGE'
+Usage: agent-ws heal [path] [--dry-run|--apply]
+
+Brings a project to a healthy state with one command, composing the existing
+steps in order: adopt (migrate) if the project is legacy or unmanaged,
+recreate missing files from templates (existing files are never overwritten),
+then sync (seed baselines / merge template changes). Defaults to --dry-run,
+which shows the plan without modifying anything.
+
+Not healed automatically: uninitialized directories (init needs your profile
+choice), invalid metadata (needs inspection), and sync conflicts (resolved by
+hand via *.merge files).
+
+Options:
+  --dry-run               Show the healing plan without modifying anything. Default.
+  --apply                 Execute the plan.
 USAGE
       ;;
     discover) cat <<'USAGE'
@@ -419,6 +456,20 @@ agent_ws_main() {
         agent_ws_cmd_audit
       fi
       ;;
+    projects)
+      if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" = "--help" ]; then
+        agent_ws_command_usage projects
+      else
+        agent_ws_cmd_projects
+      fi
+      ;;
+    heal)
+      if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" = "--help" ]; then
+        agent_ws_command_usage heal
+      else
+        agent_ws_cmd_heal
+      fi
+      ;;
     discover)
       if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ] && [ "${AGENT_WS_PATHS[0]}" = "--help" ]; then
         agent_ws_command_usage discover
@@ -625,6 +676,46 @@ agent_ws_cmd_audit() {
     first=0
     agent_ws_audit_project "$path"
   done
+}
+
+agent_ws_cmd_projects() {
+  local path state any=0 unhealthy=0
+  if [ "${#AGENT_WS_PATHS[@]}" -gt 0 ]; then
+    agent_ws_die "projects does not accept positional arguments" "run 'agent-ws projects'."
+  fi
+  agent_ws_say "Registered agent-ws projects:"
+  while IFS= read -r path; do
+    [ -n "$path" ] || continue
+    any=1
+    state="$(agent_ws_project_state "$path")"
+    [ "$state" = "in-sync" ] || unhealthy=$((unhealthy + 1))
+    printf '  %-12s %s\n' "$state" "$path"
+  done <<< "$(agent_ws_registry_list)"
+  if [ "$any" -eq 0 ]; then
+    agent_ws_say "  none registered yet"
+    agent_ws_advise "projects register themselves when agent-ws touches them: run agent-ws status in a managed project, or agent-ws init / migrate for new ones"
+    agent_ws_advise "find existing projects on disk with: agent-ws discover <root>"
+  elif [ "$unhealthy" -gt 0 ]; then
+    agent_ws_advise "$unhealthy project(s) are not in sync; check any of them with: agent-ws heal <path> (preview), then: agent-ws heal <path> --apply"
+  fi
+  agent_ws_advice_flush "all registered projects are in sync."
+}
+
+agent_ws_cmd_heal() {
+  local mode target
+  if [ "$AGENT_WS_APPLY" -eq 1 ] && [ "$AGENT_WS_DRY_RUN" -eq 1 ]; then
+    agent_ws_die "heal accepts only one of --dry-run or --apply" "preview with --dry-run, then rerun with --apply."
+  fi
+  if [ "$AGENT_WS_APPLY" -eq 1 ]; then
+    mode="apply"
+  else
+    mode="dry-run"
+  fi
+  target="${AGENT_WS_PATHS[0]:-.}"
+  if [ "${#AGENT_WS_PATHS[@]}" -gt 1 ]; then
+    agent_ws_die "heal accepts at most one project path" "run 'agent-ws help heal' for usage."
+  fi
+  agent_ws_heal_project "$target" "$mode"
 }
 
 agent_ws_cmd_discover() {

@@ -97,6 +97,8 @@ Choose commands by what they operate on:
 | Create Agent Workspace files in a project | `init` | one project |
 | Add another agent entrypoint to a project | `add-agent` | one project |
 | Inspect project health or incoming template changes | `status`, `audit`, `diff` | one or more projects |
+| See every project registered with agent-ws, with its state | `projects` | the global project registry |
+| Bring a project to a healthy state with one command | `heal` | one project (preview first) |
 | Merge published template changes into a project | `sync` | one project's framework files |
 | Convert an old `.agent/` project to the global model | `migrate` | one legacy project |
 | Update the installed `agent-ws` command and global templates | `update` | user-level installation, not project files |
@@ -126,10 +128,23 @@ agent-ws audit [path...]
 Performs deeper checks for missing files, metadata validity, stale metadata, legacy structure, template availability, and recovery guidance.
 
 ```bash
+agent-ws projects
+```
+
+Lists every project registered with agent-ws, one line per project with a one-word state (`in-sync`, `outdated`, `incomplete`, `legacy`, …). Projects register themselves whenever the tool touches them and finds valid metadata (`init`, `migrate`, `status`, `audit`, `sync`, `heal`); the registry lives at `~/.local/share/agent-ws/projects` (one absolute path per line), and entries whose directory no longer exists are pruned on listing.
+
+```bash
+agent-ws heal [path]
+agent-ws heal [path] --apply
+```
+
+Brings a project to a healthy state with one command, composing the existing steps in order: adopt if legacy or unmanaged (`migrate`), recreate missing files from templates (existing files are never overwritten), then `sync` (seed baselines / merge template changes). Defaults to a dry-run that shows the plan. It never guesses on your behalf: uninitialized directories (init needs your profile choice), unreadable metadata, and sync conflicts are reported with instructions instead of auto-resolved.
+
+```bash
 agent-ws discover <root...>
 ```
 
-Scans explicit roots for likely Agent Workspace projects and reports strong or uncertain matches with signals.
+Scans explicit roots for likely Agent Workspace projects and reports project roots — once a directory matches, its subtree is not descended into, so a project's internals (template caches, baselines, build output) are never reported as separate matches. Useful for finding projects that predate the registry; it never writes the registry itself.
 
 ```bash
 agent-ws diff [path]
