@@ -72,6 +72,40 @@ agent_ws_template_source_status() {
   fi
 }
 
+# One-word classification of a project, combining metadata state, expected
+# files, and sync readiness. Used by the projects listing and by heal.
+#   in-sync | outdated | incomplete | legacy | invalid | stale |
+#   unmanaged (workspace files, no metadata) | not-initialized | missing (dir gone)
+agent_ws_project_state() {
+  local project_root="$1" metadata_status readiness file missing_count=0
+  [ -d "$project_root" ] || { printf 'missing\n'; return 0; }
+  metadata_status="$(agent_ws_metadata_status "$project_root")"
+  case "$metadata_status" in
+    legacy|invalid|stale) printf '%s\n' "$metadata_status"; return 0 ;;
+    missing)
+      if [ -e "$project_root/WORKFLOWS.md" ] || [ -e "$project_root/PROJECT.md" ] || [ -e "$project_root/AGENTS.md" ]; then
+        printf 'unmanaged\n'
+      else
+        printf 'not-initialized\n'
+      fi
+      return 0
+      ;;
+  esac
+  while IFS= read -r file; do
+    [ -n "$file" ] || continue
+    [ -e "$project_root/$file" ] || missing_count=$((missing_count + 1))
+  done <<< "$(agent_ws_audit_expected_files "$project_root")"
+  if [ "$missing_count" -gt 0 ]; then
+    printf 'incomplete\n'
+    return 0
+  fi
+  readiness="$(agent_ws_sync_readiness "$project_root")"
+  case "$readiness" in
+    seed-needed|updates-available) printf 'outdated\n' ;;
+    *) printf 'in-sync\n' ;;
+  esac
+}
+
 # Translate the detected project state into next-step advice. Shared by
 # status and audit so both give the same guidance for the same situation.
 agent_ws_collect_project_advice() {
@@ -124,6 +158,7 @@ agent_ws_status_project() {
   template_status="$(agent_ws_template_source_status)"
 
   agent_ws_say "Status: $project_root"
+  [ "$metadata_status" = "present" ] && agent_ws_registry_add "$project_root"
   if [ "$metadata_status" = "present" ]; then
     profile="$(agent_ws_audit_metadata_profile "$project_root")"
     agents="$(agent_ws_audit_metadata_agents "$project_root")"
@@ -166,6 +201,7 @@ agent_ws_audit_project() {
   template_status="$(agent_ws_template_source_status)"
 
   agent_ws_say "Audit: $project_root"
+  [ "$metadata_status" = "present" ] && agent_ws_registry_add "$project_root"
 
   agent_ws_section "Workspace"
   agent_ws_say "  metadata: $(agent_ws_metadata_status_gloss "$metadata_status")"

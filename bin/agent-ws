@@ -21,6 +21,7 @@ fi
 for agent_ws_module in \
   templates.sh \
   metadata.sh \
+  registry.sh \
   baseline.sh \
   merge.sh \
   discovery.sh \
@@ -29,6 +30,7 @@ for agent_ws_module in \
   sync.sh \
   update.sh \
   migrate.sh \
+  heal.sh \
   commands.sh
  do
   # shellcheck source=/dev/null

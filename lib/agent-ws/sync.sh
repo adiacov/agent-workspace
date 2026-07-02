@@ -97,6 +97,7 @@ agent_ws_sync_project() {
     return 0
   fi
   agent_ws_say "template source: $template_dir"
+  [ "$metadata_status" = "present" ] && agent_ws_registry_add "$project_root"
 
   agent_ws_section "Files"
 

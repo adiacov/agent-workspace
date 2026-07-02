@@ -93,6 +93,7 @@ print(json.dumps({
 PY
   mv "$tmp" "$metadata_file"
   agent_ws_say "created $metadata_file"
+  agent_ws_registry_add "$project_root"
 }
 
 agent_ws_metadata_read() {
@@ -144,6 +145,7 @@ print(json.dumps(data, indent=2, sort_keys=True))
 PY
   mv "$tmp" "$metadata_file"
   agent_ws_say "updated $metadata_file"
+  agent_ws_registry_add "$project_root"
 }
 
 agent_ws_metadata_validate_json() {
