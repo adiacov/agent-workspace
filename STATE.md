@@ -36,8 +36,45 @@ themselves are correct. From now on: push the tag only and let CI publish.
 
 All 12 sibling projects under `~/Documents/private/projects/personal-code/` were remediated on
 2026-07-02 (seeded, completed, or migrated; one commit each, pushed) and are in-sync and
-registered. Excluded on purpose per the user: `adiacov.github.io` (deliberately unmanaged),
-`docpilot` (not using agent-ws).
+registered. Excluded on purpose per the user — never adopt/init them: `adiacov.github.io`
+(deliberately unmanaged), `docpilot` (not using agent-ws).
+Quirks: `spec-kit-issues` has no git remote (commit locally only); `posts` works on feature
+branches (e.g. `interview/agent-workspace-20260701`).
+
+## Release flow
+
+1. Content commit(s) first (conventional commits), full suite green: loop
+   `bash tests/unit/*.sh tests/integration/*.sh` (skip `helpers.sh`) + `bash tests/smoke/run-smoke.sh`.
+2. Bump `VERSION` (`vX.Y.Z` + trailing newline); prepend `## vX.Y.Z - YYYY-MM-DD` to `CHANGELOG.md`.
+3. Commit `chore(release): vX.Y.Z (theme)`; annotated tag; `git push origin main vX.Y.Z`.
+4. **Never `gh release create`** — CI publishes the release on tag push; verify with
+   `gh run watch` / `gh release view`.
+5. Update the installed copy with bare `agent-ws update` (`~/.local/bin/agent-ws`,
+   templates at `~/.local/share/agent-ws/templates`).
+
+## Codebase gotchas (easy to re-break)
+
+- Records are `:`-delimited (template specs) and `|`-delimited (generated files); user paths
+  must reject `:`, `|`, and whitespace.
+- Markdown setext `=======` is legit content — conflict detection needs labeled
+  `<<<<<<< `/`>>>>>>> ` markers, never a lone `=======`.
+- `templateRevision: "missing-*"` in `metadata.sh` looks dead but is the tested "stale"
+  contract (fixture in `tests/integration/helpers.sh`).
+- Test seams: `AGENT_WS_TEST_RELEASES`, `AGENT_WS_REGISTRY_FILE`, `AGENT_WS_TEMPLATE_SOURCE_DIR`.
+  Tests without `AGENT_WS_REGISTRY_FILE` write /tmp paths into the real registry — accepted,
+  `projects` prunes dead entries.
+- Advice engine in `commands.sh`: commands collect via `agent_ws_advise`, flush one
+  "Next steps"/"All good" block; `AGENT_WS_ADVICE_QUIET=1` silences inner flushes (heal uses it).
+- State tokens (`metadata: present`, `preserve: X`, …) stay verbatim inside glossed lines —
+  tests grep those substrings. Prompts must accept piped (non-tty) stdin.
+
+## Working conventions
+
+- Short, plain-language reports; concrete before/after when proposing changes.
+- Implement and test autonomously, but commit/push/release only when the owner asks.
+- `reports/` and `HANDOFF.md` are gitignored working files — never commit or force-add them.
+- Durable knowledge lives in this repo's files (`STATE.md`, per `WORKFLOWS.md`), not in any
+  assistant-private memory store.
 
 ## Open follow-ups (not blocking)
 
