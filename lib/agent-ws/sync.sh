@@ -6,6 +6,52 @@
 #                    missing-active | missing-template | skipped-content
 # A run exits non-zero if any file is conflicted.
 
+# Read-only check of how the project's framework files stand relative to the
+# installed templates. Prints one of:
+#   no-framework       no metadata/template source/framework mappings to check
+#   seed-needed        at least one framework file has no baseline yet
+#   updates-available  baselines are behind the installed templates
+#   up-to-date         baselines match the installed templates
+agent_ws_sync_readiness() {
+  local project_root="$1" metadata_file template_dir line path rest kind template baseline
+  metadata_file="$(agent_ws_metadata_path "$project_root")"
+  if [ ! -f "$metadata_file" ]; then
+    printf 'no-framework\n'
+    return 0
+  fi
+  template_dir="$(agent_ws_template_source_dir 2>/dev/null || true)"
+  if [ -z "$template_dir" ]; then
+    printf 'no-framework\n'
+    return 0
+  fi
+  local any=0 seed=0 updates=0
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    path="${line%%|*}"
+    rest="${line#*|}"
+    kind="${rest%%|*}"
+    template="${rest#*|}"
+    agent_ws_file_is_framework "$kind" || continue
+    [ -f "$template_dir/$template" ] || continue
+    any=1
+    baseline="$(agent_ws_baseline_path "$project_root" "$path")"
+    if [ ! -f "$baseline" ]; then
+      seed=1
+    elif ! cmp -s "$baseline" "$template_dir/$template"; then
+      updates=1
+    fi
+  done <<< "$(agent_ws_metadata_generated_records "$metadata_file" 2>/dev/null || true)"
+  if [ "$any" -eq 0 ]; then
+    printf 'no-framework\n'
+  elif [ "$seed" -eq 1 ]; then
+    printf 'seed-needed\n'
+  elif [ "$updates" -eq 1 ]; then
+    printf 'updates-available\n'
+  else
+    printf 'up-to-date\n'
+  fi
+}
+
 # EXIT-trap handler: if an apply run aborts partway, restore every file we
 # replaced from its .bak and drop the in-flight merge temp file.
 agent_ws_sync_abort_cleanup() {
@@ -48,7 +94,7 @@ agent_ws_sync_project() {
   local apply=0
   [ "$mode" = "apply" ] && apply=1
 
-  local conflicts=0 seeded_any=0
+  local conflicts=0 seeded_any=0 pending=0 missing_active=0
   AGENT_WS_SYNC_BACKUPS=()   # files we backed up this run (for cleanup/restore)
   AGENT_WS_SYNC_MERGED_TMP=""
   if [ "$apply" -eq 1 ]; then
@@ -75,6 +121,7 @@ agent_ws_sync_project() {
     fi
     if [ ! -f "$active" ]; then
       agent_ws_say "$path: missing-active"
+      missing_active=$((missing_active + 1))
       continue
     fi
 
@@ -91,6 +138,7 @@ agent_ws_sync_project() {
         agent_ws_say "$path: seeded"
       else
         agent_ws_say "$path: would-seed"
+        pending=$((pending + 1))
       fi
       continue
     fi
@@ -144,6 +192,7 @@ agent_ws_sync_project() {
     else
       rm -f "$merged"
       agent_ws_say "$path: would-update"
+      pending=$((pending + 1))
     fi
     AGENT_WS_SYNC_MERGED_TMP=""
   done <<< "$(agent_ws_metadata_generated_records "$metadata_file" 2>/dev/null || true)"
@@ -162,16 +211,29 @@ agent_ws_sync_project() {
     done
   fi
 
+  if [ "$missing_active" -gt 0 ]; then
+    agent_ws_advise "$missing_active tracked file(s) are missing from the project; restore them with: agent-ws init (existing files are never overwritten)"
+  fi
+
   if [ "$conflicts" -gt 0 ]; then
     if [ "$apply" -eq 1 ]; then
       agent_ws_say "$conflicts file(s) conflicted; live files unchanged, see *.merge"
+      agent_ws_advise "for each *.merge file: edit it to resolve the conflict markers, replace the live file with the result, delete the *.merge file, then re-run: agent-ws sync --apply"
+      agent_ws_advice_flush
     else
       agent_ws_say "$conflicts file(s) would conflict"
+      agent_ws_advise "some of your edits overlap the template changes; running 'agent-ws sync --apply' will keep your files untouched and write *.merge files to resolve by hand"
+      agent_ws_advice_flush
       return 0
     fi
     return 1
   fi
 
+  if [ "$apply" -eq 0 ] && [ "$pending" -gt 0 ]; then
+    agent_ws_advise "apply the changes above with: agent-ws sync --apply"
+  fi
+
   agent_ws_say "sync complete"
+  agent_ws_advice_flush
   return 0
 }

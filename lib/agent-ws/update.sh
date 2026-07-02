@@ -229,7 +229,14 @@ agent_ws_update_command() {
 
   if [ "$dry_run" -eq 1 ]; then
     agent_ws_say "update: dry-run"
-    agent_ws_say "would install: $version"
+    previous_version="$(agent_ws_installed_version 2>/dev/null || printf '%s' unknown)"
+    if [ "$previous_version" = "$version" ]; then
+      agent_ws_say "already up to date ($version); nothing to install"
+    else
+      agent_ws_say "would install: $version (currently $previous_version)"
+      agent_ws_advise "install it with: agent-ws update"
+    fi
+    agent_ws_advice_flush
     return 0
   fi
 

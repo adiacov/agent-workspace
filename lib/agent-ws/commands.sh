@@ -2,6 +2,38 @@
 # Command dispatch, output helpers, argument parsing, and project safety helpers.
 
 agent_ws_say() { printf '%s\n' "$*"; }
+
+# Next-step advice: commands collect plain-language recommendations while they
+# run and flush them as one "Next steps" block at the end of the output.
+AGENT_WS_ADVICE=()
+
+agent_ws_advise() {
+  local existing
+  for existing in "${AGENT_WS_ADVICE[@]:-}"; do
+    [ "$existing" = "$1" ] && return 0
+  done
+  AGENT_WS_ADVICE+=("$1")
+}
+
+# Print the collected advice (if any) and reset. When there is no advice and
+# an all-clear message is given, print that instead so healthy projects get a
+# positive confirmation rather than silence.
+agent_ws_advice_flush() {
+  local all_clear="${1:-}" line
+  if [ "${#AGENT_WS_ADVICE[@]}" -eq 0 ]; then
+    if [ -n "$all_clear" ]; then
+      agent_ws_say ""
+      agent_ws_say "All good: $all_clear"
+    fi
+    return 0
+  fi
+  agent_ws_say ""
+  agent_ws_say "Next steps:"
+  for line in "${AGENT_WS_ADVICE[@]}"; do
+    agent_ws_say "  - $line"
+  done
+  AGENT_WS_ADVICE=()
+}
 agent_ws_warn() { printf 'warning: %s\n' "$*" >&2; }
 agent_ws_error() { printf 'error: %s\n' "$*" >&2; }
 agent_ws_next() { printf 'next: %s\n' "$*" >&2; }
@@ -499,6 +531,9 @@ agent_ws_cmd_init() {
   rm -f "$records_file"
   agent_ws_metadata_write "$project_root" "$profile" "$agents" "$generated_json"
   agent_ws_say "initialized $project_root"
+  agent_ws_advise "describe your project in PROJECT.md and its current state in STATE.md (these files are yours; agent-ws never edits them)"
+  agent_ws_advise "review the workspace anytime with: agent-ws status"
+  agent_ws_advice_flush
 }
 
 agent_ws_cmd_add_agent() {
@@ -546,6 +581,8 @@ agent_ws_cmd_add_agent() {
     agent_ws_say "metadata unchanged; no new agent files created"
   fi
   agent_ws_say "added agent support to $project_root"
+  agent_ws_advise "review the workspace anytime with: agent-ws status"
+  agent_ws_advice_flush
 }
 
 agent_ws_cmd_status() {

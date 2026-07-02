@@ -39,6 +39,7 @@ agent_ws_diff_render() {
 
 agent_ws_diff_project() {
   local project_root="$1" metadata_file metadata_status template_dir line path kind template template_file baseline
+  local incoming=0 unseeded=0
   project_root="$(agent_ws_existing_project_root "$project_root")"
   metadata_file="$(agent_ws_metadata_path "$project_root")"
   metadata_status="$(agent_ws_metadata_status "$project_root")"
@@ -66,6 +67,7 @@ agent_ws_diff_project() {
     fi
     if [ ! -f "$baseline" ]; then
       agent_ws_say "no baseline: $path (run 'agent-ws sync --apply' to seed)"
+      unseeded=$((unseeded + 1))
       continue
     fi
     if cmp -s "$baseline" "$template_file"; then
@@ -73,6 +75,15 @@ agent_ws_diff_project() {
     else
       agent_ws_say "incoming: $path"
       agent_ws_diff_render "$baseline" "$template_file"
+      incoming=$((incoming + 1))
     fi
   done <<< "$(agent_ws_metadata_generated_records "$metadata_file" 2>/dev/null || true)"
+
+  if [ "$incoming" -gt 0 ]; then
+    agent_ws_advise "merge the incoming template changes shown above with: agent-ws sync --apply (your local edits are preserved)"
+  fi
+  if [ "$unseeded" -gt 0 ]; then
+    agent_ws_advise "some files have no baseline yet, so their delta cannot be shown; seed them with: agent-ws sync --apply"
+  fi
+  agent_ws_advice_flush "the project already matches the installed templates."
 }

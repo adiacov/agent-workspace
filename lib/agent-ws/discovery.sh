@@ -60,9 +60,19 @@ agent_ws_discover_root() {
 }
 
 agent_ws_discover() {
-  local root
+  local root results
   [ "$#" -gt 0 ] || agent_ws_die "discover requires at least one root path" "run 'agent-ws discover <root...>'."
+  results=""
+  local out
   for root in "$@"; do
-    agent_ws_discover_root "$root"
+    out="$(agent_ws_discover_root "$root")"
+    [ -n "$out" ] && results="${results}${out}"$'\n'
   done
+  if [ -n "$results" ]; then
+    printf '%s' "$results"
+    agent_ws_advise "check any match in depth with: agent-ws audit <path> (read-only; includes recovery guidance)"
+  else
+    agent_ws_say "no Agent Workspace projects found under the given roots"
+  fi
+  agent_ws_advice_flush
 }

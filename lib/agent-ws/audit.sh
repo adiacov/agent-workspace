@@ -72,8 +72,53 @@ agent_ws_template_source_status() {
   fi
 }
 
+# Translate the detected project state into next-step advice. Shared by
+# status and audit so both give the same guidance for the same situation.
+agent_ws_collect_project_advice() {
+  local project_root="$1" metadata_status="$2" template_status="$3" missing_count="${4:-0}" readiness
+
+  case "$metadata_status" in
+    missing)
+      if [ -e "$project_root/WORKFLOWS.md" ] || [ -e "$project_root/PROJECT.md" ] || [ -e "$project_root/AGENTS.md" ]; then
+        agent_ws_advise "this project has workspace files but agent-ws does not manage them yet; adopt it with: agent-ws migrate --dry-run"
+      else
+        agent_ws_advise "this directory is not set up yet; create a workspace with: agent-ws init"
+      fi
+      ;;
+    legacy)
+      agent_ws_advise "this project uses the old project-local layout; preview the migration with: agent-ws migrate --dry-run"
+      ;;
+    invalid)
+      agent_ws_advise "the workspace metadata cannot be read; inspect .agent-workspace/workspace.json, or regenerate it with: agent-ws init (existing files are never overwritten)"
+      ;;
+    stale)
+      agent_ws_advise "the metadata references an unavailable template source; reinstall agent-ws or set AGENT_WS_TEMPLATE_SOURCE_DIR"
+      ;;
+  esac
+
+  if [ "$missing_count" -gt 0 ] && [ "$metadata_status" = "present" ]; then
+    agent_ws_advise "some expected files are missing; recreate them with: agent-ws init (existing files are never overwritten), or add an agent with: agent-ws add-agent"
+  fi
+
+  if [ "$metadata_status" = "present" ]; then
+    readiness="$(agent_ws_sync_readiness "$project_root")"
+    case "$readiness" in
+      seed-needed)
+        agent_ws_advise "the project is not sync-ready yet (no baseline snapshots); seed them with: agent-ws sync --apply"
+        ;;
+      updates-available)
+        agent_ws_advise "newer templates are installed; review the incoming changes with: agent-ws diff, then merge them with: agent-ws sync --apply"
+        ;;
+    esac
+  fi
+
+  if [ "$template_status" = "missing" ]; then
+    agent_ws_advise "the global templates cannot be found; reinstall agent-ws or set AGENT_WS_TEMPLATE_SOURCE_DIR"
+  fi
+}
+
 agent_ws_status_project() {
-  local project_root="$1" metadata_status template_status file
+  local project_root="$1" metadata_status template_status file missing_count=0
   project_root="$(agent_ws_existing_project_root "$project_root")"
   metadata_status="$(agent_ws_metadata_status "$project_root")"
   template_status="$(agent_ws_template_source_status)"
@@ -87,6 +132,7 @@ agent_ws_status_project() {
       agent_ws_say "$file: present"
     else
       agent_ws_say "$file: missing"
+      missing_count=$((missing_count + 1))
     fi
   done <<< "$(agent_ws_audit_expected_files "$project_root")"
   if [ -d "$project_root/.agent" ]; then
@@ -95,6 +141,9 @@ agent_ws_status_project() {
   if [ -e "$project_root/bin/agent-workspace" ]; then
     agent_ws_say "legacy: bin/agent-workspace"
   fi
+
+  agent_ws_collect_project_advice "$project_root" "$metadata_status" "$template_status" "$missing_count"
+  agent_ws_advice_flush "this project is set up and in sync; nothing to do."
 }
 
 agent_ws_audit_project() {
@@ -152,4 +201,7 @@ agent_ws_audit_project() {
   if [ "$legacy_count" -eq 0 ]; then
     agent_ws_say "legacy: none"
   fi
+
+  agent_ws_collect_project_advice "$project_root" "$metadata_status" "$template_status" "$missing_count"
+  agent_ws_advice_flush "this project is set up and in sync; nothing to do."
 }

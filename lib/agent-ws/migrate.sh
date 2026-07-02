@@ -80,6 +80,7 @@ agent_ws_migrate_project() {
     profile="$(agent_ws_migrate_detect_profile "$project_root")"
     if [ "$mode" = "dry-run" ]; then
       agent_ws_say "would create: .agent-workspace/workspace.json (profile: $profile)"
+      agent_ws_advise "if this preview looks right, perform the migration with: agent-ws migrate --apply"
     else
       records_file="$(mktemp)"
       agent_ws_migrate_generated_records "$project_root" "$records_file"
@@ -95,6 +96,7 @@ agent_ws_migrate_project() {
   if [ -e "$project_root/bin/agent-workspace" ]; then
     if [ "$mode" = "dry-run" ]; then
       agent_ws_say "would remove: bin/agent-workspace"
+      agent_ws_advise "if this preview looks right, perform the migration with: agent-ws migrate --apply"
     else
       rm -f "$project_root/bin/agent-workspace"
       agent_ws_say "removed: bin/agent-workspace"
@@ -103,5 +105,8 @@ agent_ws_migrate_project() {
 
   if [ "$mode" = "apply" ]; then
     agent_ws_say "preserved active files and context"
+    agent_ws_advise "make the project sync-ready (seed baseline snapshots) with: agent-ws sync --apply"
+    agent_ws_advise "review the result with: agent-ws status"
   fi
+  agent_ws_advice_flush "nothing to migrate; the project is already on the current model."
 }
